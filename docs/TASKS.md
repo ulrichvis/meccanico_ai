@@ -1,0 +1,136 @@
+# Development backlog
+
+This file is the project's operational tracker. Check only tasks that are actually complete and verified.
+
+## Active phase: Phase 1 — Foundation and PDF upload
+
+### 1. Initialization
+
+- [ ] Initialize Next.js with App Router, strict TypeScript, Tailwind, and `src/`.
+- [ ] Configure pnpm and pin the Node.js version.
+- [ ] Add ESLint and the `lint`, `typecheck`, and `build` scripts.
+- [ ] Configure locale-prefixed routing for `en` and `it`, with English as the default locale.
+- [ ] Create `messages/en.json` and `messages/it.json` with identical key structures.
+- [ ] Add automatic supported-locale detection and a persistent language selector.
+- [ ] Add an `i18n:check` script that verifies catalog syntax and key parity.
+- [ ] Create `.env.example` and validate the server environment with Zod.
+- [ ] Add an appropriate `.gitignore`.
+- [ ] Create a minimal mobile-first layout and navigation in English and Italian.
+
+### 2. Database
+
+- [ ] Install and configure Prisma for PostgreSQL.
+- [ ] Translate the model in `docs/DATA_MODEL.md` into `schema.prisma`.
+- [ ] Include tables required by future phases without implementing their logic.
+- [ ] Add confidence constraints, DTC uniqueness, and essential indexes.
+- [ ] Generate and apply the initial migration.
+- [ ] Verify the connection and a `Source` create/read operation.
+
+### 3. Storage
+
+- [ ] Create, or document how to create, the private `technical-sources` bucket.
+- [ ] Add a server-side Supabase client.
+- [ ] Generate storage paths independently from the submitted filename.
+- [ ] Validate extension, MIME type, and maximum size on the server.
+- [ ] Remove the uploaded file if database creation fails after upload.
+- [ ] Support a signed URL for future document access.
+
+### 4. PDF upload
+
+- [ ] Create `/{locale}/upload` with drag and drop and a file picker.
+- [ ] Display filename, size, progress, and errors.
+- [ ] Send the file to the server without exposing the service-role key.
+- [ ] Store the PDF, then create the `Source` with the `uploaded` status.
+- [ ] Make the operation idempotent or prevent immediate duplicate submissions.
+- [ ] Redirect to a confirmation page or the dashboard.
+
+### 5. Minimal dashboard
+
+- [ ] Create `/{locale}` with a call to action linking to the upload page.
+- [ ] List recent sources with filename, date, type, and status.
+- [ ] Support empty, loading, and error states.
+- [ ] Make the page usable on mobile widths.
+
+### 6. Phase 1 verification
+
+- [ ] `pnpm lint` passes.
+- [ ] `pnpm i18n:check` passes and both catalogs contain the same keys.
+- [ ] `pnpm typecheck` passes.
+- [ ] `pnpm build` passes.
+- [ ] A small valid PDF uploads and appears in Storage and the database.
+- [ ] A non-PDF file is rejected with a clear message.
+- [ ] An oversized PDF is rejected.
+- [ ] A duplicate submission does not create two unintended imports.
+- [ ] A Storage/database failure produces a recoverable state with no known orphaned file.
+- [ ] The dashboard works at a mobile viewport width.
+- [ ] English and Italian dashboard, navigation, upload, validation, and error states render correctly.
+- [ ] Automatic locale selection uses a supported browser preference and falls back to English.
+- [ ] The language selector changes locale without losing the current route.
+- [ ] No user-facing string in the Phase 1 frontend is hard-coded.
+
+### Exit criteria
+
+- [ ] No OpenAI call exists in the flow yet.
+- [ ] The original file is private and retrievable through a signed URL.
+- [ ] The stored `Source` contains no invented automotive information.
+- [ ] Startup and verification commands are current in `docs/DEVELOPMENT.md`.
+- [ ] Phase 2 can begin without redesigning the upload flow.
+
+## Later phases
+
+### Phase 2 — Text extraction
+
+- [ ] Select a PDF library compatible with the server environment.
+- [ ] Extract text page by page.
+- [ ] Create the document and its metadata.
+- [ ] Handle scanned PDFs without incorrectly treating them as empty.
+- [ ] Create and display `ExtractionJob` statuses.
+
+### Phase 3 — Structured AI
+
+- [ ] Implement the Zod schema from `docs/EXTRACTION_CONTRACT.md`.
+- [ ] Version the automotive system prompt.
+- [ ] Integrate OpenAI structured outputs.
+- [ ] Preserve raw and validated outputs.
+- [ ] Handle invalid outputs and retries.
+
+### Phase 4 — Normalization
+
+- [ ] Normalize DTC codes without altering the original code.
+- [ ] Validate graph references.
+- [ ] Persist each case in a transaction.
+- [ ] Store every valid case as `active` and `unreviewed` without waiting for human approval.
+- [ ] Preserve evidence and original wording.
+
+### Phase 5 — Optional admin review and editing
+
+- [ ] Build the review screen.
+- [ ] Allow editing of all useful entities.
+- [ ] Highlight inferences.
+- [ ] Allow cases to be marked as reviewed, corrected, rejected, or archived.
+- [ ] Preserve raw and validated extraction artifacts after edits.
+
+### Phase 6 — Search and browsing
+
+- [ ] List active cases with visible review status.
+- [ ] Search by DTC, make, model, and engine.
+- [ ] Display the complete case and its relationships.
+
+### Post-MVP — Mechanic-facing assistant
+
+- [ ] Define retrieval and ranking policies for reviewed and unreviewed knowledge.
+- [ ] Implement evidence-backed retrieval over stored cases.
+- [ ] Build the conversational interface for mechanics.
+- [ ] Ask follow-up questions when vehicle or diagnostic context is incomplete.
+- [ ] Cite supporting cases and expose uncertainty.
+- [ ] Support English and Italian conversation output using the selected product locale.
+- [ ] Evaluate groundedness before production use.
+
+## Progress log
+
+| Date | Phase | Change | Verification |
+|---|---|---|---|
+| 2026-08-25 | Documentation | Created the initial documentation and backlog. | Cross-checked all Markdown files. |
+| 2026-08-25 | Documentation | Translated all project documentation into English and established English as the primary project language. | Checked internal links, formatting, and residual French text. |
+| 2026-08-25 | Documentation | Made human review non-blocking and documented the future mechanic-facing conversational assistant. | Cross-checked product, architecture, data, roadmap, and ADR terminology. |
+| 2026-08-25 | Documentation | Established English as the development language and English/Italian as required frontend locales. | Added i18n architecture, catalog rules, and Phase 1 verification criteria. |
