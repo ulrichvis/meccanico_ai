@@ -53,12 +53,11 @@ It must be callable from a route, Server Action, or worker without duplicating b
 ```text
 src/
 ├── app/
-│   ├── [locale]/
-│   │   ├── page.tsx
-│   │   ├── upload/page.tsx
-│   │   ├── extractions/[id]/review/page.tsx
-│   │   ├── cases/page.tsx
-│   │   └── cases/[id]/page.tsx
+│   ├── page.tsx
+│   ├── upload/page.tsx
+│   ├── extractions/[id]/review/page.tsx
+│   ├── cases/page.tsx
+│   ├── cases/[id]/page.tsx
 │   └── api/
 │       └── sources/route.ts
 ├── components/
@@ -74,8 +73,8 @@ src/
 │   └── logger.ts
 ├── i18n/
 │   ├── config.ts
-│   ├── routing.ts
-│   └── request.ts
+│   ├── dictionaries.ts
+│   └── translator.ts
 ├── sources/
 │   ├── source.types.ts
 │   └── adapters/
@@ -211,14 +210,13 @@ English is the official language of development. The frontend supports English (
 
 ```text
 Incoming request
-  → read locale from URL
-  → if absent, check saved preference
+  → check saved language preference
   → if absent, match supported browser language
   → fall back to English
   → load the matching message catalog
 ```
 
-The target URL structure is locale-prefixed: `/en/upload`, `/it/upload`, `/en/cases`, and `/it/cases`. The language selector preserves the current route and stores the user's explicit choice.
+Routes are language-neutral: `/`, `/upload`, and `/cases`. Changing the language updates displayed text without changing or duplicating the current URL. The language selector stores the user's explicit choice locally.
 
 Translation catalogs live in `messages/en.json` and `messages/it.json`. Both files must expose identical keys. Components receive translated strings through the i18n adapter and never import a catalog directly. API payloads and domain enums remain language-neutral; the frontend translates their display labels.
 

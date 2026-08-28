@@ -69,7 +69,16 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 
 ## Current status
 
-The repository currently contains only the initial documentation. The first implementation is Phase 1 in [the backlog](docs/TASKS.md): project initialization, database setup, Storage configuration, and PDF upload.
+Phase 1, point 1 is complete: the Next.js application foundation, strict development tooling, environment validation, and route-neutral English/Italian text localization are implemented. The next task is Phase 1, point 2 in [the backlog](docs/TASKS.md): PostgreSQL and Prisma setup.
+
+## Run locally
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Then open `http://localhost:3000`. Use the language selector to switch all displayed text between English and Italian without changing the route.
 
 ## Non-negotiable rules
 

@@ -1,0 +1,62 @@
+{
+  "brand": {
+    "name": "Meccanico IA",
+    "tagline": "Conoscenza automobilistica, strutturata."
+  },
+  "navigation": {
+    "ariaLabel": "Navigazione principale",
+    "overview": "Panoramica",
+    "foundation": "Base tecnica"
+  },
+  "language": {
+    "selectorLabel": "Lingua",
+    "english": "Inglese",
+    "italian": "Italiano"
+  },
+  "home": {
+    "eyebrow": "Fase 1 · Base tecnica",
+    "title": "Trasforma i documenti tecnici in conoscenza automobilistica affidabile.",
+    "description": "Meccanico IA sta costruendo una pipeline indipendente dalla fonte che conserva le prove, struttura il ragionamento diagnostico e prepara la conoscenza per un futuro assistente dedicato ai meccanici.",
+    "primaryAction": "Scopri la base tecnica",
+    "scopeLabel": "Ambito attuale",
+    "scopeTitle": "La base tecnica è pronta.",
+    "scopeDescription": "Questo primo traguardo definisce la struttura dell'applicazione, gli strumenti rigorosi, la validazione dell'ambiente e l'infrastruttura bilingue dei testi. Il caricamento PDF sarà il prossimo passo.",
+    "pipelineTitle": "Una pipeline di conoscenza progettata per crescere",
+    "pipelineDescription": "Il PDF è la prima fonte. Il dominio rimane indipendente affinché gli input futuri possano produrre gli stessi casi automobilistici strutturati.",
+    "steps": {
+      "ingest": {
+        "number": "01",
+        "title": "Acquisisci",
+        "description": "Conserva la fonte originale e il suo contesto tecnico."
+      },
+      "structure": {
+        "number": "02",
+        "title": "Struttura",
+        "description": "Separa fatti, inferenze, controlli, riparazioni e risultati."
+      },
+      "retrieve": {
+        "number": "03",
+        "title": "Recupera",
+        "description": "Prepara conoscenza tracciabile per i meccanici e le conversazioni future."
+      }
+    },
+    "principlesTitle": "Progettato per un'affidabilità diagnostica",
+    "principles": {
+      "evidence": {
+        "title": "Prima le prove",
+        "description": "Le informazioni importanti restano collegate alla fonte originale."
+      },
+      "uncertainty": {
+        "title": "Incertezza preservata",
+        "description": "Le possibili cause non diventano riparazioni confermate senza riscontri."
+      },
+      "sources": {
+        "title": "Indipendente dalla fonte",
+        "description": "Il PDF avvia il percorso senza definire il modello di business."
+      }
+    }
+  },
+  "footer": {
+    "status": "Base iniziale dedicata ai PDF"
+  }
+}

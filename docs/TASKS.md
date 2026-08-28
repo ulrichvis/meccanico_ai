@@ -6,16 +6,16 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ### 1. Initialization
 
-- [ ] Initialize Next.js with App Router, strict TypeScript, Tailwind, and `src/`.
-- [ ] Configure pnpm and pin the Node.js version.
-- [ ] Add ESLint and the `lint`, `typecheck`, and `build` scripts.
-- [ ] Configure locale-prefixed routing for `en` and `it`, with English as the default locale.
-- [ ] Create `messages/en.json` and `messages/it.json` with identical key structures.
-- [ ] Add automatic supported-locale detection and a persistent language selector.
-- [ ] Add an `i18n:check` script that verifies catalog syntax and key parity.
-- [ ] Create `.env.example` and validate the server environment with Zod.
-- [ ] Add an appropriate `.gitignore`.
-- [ ] Create a minimal mobile-first layout and navigation in English and Italian.
+- [x] Initialize Next.js with App Router, strict TypeScript, Tailwind, and `src/`.
+- [x] Configure pnpm and pin the Node.js version.
+- [x] Add ESLint and the `lint`, `typecheck`, and `build` scripts.
+- [x] Configure text localization for `en` and `it`, with English as the default locale and no locale-specific routing.
+- [x] Create `messages/en.json` and `messages/it.json` with identical key structures.
+- [x] Add automatic supported-locale detection and a persistent language selector.
+- [x] Add an `i18n:check` script that verifies catalog syntax and key parity.
+- [x] Create `.env.example` and validate the server environment with Zod.
+- [x] Add an appropriate `.gitignore`.
+- [x] Create a minimal mobile-first layout and navigation in English and Italian.
 
 ### 2. Database
 
@@ -37,7 +37,7 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ### 4. PDF upload
 
-- [ ] Create `/{locale}/upload` with drag and drop and a file picker.
+- [ ] Create `/upload` with drag and drop and a file picker.
 - [ ] Display filename, size, progress, and errors.
 - [ ] Send the file to the server without exposing the service-role key.
 - [ ] Store the PDF, then create the `Source` with the `uploaded` status.
@@ -46,17 +46,17 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ### 5. Minimal dashboard
 
-- [ ] Create `/{locale}` with a call to action linking to the upload page.
+- [ ] Create `/` with a call to action linking to the upload page.
 - [ ] List recent sources with filename, date, type, and status.
 - [ ] Support empty, loading, and error states.
 - [ ] Make the page usable on mobile widths.
 
 ### 6. Phase 1 verification
 
-- [ ] `pnpm lint` passes.
-- [ ] `pnpm i18n:check` passes and both catalogs contain the same keys.
-- [ ] `pnpm typecheck` passes.
-- [ ] `pnpm build` passes.
+- [x] `pnpm lint` passes.
+- [x] `pnpm i18n:check` passes and both catalogs contain the same keys.
+- [x] `pnpm typecheck` passes.
+- [x] `pnpm build` passes.
 - [ ] A small valid PDF uploads and appears in Storage and the database.
 - [ ] A non-PDF file is rejected with a clear message.
 - [ ] An oversized PDF is rejected.
@@ -65,7 +65,7 @@ This file is the project's operational tracker. Check only tasks that are actual
 - [ ] The dashboard works at a mobile viewport width.
 - [ ] English and Italian dashboard, navigation, upload, validation, and error states render correctly.
 - [ ] Automatic locale selection uses a supported browser preference and falls back to English.
-- [ ] The language selector changes locale without losing the current route.
+- [x] The language selector replaces displayed text without changing the current route.
 - [ ] No user-facing string in the Phase 1 frontend is hard-coded.
 
 ### Exit criteria
@@ -134,3 +134,4 @@ This file is the project's operational tracker. Check only tasks that are actual
 | 2026-08-25 | Documentation | Translated all project documentation into English and established English as the primary project language. | Checked internal links, formatting, and residual French text. |
 | 2026-08-25 | Documentation | Made human review non-blocking and documented the future mechanic-facing conversational assistant. | Cross-checked product, architecture, data, roadmap, and ADR terminology. |
 | 2026-08-25 | Documentation | Established English as the development language and English/Italian as required frontend locales. | Added i18n architecture, catalog rules, and Phase 1 verification criteria. |
+| 2026-08-25 | Phase 1.1 | Initialized the application, tooling, environment schema, bilingual catalogs, language selector, and responsive shell. | i18n check, ESLint, TypeScript, production build, and desktop/mobile browser verification passed. |

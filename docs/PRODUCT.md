@@ -39,17 +39,17 @@ Initially searches stored cases by DTC, make, model, or engine. In the later pro
 
 ## Primary journey
 
-1. The operator opens `/en/upload` or `/it/upload` and uploads a PDF.
+1. The operator opens `/upload` and uploads a PDF.
 2. The file is stored, and a `Source` is created with the `uploaded` status.
 3. Text is extracted page by page.
 4. The AI identifies and structures one or more cases.
 5. Raw output is preserved, then validated and normalized.
 6. Every structurally valid normalized case is stored with `reviewStatus = "unreviewed"`.
 7. The case becomes available in the admin knowledge base without waiting for human review.
-8. At any later time, an operator may open `/{locale}/extractions/[id]/review` or the localized case editor.
+8. At any later time, an operator may open `/extractions/[id]/review` or the case editor.
 9. The operator may edit, mark as reviewed, reject, or archive the case.
 
-The localized route is `/{locale}/upload`, where the initial supported locales are `en` and `it`. English is the default. On a first visit, the frontend selects a supported locale from the browser preference when possible; the user can always override it with the language selector.
+Routes do not contain the locale. English is the default interface language. On a first visit, the frontend selects a supported browser language when possible; the user can always override it with the language selector. Changing language replaces displayed text without changing the current route.
 
 ## Product languages
 

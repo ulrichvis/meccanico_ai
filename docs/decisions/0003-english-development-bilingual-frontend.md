@@ -20,7 +20,7 @@ messages/en.json
 messages/it.json
 ```
 
-English is the default locale and fallback. Routes use a locale prefix. On the first visit, the application may select a supported browser language automatically. A manual language selector is always available and its explicit choice is persisted.
+English is the default locale and fallback. Routes remain language-neutral. On the first visit, the application may select a supported browser language automatically. A manual language selector changes displayed text without navigation, and its explicit choice is persisted locally.
 
 UI localization uses deterministic catalogs, not runtime machine translation. Both catalogs must maintain key and interpolation parity.
 
@@ -33,4 +33,3 @@ UI localization uses deterministic catalogs, not runtime machine translation. Bo
 - Uploaded sources and evidence preserve their original language independently from the UI locale.
 - Every future frontend feature must be verified in English and Italian.
 - Additional locales can be added by introducing a catalog and enabling the locale in configuration.
-

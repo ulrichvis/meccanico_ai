@@ -1,0 +1,62 @@
+{
+  "brand": {
+    "name": "Meccanico IA",
+    "tagline": "Automotive knowledge, structured."
+  },
+  "navigation": {
+    "ariaLabel": "Primary navigation",
+    "overview": "Overview",
+    "foundation": "Foundation"
+  },
+  "language": {
+    "selectorLabel": "Language",
+    "english": "English",
+    "italian": "Italian"
+  },
+  "home": {
+    "eyebrow": "Phase 1 · Foundation",
+    "title": "Turn technical documents into reliable automotive knowledge.",
+    "description": "Meccanico IA is building a source-agnostic pipeline that preserves evidence, structures diagnostic reasoning, and prepares knowledge for a future mechanic-facing assistant.",
+    "primaryAction": "Explore the foundation",
+    "scopeLabel": "Current scope",
+    "scopeTitle": "The technical foundation is ready.",
+    "scopeDescription": "This first milestone establishes the application shell, strict tooling, environment validation, and bilingual text infrastructure. PDF upload comes next.",
+    "pipelineTitle": "A knowledge pipeline designed to grow",
+    "pipelineDescription": "PDF is the first source. The domain stays independent so future inputs can produce the same structured automotive cases.",
+    "steps": {
+      "ingest": {
+        "number": "01",
+        "title": "Ingest",
+        "description": "Preserve the original source and its technical context."
+      },
+      "structure": {
+        "number": "02",
+        "title": "Structure",
+        "description": "Separate facts, inferences, checks, repairs, and outcomes."
+      },
+      "retrieve": {
+        "number": "03",
+        "title": "Retrieve",
+        "description": "Prepare traceable knowledge for mechanics and future conversations."
+      }
+    },
+    "principlesTitle": "Built around diagnostic trust",
+    "principles": {
+      "evidence": {
+        "title": "Evidence first",
+        "description": "Important information remains connected to its original source."
+      },
+      "uncertainty": {
+        "title": "Uncertainty preserved",
+        "description": "Possible causes never become confirmed repairs without support."
+      },
+      "sources": {
+        "title": "Source agnostic",
+        "description": "PDF starts the journey without defining the business model."
+      }
+    }
+  },
+  "footer": {
+    "status": "PDF-first foundation"
+  }
+}

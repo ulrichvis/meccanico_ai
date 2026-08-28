@@ -7,13 +7,13 @@ The roadmap progresses through vertical slices. A phase must work end to end bef
 ### Deliverables
 
 - Next.js TypeScript project with App Router and Tailwind.
-- Locale-prefixed routing with English and Italian message catalogs.
+- Language-neutral routing with English and Italian message catalogs.
 - Automatic supported-locale detection and a persistent language selector.
 - Strict environment-variable validation.
 - Configured PostgreSQL/Supabase and Prisma.
 - Initial relational schema and migration.
 - Private Storage bucket for documents.
-- Mobile-first `/{locale}/upload` screen with drag and drop.
+- Mobile-first `/upload` screen with drag and drop.
 - Server-side PDF validation.
 - File storage and `Source` creation.
 - Minimal dashboard listing recent imports and their status.
@@ -70,7 +70,7 @@ A machine-validated extraction automatically becomes a coherent active case in t
 
 ### Deliverables
 
-- `/{locale}/extractions/[id]/review` page.
+- `/extractions/[id]/review` page.
 - Document preview and page navigation.
 - Editing of vehicles, DTCs, symptoms, causes, checks, solutions, and outcomes.
 - Clear display of inferences and confidence values.
@@ -86,9 +86,9 @@ An operator can inspect and improve stored data at any time without blocking ing
 
 ### Deliverables
 
-- `/{locale}/cases` list showing active cases with their review status.
+- `/cases` list showing active cases with their review status.
 - Simple search by DTC, make, model, and engine.
-- `/{locale}/cases/[id]` page showing the diagnostic structure.
+- `/cases/[id]` page showing the diagnostic structure.
 - Presentation of evidence, procedures, and outcomes.
 - Filters for review and lifecycle status in the admin interface.
 

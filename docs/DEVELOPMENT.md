@@ -1,23 +1,21 @@
 # Development guide
 
-## Planned prerequisites
+## Prerequisites
 
-- Node.js LTS
-- pnpm
+- Node.js 24.19.0 LTS
+- pnpm 11.19.0
 - a Supabase project with PostgreSQL and Storage
 - Git
 
-Exact versions will be pinned in `package.json` and the lockfile when Phase 1 initializes the application.
+Node.js and pnpm are pinned in `.nvmrc`, `.node-version`, `package.json`, and the lockfile.
 
-## Target installation
+## Installation
 
-After the application has been initialized:
+Install dependencies and start the current application with:
 
 ```bash
 pnpm install
 cp .env.example .env.local
-pnpm prisma generate
-pnpm prisma migrate dev
 pnpm dev
 ```
 
@@ -27,9 +25,9 @@ On PowerShell, copy the environment file with:
 Copy-Item .env.example .env.local
 ```
 
-Do not run these commands until their configuration files exist.
+The current environment schema provides safe defaults, so `.env.local` is optional until database and Storage work begins.
 
-## Planned standard commands
+## Standard commands
 
 | Command | Purpose |
 |---|---|
@@ -38,9 +36,8 @@ Do not run these commands until their configuration files exist.
 | `pnpm i18n:check` | Verify locale catalog syntax and key parity. |
 | `pnpm typecheck` | Check TypeScript without producing a build. |
 | `pnpm build` | Verify the production build. |
-| `pnpm prisma generate` | Generate the Prisma client. |
-| `pnpm prisma migrate dev` | Create or apply a local migration. |
-| `pnpm prisma studio` | Inspect local data. |
+
+Prisma commands will be added in Phase 1, point 2 when the database layer is implemented.
 
 ## Target Supabase configuration
 
