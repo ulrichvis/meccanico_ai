@@ -66,10 +66,11 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Source-agnostic architecture decision](docs/decisions/0001-source-agnostic-domain.md)
 - [Non-blocking human review decision](docs/decisions/0002-non-blocking-human-review.md)
 - [English development and bilingual frontend decision](docs/decisions/0003-english-development-bilingual-frontend.md)
+- [Private Supabase Storage decision](docs/decisions/0005-private-supabase-storage.md)
 
 ## Current status
 
-Phase 1, point 1 is complete. The local implementation for point 2 is also ready: Prisma ORM, the PostgreSQL domain schema, the initial migration, and the database verification command are implemented. Applying the migration and running the live verification remain pending until Supabase connection strings are added locally. See [the development guide](docs/DEVELOPMENT.md#supabase-database-setup).
+Phase 1, points 1 through 3 are complete. Prisma ORM is connected to the MecAI Supabase project, and the private `technical-sources` bucket accepts only PDF files up to 25 MB. The next task is Phase 1, point 4: PDF upload.
 
 ## Run locally
 

@@ -44,6 +44,9 @@ The current environment schema provides safe defaults for commands that do not a
 | `pnpm db:migrate:status` | Compare committed migrations with the configured database. |
 | `pnpm db:verify` | Verify the live connection and a transactional `Source` create/read operation. |
 | `pnpm db:studio` | Open Prisma Studio with the migration connection. |
+| `pnpm storage:configure` | Idempotently create or update the private PDF bucket. |
+| `pnpm storage:check` | Check server validation, opaque paths, and failed-persistence cleanup locally. |
+| `pnpm storage:verify` | Verify a live upload, signed retrieval, and cleanup with a synthetic PDF. |
 
 `pnpm build` and `pnpm install` regenerate Prisma Client automatically. Schema validation and client generation work while database variables are empty; migration and query commands require credentials.
 
@@ -66,16 +69,27 @@ pnpm db:verify
 
 The verification creates, reads, and removes a synthetic `Source` inside one transaction. It does not leave a test row behind. A successful run prints only a success message and never prints a connection string.
 
-All application tables have row-level security enabled with no public policies. Prisma must connect with the trusted server-side database role supplied by Supabase. Do not put `DATABASE_URL` or `DIRECT_URL` in a `NEXT_PUBLIC_` variable.
+All application tables have row-level security enabled with no public policies. Prisma connects through the dedicated server-side `mecai_prisma` role; its credential exists only in `.env.local`. Do not put `DATABASE_URL` or `DIRECT_URL` in a `NEXT_PUBLIC_` variable.
 
-## Target Supabase configuration
+Runtime PostgreSQL TLS is verified with Supabase's public production CA certificate stored at `certificates/supabase-prod-ca-2021.crt`. Do not add an `sslmode` query parameter to `DATABASE_URL`, because `pg-connection-string` can replace the explicit CA configuration when SSL parameters are present in the URL. Prisma CLI migration connections continue to use the SSL mode declared in `DIRECT_URL`.
 
-1. Create a private bucket named `technical-sources`.
-2. Deny public file access.
-3. Generate server-side paths in the form `sources/<source-id>/<safe-file-name>`.
-4. Use the service-role key only on the server.
-5. Use temporary signed URLs for previews.
-6. Document every added RLS policy.
+## Supabase Storage setup
+
+The application uses a private bucket named `technical-sources`. It accepts only `application/pdf` objects up to 25 MiB (26,214,400 bytes). The application repeats the same checks on the server and also verifies the `%PDF-` file signature.
+
+Set `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_DOCUMENTS_BUCKET` in `.env.local`, then run:
+
+```bash
+pnpm storage:configure
+pnpm storage:check
+pnpm storage:verify
+```
+
+`storage:configure` is idempotent. It creates the bucket when absent and otherwise restores its private access, PDF MIME restriction, and size limit. `storage:verify` uploads a synthetic PDF, retrieves it through a 60-second signed URL, and removes it in a `finally` block.
+
+Storage paths use `sources/<source-id>/<random-uuid>.pdf`; the submitted filename is retained only as source metadata and never controls an object path. The service secret remains server-only. No `storage.objects` policy is added in this phase because browsers never access the bucket directly: trusted server code uploads, removes, and signs objects using the Supabase secret key. Any future direct client access requires a separate least-privilege RLS decision.
+
+Supabase also applies a project-wide Storage file-size ceiling. The bucket-specific 25 MiB limit must remain at or below that global ceiling. Supabase Free projects currently allow a global limit up to 50 MB, so 25 MiB is supported.
 
 ## Migration conventions
 

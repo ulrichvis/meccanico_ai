@@ -17,7 +17,10 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
     "db:studio": "prisma studio",
-    "db:verify": "tsx scripts/verify-database.ts"
+    "db:verify": "tsx scripts/verify-database.ts",
+    "storage:configure": "tsx scripts/configure-storage.ts",
+    "storage:check": "tsx scripts/check-storage.ts",
+    "storage:verify": "tsx scripts/verify-storage.ts"
   },
   "engines": {
     "node": "24.19.x",
@@ -28,10 +31,12 @@
     "@next/env": "16.3.3",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
+    "@supabase/supabase-js": "2.112.4",
     "next": "16.3.3",
     "pg": "8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "server-only": "0.0.1",
     "zod": "4.4.3"
   },
   "devDependencies": {

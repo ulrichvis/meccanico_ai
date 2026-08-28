@@ -24,17 +24,17 @@ This file is the project's operational tracker. Check only tasks that are actual
 - [x] Include tables required by future phases without implementing their logic.
 - [x] Add confidence constraints, DTC uniqueness, and essential indexes.
 - [x] Generate the initial migration.
-- [ ] Apply the initial migration to Supabase after local connection strings are provided.
-- [ ] Verify the connection and a `Source` create/read operation.
+- [x] Apply the initial migration to Supabase after local connection strings are provided.
+- [x] Verify the connection and a `Source` create/read operation.
 
 ### 3. Storage
 
-- [ ] Create, or document how to create, the private `technical-sources` bucket.
-- [ ] Add a server-side Supabase client.
-- [ ] Generate storage paths independently from the submitted filename.
-- [ ] Validate extension, MIME type, and maximum size on the server.
-- [ ] Remove the uploaded file if database creation fails after upload.
-- [ ] Support a signed URL for future document access.
+- [x] Create, or document how to create, the private `technical-sources` bucket.
+- [x] Add a server-side Supabase client.
+- [x] Generate storage paths independently from the submitted filename.
+- [x] Validate extension, MIME type, and maximum size on the server.
+- [x] Remove the uploaded file if database creation fails after upload.
+- [x] Support a signed URL for future document access.
 
 ### 4. PDF upload
 
@@ -136,4 +136,5 @@ This file is the project's operational tracker. Check only tasks that are actual
 | 2026-08-25 | Documentation | Made human review non-blocking and documented the future mechanic-facing conversational assistant. | Cross-checked product, architecture, data, roadmap, and ADR terminology. |
 | 2026-08-25 | Documentation | Established English as the development language and English/Italian as required frontend locales. | Added i18n architecture, catalog rules, and Phase 1 verification criteria. |
 | 2026-08-25 | Phase 1.1 | Initialized the application, tooling, environment schema, bilingual catalogs, language selector, and responsive shell. | i18n check, ESLint, TypeScript, production build, and desktop/mobile browser verification passed. |
-| 2026-08-28 | Phase 1.2 | Added Prisma ORM, the PostgreSQL domain schema, database constraints, the initial migration, and a live connection verification command. | Local schema generation and static checks passed; Supabase deployment and live create/read verification await local credentials. |
+| 2026-08-28 | Phase 1.2 | Added Prisma ORM, the PostgreSQL domain schema, database constraints, the initial migration, verified TLS, and a dedicated server-side database role. | Migration deployed to MecAI; migration status is current; transactional `Source` create/read/delete passed; Supabase advisors report no errors or warnings. |
+| 2026-08-28 | Phase 1.3 | Added private Supabase Storage, a server-only client, PDF validation, opaque object paths, failed-persistence cleanup, and signed document access with a 25 MiB limit. | Local boundary and compensation checks passed; live synthetic PDF upload, signed retrieval, and cleanup passed on MecAI. |

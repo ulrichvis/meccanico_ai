@@ -15,6 +15,8 @@ Use Prisma ORM 7 with PostgreSQL and the `pg` driver adapter.
 
 - `DATABASE_URL` is the pooled runtime connection used by the application.
 - `DIRECT_URL` is the direct or session connection used by Prisma migrations and administrative tooling.
+- Runtime TLS verifies the Supabase pooler against the committed Supabase production CA certificate instead of disabling certificate verification.
+- The application and migration commands use a dedicated `mecai_prisma` login with only the database and `public` schema privileges needed by Prisma. It is a server-only role with `BYPASSRLS` and `CREATEDB`; its generated password is stored only in `.env.local`.
 - Prisma configuration loads the same root `.env*` files as Next.js.
 - Schema validation and client generation remain available when both variables are empty.
 - Prisma models use English camel-case identifiers and map to snake-case PostgreSQL names.

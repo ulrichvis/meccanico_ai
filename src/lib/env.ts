@@ -29,7 +29,7 @@ const serverEnvironmentSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   NEXT_PUBLIC_APP_URL: optionalUrl.default("http://localhost:3000"),
-  MAX_UPLOAD_SIZE_MB: z.coerce.number().positive().default(20),
+  MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().default(25),
   DATABASE_URL: optionalPostgresUrl,
   DIRECT_URL: optionalPostgresUrl,
   NEXT_PUBLIC_SUPABASE_URL: optionalUrl,
