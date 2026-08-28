@@ -25,6 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="header-actions">
           <nav aria-label={t("navigation.ariaLabel")} className="primary-nav">
             <Link href="/">{t("navigation.overview")}</Link>
+            <Link href="/sources">{t("navigation.sources")}</Link>
             <Link href="/upload">{t("navigation.upload")}</Link>
             <Link href="/#foundation">{t("navigation.foundation")}</Link>
           </nav>

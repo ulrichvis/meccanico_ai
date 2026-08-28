@@ -105,6 +105,19 @@ The verification submits a synthetic PDF twice with the same upload identifier, 
 
 For a manual UI check, open `/upload` and select or drop up to 20 PDFs no larger than 20 MB each. Confirm that every file has its own validation, progress, and result; invalid files do not block valid files; failed transfers can be retried; and the final bilingual summary reports stored and failed files independently. A single successful PDF still redirects to `/upload/<source-id>/success`.
 
+## Source dashboard verification
+
+Open `/sources` after uploading one or more documents. The page displays at most the 50 most recent sources, ordered by upload date and identifier, with filename, source type, processing status, and a locale-formatted timestamp. Verify that:
+
+- the header links to both `/sources` and `/upload`;
+- English and Italian change every label, status, and formatted date without changing the URL;
+- the table becomes stacked source cards at a mobile width;
+- an empty database shows the upload call to action;
+- a database connection failure shows the recoverable error state;
+- navigation displays the loading skeleton while the server query is pending.
+
+The query is bounded and supported by `sources_created_at_id_idx`, which matches its descending sort order.
+
 ## Migration conventions
 
 - A change to `schema.prisma` requires an explicitly named migration.

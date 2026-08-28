@@ -57,10 +57,10 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ### 5. Minimal dashboard
 
-- [ ] Create `/` with a call to action linking to the upload page.
-- [ ] List recent sources with filename, date, type, and status.
-- [ ] Support empty, loading, and error states.
-- [ ] Make the page usable on mobile widths.
+- [x] Create `/sources` with a call to action linking to the upload page.
+- [x] List recent sources with filename, date, type, and status.
+- [x] Support empty, loading, and error states.
+- [x] Make the page usable on mobile widths.
 
 ### 6. Phase 1 verification
 
@@ -73,8 +73,8 @@ This file is the project's operational tracker. Check only tasks that are actual
 - [x] An oversized PDF is rejected.
 - [x] A duplicate submission does not create two unintended imports.
 - [x] A Storage/database failure produces a recoverable state with no known orphaned file.
-- [ ] The dashboard works at a mobile viewport width.
-- [ ] English and Italian dashboard, navigation, upload, validation, and error states render correctly.
+- [x] The dashboard works at a mobile viewport width.
+- [x] English and Italian dashboard, navigation, upload, validation, and error states render correctly.
 - [ ] Automatic locale selection uses a supported browser preference and falls back to English.
 - [x] The language selector replaces displayed text without changing the current route.
 - [ ] No user-facing string in the Phase 1 frontend is hard-coded.
@@ -150,3 +150,4 @@ This file is the project's operational tracker. Check only tasks that are actual
 | 2026-08-28 | Phase 1.3 | Added private Supabase Storage, a server-only client, PDF validation, opaque object paths, failed-persistence cleanup, and signed document access with a 25 MiB limit. | Local boundary and compensation checks passed; live synthetic PDF upload, signed retrieval, and cleanup passed on MecAI. |
 | 2026-08-28 | Phase 1.4 | Added the bilingual PDF upload UI, progress reporting, server endpoint, relational persistence, retry idempotency, and confirmation page. | Live endpoint upload/persistence/retry/rejection/cleanup passed; English and Italian desktop and 390 px mobile layouts were browser-verified. |
 | 2026-08-28 | Phase 1.4.1 | Added batches of up to 20 PDFs, a 20 MiB per-file limit, three-request concurrency, independent results, retries, and bilingual summaries. | Bucket limit verified; concurrent live uploads, persistence, idempotency, invalid-content isolation, catalog parity, lint, types, and production build passed. |
+| 2026-08-28 | Phase 1.5 | Added the `/sources` dashboard with recent-source metadata, localized statuses and dates, responsive rows, and empty/loading/error states. | Live MecAI data rendered in English and Italian; 390 px mobile layout and browser console passed; recent-source index migration applied. |

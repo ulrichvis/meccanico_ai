@@ -10,6 +10,37 @@ export interface UploadedSource {
   status: "UPLOADED";
 }
 
+export interface RecentSource {
+  createdAt: string;
+  id: string;
+  mimeType: string | null;
+  originalFilename: string | null;
+  status: string;
+  type: string;
+}
+
+const RECENT_SOURCE_LIMIT = 50;
+
+export async function listRecentSources(): Promise<RecentSource[]> {
+  const sources = await getDatabaseClient().source.findMany({
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: {
+      createdAt: true,
+      id: true,
+      mimeType: true,
+      originalFilename: true,
+      status: true,
+      type: true,
+    },
+    take: RECENT_SOURCE_LIMIT,
+  });
+
+  return sources.map((source) => ({
+    ...source,
+    createdAt: source.createdAt.toISOString(),
+  }));
+}
+
 export async function findUploadedSource(
   sourceId: string,
 ): Promise<UploadedSource | null> {

@@ -121,6 +121,7 @@ model Source {
   evidence         SourceEvidence[]
 
   @@index([status, createdAt(sort: Desc)], map: "sources_status_created_at_idx")
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "sources_created_at_id_idx")
   @@map("sources")
 }
 

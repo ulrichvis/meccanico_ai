@@ -6,6 +6,7 @@
   "navigation": {
     "ariaLabel": "Primary navigation",
     "overview": "Overview",
+    "sources": "Sources",
     "upload": "Upload PDF",
     "foundation": "Foundation"
   },
@@ -102,6 +103,52 @@
       "description": "The source was registered and is ready for the next extraction phase.",
       "reference": "Source reference",
       "another": "Upload another PDF"
+    }
+  },
+  "sources": {
+    "eyebrow": "Source library",
+    "title": "Uploaded documents.",
+    "description": "Review the latest source files registered in the knowledge pipeline.",
+    "uploadAction": "Upload PDFs",
+    "recentTitle": "Recent sources",
+    "count": "{count} documents",
+    "unnamed": "Unnamed source",
+    "loading": "Loading your source library…",
+    "empty": {
+      "title": "No documents yet",
+      "description": "Upload your first technical PDF to start building the source library.",
+      "action": "Upload the first PDF"
+    },
+    "error": {
+      "title": "The source library is unavailable",
+      "description": "The documents could not be loaded. Your stored files are not affected.",
+      "retry": "Try again"
+    },
+    "table": {
+      "label": "Recently uploaded sources",
+      "filename": "Filename",
+      "type": "Type",
+      "status": "Status",
+      "uploadedAt": "Uploaded"
+    },
+    "type": {
+      "pdf": "PDF",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "text": "Text",
+      "audio": "Audio",
+      "diagnosticReport": "Diagnostic report",
+      "other": "Other"
+    },
+    "status": {
+      "uploaded": "Uploaded",
+      "extractingText": "Extracting text",
+      "textExtracted": "Text extracted",
+      "processing": "Processing",
+      "persisted": "Persisted",
+      "schemaInvalid": "Needs review",
+      "failed": "Failed",
+      "unknown": "Unknown"
     }
   },
   "footer": {

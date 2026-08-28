@@ -69,10 +69,11 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Private Supabase Storage decision](docs/decisions/0005-private-supabase-storage.md)
 - [Idempotent PDF upload decision](docs/decisions/0006-idempotent-pdf-upload.md)
 - [Limited-concurrency PDF batches decision](docs/decisions/0007-limited-concurrency-pdf-batches.md)
+- [Recent sources dashboard decision](docs/decisions/0008-recent-sources-dashboard.md)
 
 ## Current status
 
-Phase 1, points 1 through 4 are complete, and point 4.1 adds batches of up to 20 PDFs. Each private PDF is limited to 20 MB, tracked independently, and uploaded with limited concurrency and idempotent retries. The next task is Phase 1, point 5: the minimal dashboard.
+Phase 1, points 1 through 5 are complete. Operators can upload batches of private PDFs and review the latest registered documents on the bilingual `/sources` dashboard. The next task is the final Phase 1 verification.
 
 ## Run locally
 

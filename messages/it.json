@@ -6,6 +6,7 @@
   "navigation": {
     "ariaLabel": "Navigazione principale",
     "overview": "Panoramica",
+    "sources": "Fonti",
     "upload": "Carica PDF",
     "foundation": "Base tecnica"
   },
@@ -102,6 +103,52 @@
       "description": "La fonte è stata registrata ed è pronta per la prossima fase di estrazione.",
       "reference": "Riferimento fonte",
       "another": "Carica un altro PDF"
+    }
+  },
+  "sources": {
+    "eyebrow": "Archivio delle fonti",
+    "title": "Documenti caricati.",
+    "description": "Consulta gli ultimi file sorgente registrati nella pipeline di conoscenza.",
+    "uploadAction": "Carica PDF",
+    "recentTitle": "Fonti recenti",
+    "count": "{count} documenti",
+    "unnamed": "Fonte senza nome",
+    "loading": "Caricamento dell'archivio delle fonti…",
+    "empty": {
+      "title": "Nessun documento",
+      "description": "Carica il tuo primo PDF tecnico per iniziare a costruire l'archivio delle fonti.",
+      "action": "Carica il primo PDF"
+    },
+    "error": {
+      "title": "L'archivio delle fonti non è disponibile",
+      "description": "Non è stato possibile caricare i documenti. I file già salvati non sono stati modificati.",
+      "retry": "Riprova"
+    },
+    "table": {
+      "label": "Fonti caricate di recente",
+      "filename": "Nome file",
+      "type": "Tipo",
+      "status": "Stato",
+      "uploadedAt": "Caricato"
+    },
+    "type": {
+      "pdf": "PDF",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "text": "Testo",
+      "audio": "Audio",
+      "diagnosticReport": "Rapporto diagnostico",
+      "other": "Altro"
+    },
+    "status": {
+      "uploaded": "Caricato",
+      "extractingText": "Estrazione del testo",
+      "textExtracted": "Testo estratto",
+      "processing": "Elaborazione",
+      "persisted": "Salvato",
+      "schemaInvalid": "Da verificare",
+      "failed": "Non riuscito",
+      "unknown": "Sconosciuto"
     }
   },
   "footer": {
