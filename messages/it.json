@@ -6,6 +6,7 @@
   "navigation": {
     "ariaLabel": "Navigazione principale",
     "overview": "Panoramica",
+    "upload": "Carica PDF",
     "foundation": "Base tecnica"
   },
   "language": {
@@ -17,7 +18,7 @@
     "eyebrow": "Fase 1 · Base tecnica",
     "title": "Trasforma i documenti tecnici in conoscenza automobilistica affidabile.",
     "description": "Meccanico IA sta costruendo una pipeline indipendente dalla fonte che conserva le prove, struttura il ragionamento diagnostico e prepara la conoscenza per un futuro assistente dedicato ai meccanici.",
-    "primaryAction": "Scopri la base tecnica",
+    "primaryAction": "Carica un PDF",
     "scopeLabel": "Ambito attuale",
     "scopeTitle": "La base tecnica è pronta.",
     "scopeDescription": "Questo primo traguardo definisce la struttura dell'applicazione, gli strumenti rigorosi, la validazione dell'ambiente e l'infrastruttura bilingue dei testi. Il caricamento PDF sarà il prossimo passo.",
@@ -56,7 +57,38 @@
       }
     }
   },
+  "upload": {
+    "eyebrow": "Fase 1 · Acquisizione della fonte",
+    "title": "Aggiungi un PDF tecnico.",
+    "description": "Il documento originale verrà conservato privatamente e preparato per la pipeline di estrazione. L'elaborazione IA non inizia ancora.",
+    "dropzone": {
+      "title": "Trascina qui il tuo PDF",
+      "description": "Trascina un file oppure selezionalo dal tuo dispositivo.",
+      "browse": "Scegli un PDF"
+    },
+    "maximumSize": "Solo PDF · Massimo {size} MB",
+    "removeFile": "Rimuovi",
+    "submit": "Carica documento",
+    "uploading": "Caricamento…",
+    "progress": "Avanzamento caricamento",
+    "errors": {
+      "fileRequired": "Scegli un file PDF prima di caricarlo.",
+      "invalidExtension": "Il file selezionato deve avere l'estensione .pdf.",
+      "invalidMimeType": "Il file selezionato non è riconosciuto come PDF.",
+      "invalidPdf": "Il contenuto del file non è un documento PDF valido.",
+      "fileTooLarge": "Il PDF supera il limite di {size} MB.",
+      "storageFailed": "Non è stato possibile salvare il documento. Riprova.",
+      "uploadFailed": "Non è stato possibile completare il caricamento. Riprova."
+    },
+    "success": {
+      "eyebrow": "Caricamento completato",
+      "title": "Il tuo PDF è stato salvato in sicurezza.",
+      "description": "La fonte è stata registrata ed è pronta per la prossima fase di estrazione.",
+      "reference": "Riferimento fonte",
+      "another": "Carica un altro PDF"
+    }
+  },
   "footer": {
-    "status": "Base iniziale dedicata ai PDF"
+    "status": "Acquisizione privata dei PDF"
   }
 }

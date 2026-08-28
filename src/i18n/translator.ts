@@ -10,7 +10,13 @@ type NestedKeyOf<T> = {
 
 export type MessageKey = NestedKeyOf<Messages>;
 
-export function translate(messages: Messages, key: MessageKey): string {
+type TranslationValues = Record<string, string | number>;
+
+export function translate(
+  messages: Messages,
+  key: MessageKey,
+  values?: TranslationValues,
+): string {
   let value: unknown = messages;
 
   for (const segment of key.split(".")) {
@@ -25,5 +31,11 @@ export function translate(messages: Messages, key: MessageKey): string {
     throw new Error(`Translation key does not resolve to text: ${key}`);
   }
 
-  return value;
+  if (!values) {
+    return value;
+  }
+
+  return value.replace(/\{(\w+)\}/g, (placeholder, name: string) =>
+    name in values ? String(values[name]) : placeholder,
+  );
 }

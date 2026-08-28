@@ -20,7 +20,8 @@
     "db:verify": "tsx scripts/verify-database.ts",
     "storage:configure": "tsx scripts/configure-storage.ts",
     "storage:check": "tsx scripts/check-storage.ts",
-    "storage:verify": "tsx scripts/verify-storage.ts"
+    "storage:verify": "tsx scripts/verify-storage.ts",
+    "upload:verify": "tsx scripts/verify-upload.ts"
   },
   "engines": {
     "node": "24.19.x",

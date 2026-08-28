@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useLanguage } from "@/components/i18n/language-provider";
 
 const pipelineSteps = ["ingest", "structure", "retrieve"] as const;
@@ -16,10 +18,10 @@ export function HomeContent() {
           <p className="eyebrow">{t("home.eyebrow")}</p>
           <h1>{t("home.title")}</h1>
           <p className="hero-description">{t("home.description")}</p>
-          <a className="primary-action" href="#foundation">
+          <Link className="primary-action" href="/upload">
             {t("home.primaryAction")}
-            <span aria-hidden="true">↓</span>
-          </a>
+            <span aria-hidden="true">→</span>
+          </Link>
         </div>
 
         <aside className="scope-card">

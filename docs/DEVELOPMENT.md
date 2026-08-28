@@ -47,6 +47,7 @@ The current environment schema provides safe defaults for commands that do not a
 | `pnpm storage:configure` | Idempotently create or update the private PDF bucket. |
 | `pnpm storage:check` | Check server validation, opaque paths, and failed-persistence cleanup locally. |
 | `pnpm storage:verify` | Verify a live upload, signed retrieval, and cleanup with a synthetic PDF. |
+| `pnpm upload:verify` | Verify the running upload endpoint, database persistence, retry idempotency, invalid-content rejection, and cleanup. |
 
 `pnpm build` and `pnpm install` regenerate Prisma Client automatically. Schema validation and client generation work while database variables are empty; migration and query commands require credentials.
 
@@ -90,6 +91,17 @@ pnpm storage:verify
 Storage paths use `sources/<source-id>/<random-uuid>.pdf`; the submitted filename is retained only as source metadata and never controls an object path. The service secret remains server-only. No `storage.objects` policy is added in this phase because browsers never access the bucket directly: trusted server code uploads, removes, and signs objects using the Supabase secret key. Any future direct client access requires a separate least-privilege RLS decision.
 
 Supabase also applies a project-wide Storage file-size ceiling. The bucket-specific 25 MiB limit must remain at or below that global ceiling. Supabase Free projects currently allow a global limit up to 50 MB, so 25 MiB is supported.
+
+## PDF upload verification
+
+Start the application, then run the live endpoint verification in another terminal:
+
+```bash
+pnpm dev
+pnpm upload:verify
+```
+
+The verification submits a synthetic PDF twice with the same upload identifier, confirms that exactly one `Source` exists, checks invalid PDF-content rejection, and removes its Storage object and database row. For a manual UI check, open `/upload`, select or drop a PDF no larger than 25 MB, confirm that filename, formatted size, and progress are shown, and verify the redirect to `/upload/<source-id>/success`.
 
 ## Migration conventions
 

@@ -6,6 +6,7 @@
   "navigation": {
     "ariaLabel": "Primary navigation",
     "overview": "Overview",
+    "upload": "Upload PDF",
     "foundation": "Foundation"
   },
   "language": {
@@ -17,7 +18,7 @@
     "eyebrow": "Phase 1 · Foundation",
     "title": "Turn technical documents into reliable automotive knowledge.",
     "description": "Meccanico IA is building a source-agnostic pipeline that preserves evidence, structures diagnostic reasoning, and prepares knowledge for a future mechanic-facing assistant.",
-    "primaryAction": "Explore the foundation",
+    "primaryAction": "Upload a PDF",
     "scopeLabel": "Current scope",
     "scopeTitle": "The technical foundation is ready.",
     "scopeDescription": "This first milestone establishes the application shell, strict tooling, environment validation, and bilingual text infrastructure. PDF upload comes next.",
@@ -56,7 +57,38 @@
       }
     }
   },
+  "upload": {
+    "eyebrow": "Phase 1 · Source ingestion",
+    "title": "Add a technical PDF.",
+    "description": "The original document will be stored privately and prepared for the extraction pipeline. No AI processing starts yet.",
+    "dropzone": {
+      "title": "Drop your PDF here",
+      "description": "Drag and drop one file, or choose it from your device.",
+      "browse": "Choose a PDF"
+    },
+    "maximumSize": "PDF only · Maximum {size} MB",
+    "removeFile": "Remove",
+    "submit": "Upload document",
+    "uploading": "Uploading…",
+    "progress": "Upload progress",
+    "errors": {
+      "fileRequired": "Choose a PDF file before uploading.",
+      "invalidExtension": "The selected file must use the .pdf extension.",
+      "invalidMimeType": "The selected file is not recognized as a PDF.",
+      "invalidPdf": "The file content is not a valid PDF document.",
+      "fileTooLarge": "The PDF is larger than the {size} MB limit.",
+      "storageFailed": "The document could not be stored. Please try again.",
+      "uploadFailed": "The upload could not be completed. Please try again."
+    },
+    "success": {
+      "eyebrow": "Upload complete",
+      "title": "Your PDF is safely stored.",
+      "description": "The source was registered and is ready for the next extraction phase.",
+      "reference": "Source reference",
+      "another": "Upload another PDF"
+    }
+  },
   "footer": {
-    "status": "PDF-first foundation"
+    "status": "Private PDF ingestion"
   }
 }

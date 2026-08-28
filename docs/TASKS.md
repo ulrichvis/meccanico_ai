@@ -38,12 +38,12 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ### 4. PDF upload
 
-- [ ] Create `/upload` with drag and drop and a file picker.
-- [ ] Display filename, size, progress, and errors.
-- [ ] Send the file to the server without exposing the service-role key.
-- [ ] Store the PDF, then create the `Source` with the `uploaded` status.
-- [ ] Make the operation idempotent or prevent immediate duplicate submissions.
-- [ ] Redirect to a confirmation page or the dashboard.
+- [x] Create `/upload` with drag and drop and a file picker.
+- [x] Display filename, size, progress, and errors.
+- [x] Send the file to the server without exposing the service-role key.
+- [x] Store the PDF, then create the `Source` with the `uploaded` status.
+- [x] Make the operation idempotent or prevent immediate duplicate submissions.
+- [x] Redirect to a confirmation page or the dashboard.
 
 ### 5. Minimal dashboard
 
@@ -58,11 +58,11 @@ This file is the project's operational tracker. Check only tasks that are actual
 - [x] `pnpm i18n:check` passes and both catalogs contain the same keys.
 - [x] `pnpm typecheck` passes.
 - [x] `pnpm build` passes.
-- [ ] A small valid PDF uploads and appears in Storage and the database.
-- [ ] A non-PDF file is rejected with a clear message.
-- [ ] An oversized PDF is rejected.
-- [ ] A duplicate submission does not create two unintended imports.
-- [ ] A Storage/database failure produces a recoverable state with no known orphaned file.
+- [x] A small valid PDF uploads and appears in Storage and the database.
+- [x] A non-PDF file is rejected with a clear message.
+- [x] An oversized PDF is rejected.
+- [x] A duplicate submission does not create two unintended imports.
+- [x] A Storage/database failure produces a recoverable state with no known orphaned file.
 - [ ] The dashboard works at a mobile viewport width.
 - [ ] English and Italian dashboard, navigation, upload, validation, and error states render correctly.
 - [ ] Automatic locale selection uses a supported browser preference and falls back to English.
@@ -138,3 +138,4 @@ This file is the project's operational tracker. Check only tasks that are actual
 | 2026-08-25 | Phase 1.1 | Initialized the application, tooling, environment schema, bilingual catalogs, language selector, and responsive shell. | i18n check, ESLint, TypeScript, production build, and desktop/mobile browser verification passed. |
 | 2026-08-28 | Phase 1.2 | Added Prisma ORM, the PostgreSQL domain schema, database constraints, the initial migration, verified TLS, and a dedicated server-side database role. | Migration deployed to MecAI; migration status is current; transactional `Source` create/read/delete passed; Supabase advisors report no errors or warnings. |
 | 2026-08-28 | Phase 1.3 | Added private Supabase Storage, a server-only client, PDF validation, opaque object paths, failed-persistence cleanup, and signed document access with a 25 MiB limit. | Local boundary and compensation checks passed; live synthetic PDF upload, signed retrieval, and cleanup passed on MecAI. |
+| 2026-08-28 | Phase 1.4 | Added the bilingual PDF upload UI, progress reporting, server endpoint, relational persistence, retry idempotency, and confirmation page. | Live endpoint upload/persistence/retry/rejection/cleanup passed; English and Italian desktop and 390 px mobile layouts were browser-verified. |

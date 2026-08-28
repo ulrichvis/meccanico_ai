@@ -23,7 +23,10 @@ import { translate, type MessageKey } from "@/i18n/translator";
 type LanguageContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: MessageKey) => string;
+  t: (
+    key: MessageKey,
+    values?: Record<string, string | number>,
+  ) => string;
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
@@ -98,7 +101,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     () => ({
       locale,
       setLocale,
-      t: (key) => translate(dictionaries[locale], key),
+      t: (key, values) => translate(dictionaries[locale], key, values),
     }),
     [locale, setLocale],
   );

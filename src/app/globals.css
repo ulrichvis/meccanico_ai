@@ -38,6 +38,11 @@ select {
   font: inherit;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -59,6 +64,224 @@ select {
 .site-footer {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
+}
+
+.upload-page,
+.success-page {
+  width: min(940px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 72px 0 96px;
+}
+
+.upload-intro {
+  max-width: 720px;
+}
+
+.upload-intro h1,
+.success-card h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.8rem, 9vw, 5.8rem);
+  font-weight: 500;
+  letter-spacing: -0.065em;
+  line-height: 0.95;
+}
+
+.upload-intro > p:last-child,
+.success-card > p:not(.eyebrow, .source-reference) {
+  max-width: 650px;
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.upload-panel,
+.success-card {
+  margin-top: 46px;
+  border: 1px solid rgb(21 32 29 / 12%);
+  border-radius: 30px;
+  background: var(--surface);
+  padding: clamp(18px, 4vw, 36px);
+  box-shadow: 0 26px 80px rgb(39 53 48 / 9%);
+}
+
+.drop-zone {
+  display: grid;
+  min-height: 350px;
+  place-items: center;
+  align-content: center;
+  border: 2px dashed #cbd1ca;
+  border-radius: 22px;
+  background: #f8f7f1;
+  padding: 34px 20px;
+  text-align: center;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.drop-zone.is-dragging {
+  border-color: var(--accent);
+  background: rgb(240 100 44 / 7%);
+  transform: scale(1.005);
+}
+
+.upload-icon {
+  display: grid;
+  width: 58px;
+  height: 68px;
+  place-items: center;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  color: var(--accent-dark);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.drop-zone h2 {
+  margin: 22px 0 0;
+  font-size: 1.45rem;
+  letter-spacing: -0.035em;
+}
+
+.drop-zone p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.drop-zone small {
+  margin-top: 16px;
+  color: var(--muted);
+}
+
+.secondary-action {
+  min-height: 44px;
+  margin-top: 22px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  padding: 0 18px;
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.selected-file,
+.upload-progress {
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+.selected-file,
+.upload-progress > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.selected-file strong,
+.selected-file span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.selected-file span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.selected-file button {
+  border: 0;
+  background: transparent;
+  color: var(--accent-dark);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.upload-progress span {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.upload-progress progress {
+  width: 100%;
+  height: 8px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  accent-color: var(--signal);
+}
+
+.upload-error {
+  margin: 18px 0 0;
+  border-left: 4px solid var(--accent-dark);
+  border-radius: 8px;
+  background: rgb(189 61 19 / 8%);
+  color: #8e2d0f;
+  padding: 13px 15px;
+  line-height: 1.5;
+}
+
+.upload-submit {
+  border: 0;
+  cursor: pointer;
+}
+
+.upload-submit:disabled:hover {
+  background: var(--accent);
+  transform: none;
+}
+
+.success-page {
+  display: grid;
+  min-height: calc(100vh - 162px);
+  place-items: center;
+}
+
+.success-card {
+  width: min(720px, 100%);
+  margin: 0;
+  text-align: center;
+}
+
+.success-mark {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 26px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--signal);
+  color: white;
+  font-size: 1.55rem;
+  font-weight: 800;
+}
+
+.success-card .eyebrow {
+  margin-bottom: 14px;
+}
+
+.success-card > p:not(.eyebrow, .source-reference) {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.source-reference {
+  display: grid;
+  gap: 7px;
+  margin: 26px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.source-reference code {
+  color: var(--ink);
+  overflow-wrap: anywhere;
 }
 
 .site-header {
@@ -403,6 +626,15 @@ a:focus-visible {
 
   .foundation {
     padding-top: 68px;
+  }
+
+  .upload-page,
+  .success-page {
+    padding: 46px 0 64px;
+  }
+
+  .drop-zone {
+    min-height: 310px;
   }
 
   .site-footer {

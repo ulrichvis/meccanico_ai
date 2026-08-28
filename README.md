@@ -67,10 +67,11 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Non-blocking human review decision](docs/decisions/0002-non-blocking-human-review.md)
 - [English development and bilingual frontend decision](docs/decisions/0003-english-development-bilingual-frontend.md)
 - [Private Supabase Storage decision](docs/decisions/0005-private-supabase-storage.md)
+- [Idempotent PDF upload decision](docs/decisions/0006-idempotent-pdf-upload.md)
 
 ## Current status
 
-Phase 1, points 1 through 3 are complete. Prisma ORM is connected to the MecAI Supabase project, and the private `technical-sources` bucket accepts only PDF files up to 25 MB. The next task is Phase 1, point 4: PDF upload.
+Phase 1, points 1 through 4 are complete. The bilingual upload flow validates and stores private PDFs up to 25 MB, creates an `uploaded` source, handles retries idempotently, and redirects to confirmation. The next task is Phase 1, point 5: the minimal dashboard.
 
 ## Run locally
 

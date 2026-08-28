@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 
 import { LanguageSelector } from "@/components/i18n/language-selector";
 import { useLanguage } from "@/components/i18n/language-provider";
@@ -11,7 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="site-shell">
       <header className="site-header">
-        <a className="brand" href="#overview">
+        <Link className="brand" href="/">
           <span className="brand-mark" aria-hidden="true">
             M
           </span>
@@ -19,12 +20,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             <strong>{t("brand.name")}</strong>
             <small>{t("brand.tagline")}</small>
           </span>
-        </a>
+        </Link>
 
         <div className="header-actions">
           <nav aria-label={t("navigation.ariaLabel")} className="primary-nav">
-            <a href="#overview">{t("navigation.overview")}</a>
-            <a href="#foundation">{t("navigation.foundation")}</a>
+            <Link href="/">{t("navigation.overview")}</Link>
+            <Link href="/upload">{t("navigation.upload")}</Link>
+            <Link href="/#foundation">{t("navigation.foundation")}</Link>
           </nav>
           <LanguageSelector />
         </div>
