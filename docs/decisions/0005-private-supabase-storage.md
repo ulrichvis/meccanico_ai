@@ -1,6 +1,6 @@
 # ADR 0005: Private Supabase Storage for source documents
 
-- Status: Accepted
+- Status: Accepted (amended by ADR 0007)
 - Date: 2026-08-28
 
 ## Context
@@ -13,7 +13,7 @@ The first upload route is not implemented yet, but its Storage contract must be 
 
 Use the private Supabase Storage bucket `technical-sources` through a server-only adapter.
 
-- Restrict the bucket to `application/pdf` objects no larger than 25 MiB (26,214,400 bytes).
+- Restrict the bucket to `application/pdf` objects no larger than 20 MiB (20,971,520 bytes).
 - Repeat extension, declared MIME type, byte size, and `%PDF-` signature validation on the application server.
 - Generate object paths as `sources/<source-id>/<random-uuid>.pdf`. The submitted filename is metadata only.
 - Keep the Supabase secret key in server-only environment configuration and disable client auth-session persistence on the service client.
@@ -27,6 +27,6 @@ Use the private Supabase Storage bucket `technical-sources` through a server-onl
 
 The PDF upload route can use one application service for validation, upload, relational persistence, and compensating cleanup. Storage implementation details remain replaceable behind the `SourceStorage` interface.
 
-The 25 MiB application limit is also enforced by Supabase, but it cannot exceed the project's global Storage limit. Standard Supabase uploads are sufficient for the current adapter; the upload phase should evaluate resumable transfer behavior for larger or unreliable connections without changing the storage contract.
+The 20 MiB application limit is also enforced by Supabase, but it cannot exceed the project's global Storage limit. Standard Supabase uploads are sufficient for the current adapter; the upload phase should evaluate resumable transfer behavior for larger or unreliable connections without changing the storage contract.
 
 Direct browser uploads or reads are not authorized by this decision. Introducing them later requires explicit RLS policies and a separate security review.

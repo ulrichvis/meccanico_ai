@@ -25,4 +25,4 @@ Use `POST /api/sources` as a thin Next.js Route Handler and keep orchestration i
 
 The route and React component remain thin, while the same service can later be called from another transport. Repeating a request or retrying after a network interruption does not create an unintended second import as long as the selected file retains its upload UUID.
 
-The current route buffers multipart data in the Next.js server process. This is acceptable at the 25 MB MVP limit. Resumable or direct signed uploads can be introduced later behind the existing Storage interface if deployment limits or unreliable connections require them.
+The current route buffers one multipart document at a time in the Next.js server process. This is acceptable at the 20 MB per-file MVP limit. Resumable or direct signed uploads can be introduced later behind the existing Storage interface if deployment limits or unreliable connections require them.

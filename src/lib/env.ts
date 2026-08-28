@@ -29,7 +29,8 @@ const serverEnvironmentSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   NEXT_PUBLIC_APP_URL: optionalUrl.default("http://localhost:3000"),
-  MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().default(25),
+  MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().default(20),
+  MAX_UPLOAD_FILES_PER_BATCH: z.coerce.number().int().positive().default(20),
   DATABASE_URL: optionalPostgresUrl,
   DIRECT_URL: optionalPostgresUrl,
   NEXT_PUBLIC_SUPABASE_URL: optionalUrl,
@@ -44,6 +45,7 @@ export const env = serverEnvironmentSchema.parse({
   NODE_ENV: process.env.NODE_ENV,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   MAX_UPLOAD_SIZE_MB: process.env.MAX_UPLOAD_SIZE_MB,
+  MAX_UPLOAD_FILES_PER_BATCH: process.env.MAX_UPLOAD_FILES_PER_BATCH,
   DATABASE_URL: process.env.DATABASE_URL,
   DIRECT_URL: process.env.DIRECT_URL,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,

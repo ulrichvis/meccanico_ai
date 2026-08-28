@@ -59,26 +59,42 @@
   },
   "upload": {
     "eyebrow": "Fase 1 · Acquisizione della fonte",
-    "title": "Aggiungi un PDF tecnico.",
-    "description": "Il documento originale verrà conservato privatamente e preparato per la pipeline di estrazione. L'elaborazione IA non inizia ancora.",
+    "title": "Aggiungi i tuoi PDF tecnici.",
+    "description": "Ogni documento originale verrà conservato privatamente e preparato separatamente per la pipeline di estrazione. L'elaborazione IA non inizia ancora.",
     "dropzone": {
-      "title": "Trascina qui il tuo PDF",
-      "description": "Trascina un file oppure selezionalo dal tuo dispositivo.",
-      "browse": "Scegli un PDF"
+      "title": "Trascina qui i tuoi PDF",
+      "description": "Trascina più file oppure selezionali dal tuo dispositivo.",
+      "browse": "Scegli i PDF"
     },
-    "maximumSize": "Solo PDF · Massimo {size} MB",
+    "limits": "Solo PDF · {size} MB per file · Fino a {count} file per lotto",
     "removeFile": "Rimuovi",
-    "submit": "Carica documento",
-    "uploading": "Caricamento…",
-    "progress": "Avanzamento caricamento",
+    "submitBatch": "Carica {count} file",
+    "uploading": "Caricamento del lotto…",
+    "queue": {
+      "title": "File in questo lotto",
+      "count": "{count} di {maximum}"
+    },
+    "status": {
+      "queued": "Pronto",
+      "uploading": "Caricamento",
+      "success": "Salvato",
+      "error": "Richiede attenzione"
+    },
+    "summary": {
+      "title": "Lotto completato",
+      "result": "{successful} salvati · {failed} non riusciti o rifiutati",
+      "anotherBatch": "Avvia un altro lotto"
+    },
     "errors": {
-      "fileRequired": "Scegli un file PDF prima di caricarlo.",
+      "fileRequired": "Scegli almeno un PDF prima del caricamento.",
       "invalidExtension": "Il file selezionato deve avere l'estensione .pdf.",
       "invalidMimeType": "Il file selezionato non è riconosciuto come PDF.",
       "invalidPdf": "Il contenuto del file non è un documento PDF valido.",
       "fileTooLarge": "Il PDF supera il limite di {size} MB.",
       "storageFailed": "Non è stato possibile salvare il documento. Riprova.",
-      "uploadFailed": "Non è stato possibile completare il caricamento. Riprova."
+      "uploadFailed": "Non è stato possibile completare il caricamento. Riprova.",
+      "maximumFiles": "Un lotto non può contenere più di {count} PDF.",
+      "duplicateFile": "Un file già presente in questo lotto è stato ignorato."
     },
     "success": {
       "eyebrow": "Caricamento completato",

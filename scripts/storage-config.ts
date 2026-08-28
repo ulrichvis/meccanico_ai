@@ -6,7 +6,7 @@ import { createSupabaseServiceClient } from "../src/supabase/client-factory";
 loadEnvConfig(process.cwd());
 
 const storageEnvironmentSchema = z.object({
-  MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().default(25),
+  MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().default(20),
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
   SUPABASE_DOCUMENTS_BUCKET: z.string().min(1).default("technical-sources"),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),

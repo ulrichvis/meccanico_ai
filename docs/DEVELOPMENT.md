@@ -76,7 +76,7 @@ Runtime PostgreSQL TLS is verified with Supabase's public production CA certific
 
 ## Supabase Storage setup
 
-The application uses a private bucket named `technical-sources`. It accepts only `application/pdf` objects up to 25 MiB (26,214,400 bytes). The application repeats the same checks on the server and also verifies the `%PDF-` file signature.
+The application uses a private bucket named `technical-sources`. It accepts only `application/pdf` objects up to 20 MiB (20,971,520 bytes). The application repeats the same checks on the server and also verifies the `%PDF-` file signature.
 
 Set `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_DOCUMENTS_BUCKET` in `.env.local`, then run:
 
@@ -90,7 +90,7 @@ pnpm storage:verify
 
 Storage paths use `sources/<source-id>/<random-uuid>.pdf`; the submitted filename is retained only as source metadata and never controls an object path. The service secret remains server-only. No `storage.objects` policy is added in this phase because browsers never access the bucket directly: trusted server code uploads, removes, and signs objects using the Supabase secret key. Any future direct client access requires a separate least-privilege RLS decision.
 
-Supabase also applies a project-wide Storage file-size ceiling. The bucket-specific 25 MiB limit must remain at or below that global ceiling. Supabase Free projects currently allow a global limit up to 50 MB, so 25 MiB is supported.
+Supabase also applies a project-wide Storage file-size ceiling. The bucket-specific 20 MiB limit must remain at or below that global ceiling. Supabase Free projects currently allow a global limit up to 50 MB, so 20 MiB is supported.
 
 ## PDF upload verification
 
@@ -101,7 +101,9 @@ pnpm dev
 pnpm upload:verify
 ```
 
-The verification submits a synthetic PDF twice with the same upload identifier, confirms that exactly one `Source` exists, checks invalid PDF-content rejection, and removes its Storage object and database row. For a manual UI check, open `/upload`, select or drop a PDF no larger than 25 MB, confirm that filename, formatted size, and progress are shown, and verify the redirect to `/upload/<source-id>/success`.
+The verification submits a synthetic PDF twice with the same upload identifier, concurrently uploads three additional PDFs, confirms one `Source` per valid document, checks invalid PDF-content rejection, and removes every Storage object and database row it created.
+
+For a manual UI check, open `/upload` and select or drop up to 20 PDFs no larger than 20 MB each. Confirm that every file has its own validation, progress, and result; invalid files do not block valid files; failed transfers can be retried; and the final bilingual summary reports stored and failed files independently. A single successful PDF still redirects to `/upload/<source-id>/success`.
 
 ## Migration conventions
 

@@ -59,26 +59,42 @@
   },
   "upload": {
     "eyebrow": "Phase 1 · Source ingestion",
-    "title": "Add a technical PDF.",
-    "description": "The original document will be stored privately and prepared for the extraction pipeline. No AI processing starts yet.",
+    "title": "Add your technical PDFs.",
+    "description": "Each original document will be stored privately and prepared independently for the extraction pipeline. No AI processing starts yet.",
     "dropzone": {
-      "title": "Drop your PDF here",
-      "description": "Drag and drop one file, or choose it from your device.",
-      "browse": "Choose a PDF"
+      "title": "Drop your PDFs here",
+      "description": "Drag and drop several files, or choose them from your device.",
+      "browse": "Choose PDFs"
     },
-    "maximumSize": "PDF only · Maximum {size} MB",
+    "limits": "PDF only · {size} MB per file · Up to {count} files per batch",
     "removeFile": "Remove",
-    "submit": "Upload document",
-    "uploading": "Uploading…",
-    "progress": "Upload progress",
+    "submitBatch": "Upload {count} files",
+    "uploading": "Uploading batch…",
+    "queue": {
+      "title": "Files in this batch",
+      "count": "{count} of {maximum}"
+    },
+    "status": {
+      "queued": "Ready",
+      "uploading": "Uploading",
+      "success": "Stored",
+      "error": "Needs attention"
+    },
+    "summary": {
+      "title": "Batch complete",
+      "result": "{successful} stored · {failed} failed or rejected",
+      "anotherBatch": "Start another batch"
+    },
     "errors": {
-      "fileRequired": "Choose a PDF file before uploading.",
+      "fileRequired": "Choose at least one PDF before uploading.",
       "invalidExtension": "The selected file must use the .pdf extension.",
       "invalidMimeType": "The selected file is not recognized as a PDF.",
       "invalidPdf": "The file content is not a valid PDF document.",
       "fileTooLarge": "The PDF is larger than the {size} MB limit.",
       "storageFailed": "The document could not be stored. Please try again.",
-      "uploadFailed": "The upload could not be completed. Please try again."
+      "uploadFailed": "The upload could not be completed. Please try again.",
+      "maximumFiles": "A batch can contain no more than {count} PDFs.",
+      "duplicateFile": "A file already present in this batch was ignored."
     },
     "success": {
       "eyebrow": "Upload complete",

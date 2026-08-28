@@ -44,7 +44,9 @@ async function verifyUpload(): Promise<void> {
   );
   const uploadId = randomUUID();
   const invalidUploadId = randomUUID();
-  let storagePath: string | null = null;
+  const batchUploadIds = [randomUUID(), randomUUID(), randomUUID()];
+  const cleanupUploadIds = [uploadId, invalidUploadId, ...batchUploadIds];
+  const storagePaths: string[] = [];
 
   try {
     const file = new File(["%PDF-1.7\n% upload verification\n%%EOF"], "verification.pdf", {
@@ -75,7 +77,7 @@ async function verifyUpload(): Promise<void> {
     if (sources.length !== 1 || !sources[0].storagePath) {
       throw new Error("The upload did not leave exactly one stored source.");
     }
-    storagePath = sources[0].storagePath;
+    storagePaths.push(sources[0].storagePath);
 
     const invalid = await submitFile(
       applicationUrl,
@@ -89,15 +91,43 @@ async function verifyUpload(): Promise<void> {
       throw new Error("The rejected upload unexpectedly created a source.");
     }
 
+    const batchResults = await Promise.all(
+      batchUploadIds.map((batchUploadId, index) =>
+        submitFile(
+          applicationUrl,
+          batchUploadId,
+          new File(
+            [`%PDF-1.7\n% batch verification ${index + 1}\n%%EOF`],
+            `batch-${index + 1}.pdf`,
+            { type: "application/pdf" },
+          ),
+        ),
+      ),
+    );
+    if (batchResults.some((result) => result.status !== 200)) {
+      throw new Error("At least one concurrent batch upload failed.");
+    }
+
+    const batchSources = await database.source.findMany({
+      where: { id: { in: batchUploadIds } },
+      select: { storagePath: true },
+    });
+    if (batchSources.length !== batchUploadIds.length) {
+      throw new Error("The concurrent batch did not create one source per valid PDF.");
+    }
+    storagePaths.push(
+      ...batchSources.flatMap((source) => source.storagePath ? [source.storagePath] : []),
+    );
+
     console.info(
-      "PDF upload, database persistence, idempotency, and invalid-content rejection passed.",
+      "Single and concurrent PDF uploads, persistence, idempotency, and rejection passed.",
     );
   } finally {
-    if (storagePath) {
+    for (const storagePath of storagePaths) {
       await storage.remove(storagePath);
     }
     await database.source.deleteMany({
-      where: { id: { in: [uploadId, invalidUploadId] } },
+      where: { id: { in: cleanupUploadIds } },
     });
     await database.$disconnect();
   }

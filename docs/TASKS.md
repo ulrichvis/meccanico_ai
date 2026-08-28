@@ -45,6 +45,16 @@ This file is the project's operational tracker. Check only tasks that are actual
 - [x] Make the operation idempotent or prevent immediate duplicate submissions.
 - [x] Redirect to a confirmation page or the dashboard.
 
+### 4.1 Multiple PDF upload
+
+- [x] Accept up to 20 PDFs in one picker or drag-and-drop batch.
+- [x] Enforce the 20 MB limit independently for every PDF.
+- [x] Display validation, progress, and result independently for every file.
+- [x] Upload with limited concurrency instead of starting every request at once.
+- [x] Keep failures isolated so valid files continue uploading.
+- [x] Allow retrying failed transfers with the same idempotency identifier.
+- [x] Display a bilingual batch summary and allow starting another batch.
+
 ### 5. Minimal dashboard
 
 - [ ] Create `/` with a call to action linking to the upload page.
@@ -139,3 +149,4 @@ This file is the project's operational tracker. Check only tasks that are actual
 | 2026-08-28 | Phase 1.2 | Added Prisma ORM, the PostgreSQL domain schema, database constraints, the initial migration, verified TLS, and a dedicated server-side database role. | Migration deployed to MecAI; migration status is current; transactional `Source` create/read/delete passed; Supabase advisors report no errors or warnings. |
 | 2026-08-28 | Phase 1.3 | Added private Supabase Storage, a server-only client, PDF validation, opaque object paths, failed-persistence cleanup, and signed document access with a 25 MiB limit. | Local boundary and compensation checks passed; live synthetic PDF upload, signed retrieval, and cleanup passed on MecAI. |
 | 2026-08-28 | Phase 1.4 | Added the bilingual PDF upload UI, progress reporting, server endpoint, relational persistence, retry idempotency, and confirmation page. | Live endpoint upload/persistence/retry/rejection/cleanup passed; English and Italian desktop and 390 px mobile layouts were browser-verified. |
+| 2026-08-28 | Phase 1.4.1 | Added batches of up to 20 PDFs, a 20 MiB per-file limit, three-request concurrency, independent results, retries, and bilingual summaries. | Bucket limit verified; concurrent live uploads, persistence, idempotency, invalid-content isolation, catalog parity, lint, types, and production build passed. |

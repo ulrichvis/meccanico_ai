@@ -5,7 +5,10 @@ import { env } from "@/lib/env";
 export default function UploadPage() {
   return (
     <AppShell>
-      <PdfUploadForm maximumUploadSizeMb={env.MAX_UPLOAD_SIZE_MB} />
+      <PdfUploadForm
+        maximumBatchFiles={env.MAX_UPLOAD_FILES_PER_BATCH}
+        maximumUploadSizeMb={env.MAX_UPLOAD_SIZE_MB}
+      />
     </AppShell>
   );
 }

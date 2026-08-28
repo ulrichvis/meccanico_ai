@@ -237,6 +237,135 @@ button:disabled {
   transform: none;
 }
 
+.upload-queue {
+  margin-top: 24px;
+}
+
+.queue-heading,
+.file-item,
+.file-status,
+.upload-actions {
+  display: flex;
+  align-items: center;
+}
+
+.queue-heading {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.queue-heading h2,
+.batch-summary h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: -0.025em;
+}
+
+.queue-heading span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.file-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.file-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px 18px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 15px 16px;
+}
+
+.file-item.is-success {
+  border-color: rgb(26 139 103 / 32%);
+  background: rgb(26 139 103 / 4%);
+}
+
+.file-item.is-error {
+  border-color: rgb(189 61 19 / 28%);
+  background: rgb(189 61 19 / 4%);
+}
+
+.file-details {
+  min-width: 0;
+}
+
+.file-details strong,
+.file-details span {
+  display: block;
+}
+
+.file-details strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-details span,
+.file-status {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.file-details span {
+  margin-top: 4px;
+}
+
+.file-status {
+  gap: 9px;
+}
+
+.file-item > button {
+  border: 0;
+  background: transparent;
+  color: var(--accent-dark);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.file-item progress {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  accent-color: var(--signal);
+}
+
+.file-item > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #8e2d0f;
+  font-size: 0.84rem;
+}
+
+.batch-summary {
+  margin-top: 20px;
+  border-radius: 15px;
+  background: rgb(26 139 103 / 8%);
+  padding: 16px 18px;
+}
+
+.batch-summary p {
+  margin: 7px 0 0;
+  color: var(--muted);
+}
+
+.upload-actions {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.upload-actions .secondary-action {
+  margin-top: 34px;
+}
+
 .success-page {
   display: grid;
   min-height: calc(100vh - 162px);
@@ -635,6 +764,14 @@ a:focus-visible {
 
   .drop-zone {
     min-height: 310px;
+  }
+
+  .file-item {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .file-item > button {
+    grid-column: 2;
   }
 
   .site-footer {
