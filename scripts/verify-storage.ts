@@ -33,6 +33,15 @@ async function verifyStorage(): Promise<void> {
   try {
     await storage.upload({ content, contentType: "application/pdf", path });
     uploaded = true;
+    const fileInfo = await storage.getFileInfo(path);
+
+    if (
+      fileInfo.contentType !== "application/pdf" ||
+      fileInfo.sizeBytes !== content.size
+    ) {
+      throw new Error("The stored PDF metadata is invalid.");
+    }
+
     const signedUrl = await storage.createSignedUrl(path, 60);
     const response = await fetch(signedUrl);
 
@@ -45,7 +54,9 @@ async function verifyStorage(): Promise<void> {
     }
   }
 
-  console.info("Private Storage upload, signed retrieval, and cleanup verification passed.");
+  console.info(
+    "Private Storage metadata, signed retrieval, and cleanup verification passed.",
+  );
 }
 
 verifyStorage().catch((error: unknown) => {

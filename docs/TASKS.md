@@ -2,7 +2,7 @@
 
 This file is the project's operational tracker. Check only tasks that are actually complete and verified.
 
-## Active phase: Phase 1 — Foundation and PDF upload
+## Active phase: Phase 2 — Source text extraction
 
 ### 1. Initialization
 
@@ -75,21 +75,21 @@ This file is the project's operational tracker. Check only tasks that are actual
 - [x] A Storage/database failure produces a recoverable state with no known orphaned file.
 - [x] The dashboard works at a mobile viewport width.
 - [x] English and Italian dashboard, navigation, upload, validation, and error states render correctly.
-- [ ] Automatic locale selection uses a supported browser preference and falls back to English.
+- [x] Automatic locale selection uses a supported browser preference and falls back to English.
 - [x] The language selector replaces displayed text without changing the current route.
-- [ ] No user-facing string in the Phase 1 frontend is hard-coded.
+- [x] No translatable user-facing string in the Phase 1 frontend is hard-coded.
 
 ### Exit criteria
 
-- [ ] No OpenAI call exists in the flow yet.
-- [ ] The original file is private and retrievable through a signed URL.
-- [ ] The stored `Source` contains no invented automotive information.
-- [ ] Startup and verification commands are current in `docs/DEVELOPMENT.md`.
-- [ ] Phase 2 can begin without redesigning the upload flow.
+- [x] Phase 1 was completed before any OpenAI call was integrated.
+- [x] The original file is private and retrievable through a signed URL.
+- [x] The stored `Source` contains no invented automotive information.
+- [x] Startup and verification commands are current in `docs/DEVELOPMENT.md`.
+- [x] Phase 2 can begin without redesigning the upload flow.
 
 ## Planned phases
 
-The following phases are documented only. No implementation should begin until the Phase 2 plan has been reviewed and explicitly approved.
+Phase 2 is active. Later phases remain documented only and require explicit approval before implementation.
 
 ### Phase 2 — Source text extraction
 
@@ -97,29 +97,30 @@ Phase 2 ends with validated page-aware text. It must not create automotive cases
 
 #### 2.1 Contract and representative inputs
 
-- [ ] Approve the Phase 2 scope and acceptance criteria before coding.
-- [ ] Define a strict Zod contract for ordered `{ pageNumber, text }` content and source metadata.
+- [x] Approve the Phase 2 scope and acceptance criteria before coding.
+- [x] Define a strict Zod contract for ordered page content, text quality, uncertainty, and source metadata.
 - [ ] Select representative private fixtures: native text, scan-only, mixed text/scan, garbled Unicode, sparse pages, and a document containing useful diagrams or photographs.
-- [ ] Record the source language without translating or rewriting source text.
-- [ ] Confirm that missing metadata remains `null` and missing page text remains an empty string only when the page is known to exist.
+- [x] Record the source language without translating or rewriting source text.
+- [x] Confirm that missing metadata remains `null` and missing page text remains an empty string only when the page is known to exist.
 
 #### 2.2 Direct PDF transfer
 
-- [ ] Do not install a PDF-reading, text-layer, OCR, or local preflight library for Phase 2.
-- [ ] Retrieve the original PDF from private Supabase Storage on the server.
-- [ ] Verify source eligibility, object existence, validated MIME metadata, configured size limit, and non-empty transfer without parsing PDF content.
-- [ ] Provide the complete PDF directly to the Responses API using a secure supported file-input method.
-- [ ] Delete or expire temporary provider files when the selected transfer method creates them.
-- [ ] Treat filenames and PDF metadata as untrusted and non-authoritative.
+- [x] Do not install a PDF-reading, text-layer, OCR, or local preflight library for Phase 2.
+- [x] Retrieve the original PDF from private Supabase Storage on the server.
+- [x] Verify source eligibility, object existence, validated MIME metadata, configured size limit, and non-empty transfer without parsing PDF content.
+- [x] Provide the complete PDF directly to the Responses API using a secure supported file-input method.
+- [x] Use a ten-minute signed URL so no persistent provider file needs to be created or deleted.
+- [x] Treat filenames and PDF metadata as untrusted and non-authoritative.
 
 #### 2.3 OpenAI text extraction
 
-- [ ] Add a server-only OpenAI adapter using the Responses API, PDF file input, and strict Structured Outputs.
-- [ ] Version a text-extraction prompt that requests transcription only and forbids diagnosis, summarization, translation, domain extraction, and invented content.
-- [ ] Allow scanned-page text transcription while forbidding descriptions or interpretations of diagrams and photographs.
-- [ ] Require source-language text, ordered one-based page numbers, and explicit unreadable-page handling.
-- [ ] Validate every model response with Zod and preserve every raw attempt.
-- [ ] Verify current model names and PDF-input behavior against official OpenAI documentation immediately before implementation.
+- [x] Add a server-only OpenAI adapter using the Responses API, PDF file input, and strict Structured Outputs.
+- [x] Version a text-extraction prompt that requests transcription only and forbids diagnosis, summarization, translation, domain extraction, and invented content.
+- [x] Allow scanned-page text transcription while forbidding descriptions or interpretations of diagrams and photographs.
+- [x] Require source-language text, ordered one-based page numbers, and explicit unreadable-page handling.
+- [x] Validate every model response with Zod.
+- [ ] Persist every raw attempt through the Phase 2 orchestration history.
+- [x] Verify the configured model and PDF-input behavior against official OpenAI documentation and a live private-PDF transfer.
 
 #### 2.4 Model routing and quality gates
 
@@ -255,3 +256,4 @@ Phase 3 consumes only the validated page-aware text produced by Phase 2. It does
 | 2026-08-28 | Phase 1.5 | Added the `/sources` dashboard with recent-source metadata, localized statuses and dates, responsive rows, and empty/loading/error states. | Live MecAI data rendered in English and Italian; 390 px mobile layout and browser console passed; recent-source index migration applied. |
 | 2026-08-29 | Documentation | Simplified Phase 2 to send every original PDF directly to OpenAI, removed the planned local PDF parser and preflight, and retained bounded validation, audit history, and future visual extraction. | Cross-checked the plan against the Prisma schema, architecture rules, and official Responses API PDF file-input documentation; no code or schema changes made. |
 | 2026-08-29 | Documentation | Accepted the supplied automotive diagnostic-structure prompt as the Phase 3 baseline and adapted its contract to the existing relational schema. | Verified multiple-vehicle and outcome cardinality, evidence nullability, supported graph nodes, dedicated foreign-key links, non-blocking review semantics, PDF input, and Structured Outputs; no code or schema changes made. |
+| 2026-08-29 | Phase 2.1–2.3 | Added the strict page-aware text contract, versioned transcription-only prompt, server-only Responses API adapter, private Storage eligibility checks, and ten-minute signed-URL PDF transfer. | Catalog parity, lint, types, and build passed; a live three-page private PDF returned validated ordered text with the configured model without persisting extracted content. |

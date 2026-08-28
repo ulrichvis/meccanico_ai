@@ -262,12 +262,10 @@ SUPABASE_DOCUMENTS_BUCKET=technical-sources
 MAX_UPLOAD_SIZE_MB=20
 MAX_UPLOAD_FILES_PER_BATCH=20
 OPENAI_API_KEY=
-OPENAI_TEXT_MODEL_PRIMARY=gpt-5.6-luna
-OPENAI_TEXT_MODEL_ESCALATION=gpt-5.6-terra
-OPENAI_TEXT_MODEL_EXCEPTIONAL=gpt-5.6-sol
+OPENAI_EXTRACTION_MODEL=gpt-5.6-luna
 ```
 
-OpenAI variables become mandatory when Phase 2 implementation begins. Model identifiers are configuration defaults and must not be scattered through application code. Phase 3 uses separately named automotive-extraction configuration.
+OpenAI variables are mandatory only when Phase 2 extraction runs. The first implementation uses one configurable model and objective quality checks will determine whether later escalation tiers are justified. Model identifiers must not be scattered through application code. Phase 3 will use separately named automotive-extraction configuration.
 
 ## Minimum observability
 

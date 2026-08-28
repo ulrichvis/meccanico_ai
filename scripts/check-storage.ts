@@ -61,6 +61,10 @@ async function checkStorageBoundaries(): Promise<void> {
   const removedPaths: string[] = [];
   const storage: SourceStorage = {
     createSignedUrl: async () => "https://example.invalid/signed",
+    getFileInfo: async () => ({
+      contentType: "application/pdf",
+      sizeBytes: validFile.size,
+    }),
     remove: async (storagePath) => {
       removedPaths.push(storagePath);
     },

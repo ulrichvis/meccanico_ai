@@ -3,7 +3,8 @@ export class StorageOperationError extends Error {
     public readonly code:
       | "STORAGE_UPLOAD_FAILED"
       | "STORAGE_REMOVE_FAILED"
-      | "STORAGE_SIGNED_URL_FAILED",
+      | "STORAGE_SIGNED_URL_FAILED"
+      | "STORAGE_FILE_INFO_FAILED",
     options?: ErrorOptions,
   ) {
     super(code, options);

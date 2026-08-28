@@ -48,6 +48,7 @@ The current environment schema provides safe defaults for commands that do not a
 | `pnpm storage:check` | Check server validation, opaque paths, and failed-persistence cleanup locally. |
 | `pnpm storage:verify` | Verify a live upload, signed retrieval, and cleanup with a synthetic PDF. |
 | `pnpm upload:verify` | Verify the running upload endpoint, database persistence, retry idempotency, invalid-content rejection, and cleanup. |
+| `pnpm openai:verify-pdf [source-id]` | Send one eligible private PDF directly to OpenAI and validate its page-aware text response without persisting it. |
 
 `pnpm build` and `pnpm install` regenerate Prisma Client automatically. Schema validation and client generation work while database variables are empty; migration and query commands require credentials.
 
@@ -117,6 +118,16 @@ Open `/sources` after uploading one or more documents. The page displays at most
 - navigation displays the loading skeleton while the server query is pending.
 
 The query is bounded and supported by `sources_created_at_id_idx`, which matches its descending sort order.
+
+## OpenAI PDF transfer verification
+
+Set the server-only `OPENAI_API_KEY` and `OPENAI_EXTRACTION_MODEL` values in `.env.local`. To exercise the Phase 2 transfer boundary against the latest eligible uploaded PDF, run:
+
+```bash
+pnpm openai:verify-pdf
+```
+
+Pass a source UUID as the optional argument to select a specific uploaded PDF. This command performs a real billable OpenAI request. It verifies the private Storage object's existence, PDF content type, non-zero size, and configured size ceiling; creates a ten-minute signed URL; sends the complete PDF as a Responses API file input; and validates the strict structured response. It writes no extracted text or status changes to the database and logs neither document content nor the signed URL.
 
 ## Migration conventions
 

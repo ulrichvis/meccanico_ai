@@ -19,6 +19,15 @@ export interface RecentSource {
   type: string;
 }
 
+export interface SourceForTextExtraction {
+  id: string;
+  mimeType: string | null;
+  originalFilename: string | null;
+  status: string;
+  storagePath: string | null;
+  type: string;
+}
+
 const RECENT_SOURCE_LIMIT = 50;
 
 export async function listRecentSources(): Promise<RecentSource[]> {
@@ -48,6 +57,22 @@ export async function findUploadedSource(
     where: { id: sourceId },
     select: { id: true, originalFilename: true, status: true },
   }) as Promise<UploadedSource | null>;
+}
+
+export async function findSourceForTextExtraction(
+  sourceId: string,
+): Promise<SourceForTextExtraction | null> {
+  return getDatabaseClient().source.findUnique({
+    where: { id: sourceId },
+    select: {
+      id: true,
+      mimeType: true,
+      originalFilename: true,
+      status: true,
+      storagePath: true,
+      type: true,
+    },
+  });
 }
 
 export async function createUploadedSource(

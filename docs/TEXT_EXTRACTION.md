@@ -28,6 +28,8 @@ Validate the model response with Zod before persistence.
 type PageContent = {
   pageNumber: number;
   text: string;
+  textQuality: "readable" | "partial" | "unreadable";
+  uncertainty: string | null;
 };
 
 type ExtractedDocumentContent = {
@@ -37,12 +39,10 @@ type ExtractedDocumentContent = {
   language: string | null;
   pageCount: number;
   pages: PageContent[];
-  rawText: string;
-  extractionMethod: "openai_pdf";
 };
 ```
 
-Missing metadata remains `null`. Text preserves the source language and original wording. Page numbers are one-based and must correspond to the original PDF.
+Missing metadata remains `null`. Text preserves the source language and original wording. Page numbers are one-based, consecutive, and must correspond to the original PDF. Partial and unreadable pages require a short extraction uncertainty. The application derives `Source.rawText` from the validated ordered pages; it does not ask the model to duplicate that content. Transfer and extraction-method metadata are recorded by the application rather than trusted from model output.
 
 ## 2.1 Direct PDF input
 
@@ -77,13 +77,7 @@ Use the Responses API with PDF file input and a strict JSON Schema equivalent to
 
 Model identifiers are centralized in configuration and recorded on every attempt.
 
-```dotenv
-OPENAI_TEXT_MODEL_PRIMARY=gpt-5.6-luna
-OPENAI_TEXT_MODEL_ESCALATION=gpt-5.6-terra
-OPENAI_TEXT_MODEL_EXCEPTIONAL=gpt-5.6-sol
-```
-
-These are planned defaults, not hard-coded business rules. Verify current availability before implementation and allow environment overrides.
+The current first route uses the server-only `OPENAI_EXTRACTION_MODEL` setting. The configured `gpt-5.6-luna` model was verified against the Responses API with PDF input and strict Structured Outputs on 2026-08-29. Escalation tiers will be introduced only when representative fixtures provide measurable reasons for them; model identifiers remain configuration rather than business rules.
 
 Because the application does not inspect PDF content locally, it does not classify a document as `easy`, `medium`, or `hard` before the first request. Routing policy:
 
@@ -139,10 +133,10 @@ Future multimodal work should add a replaceable visual-content adapter that can 
 ## 2.7 Security and privacy
 
 - Retrieve PDFs only from the private bucket on the server.
-- Use short-lived access, direct file data, or a provider file upload supported by the Responses API.
+- Create a ten-minute Supabase signed URL and pass it as an OpenAI `input_file` URL.
 - Never expose service-role credentials or signed URLs to model output, logs, or the browser unnecessarily.
 - Do not log full document content.
-- Delete or expire temporary provider files according to the selected transfer method.
+- Set `store: false`; the selected method creates no persistent OpenAI file, and the Storage URL expires automatically.
 - Treat filenames and PDF metadata as untrusted input.
 
 ## Phase 2 acceptance criteria

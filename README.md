@@ -74,10 +74,11 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Recent sources dashboard decision](docs/decisions/0008-recent-sources-dashboard.md)
 - [Separate text and knowledge extraction decision](docs/decisions/0009-separate-text-recovery-from-knowledge-extraction.md)
 - [Database-aligned automotive prompt decision](docs/decisions/0010-database-aligned-automotive-prompt.md)
+- [Short-lived signed URL for OpenAI PDF transfer](docs/decisions/0011-short-lived-signed-url-openai-transfer.md)
 
 ## Current status
 
-Phase 1 implementation is complete and its remaining manual exit checks are tracked in the backlog. Phase 2 has been specified but not implemented: the original private PDF will be sent directly to OpenAI without a local PDF-reading library, and OpenAI will return faithful text only. The supplied automotive diagnostic prompt has been accepted and database-aligned as the separate Phase 3 baseline.
+Phase 1 is complete. Phase 2 is active: its strict page-aware contract, transcription-only prompt, server-only OpenAI adapter, and direct private-PDF transfer are implemented and live-verified. Persistence, retry history, quality routing, and the processing UI remain in the Phase 2 backlog. The automotive diagnostic prompt remains the separate Phase 3 baseline.
 
 ## Run locally
 
