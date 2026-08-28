@@ -50,7 +50,7 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - Zod for input and structured-output validation
 - Tailwind CSS for the user interface
 - Locale-based frontend with English and Italian message catalogs
-- OpenAI API starting in Phase 3 only
+- OpenAI Responses API for Phase 2 text extraction and Phase 3 automotive structuring
 
 ## Documentation
 
@@ -58,6 +58,8 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Technical architecture](docs/ARCHITECTURE.md)
 - [Data model](docs/DATA_MODEL.md)
 - [AI extraction contract](docs/EXTRACTION_CONTRACT.md)
+- [Automotive extraction prompt specification](docs/AUTOMOTIVE_EXTRACTION_PROMPT.md)
+- [Phase 2 text extraction plan](docs/TEXT_EXTRACTION.md)
 - [Development guide](docs/DEVELOPMENT.md)
 - [Frontend internationalization](docs/I18N.md)
 - [Roadmap](docs/ROADMAP.md)
@@ -70,10 +72,12 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Idempotent PDF upload decision](docs/decisions/0006-idempotent-pdf-upload.md)
 - [Limited-concurrency PDF batches decision](docs/decisions/0007-limited-concurrency-pdf-batches.md)
 - [Recent sources dashboard decision](docs/decisions/0008-recent-sources-dashboard.md)
+- [Separate text and knowledge extraction decision](docs/decisions/0009-separate-text-recovery-from-knowledge-extraction.md)
+- [Database-aligned automotive prompt decision](docs/decisions/0010-database-aligned-automotive-prompt.md)
 
 ## Current status
 
-Phase 1, points 1 through 5 are complete. Operators can upload batches of private PDFs and review the latest registered documents on the bilingual `/sources` dashboard. The next task is the final Phase 1 verification.
+Phase 1 implementation is complete and its remaining manual exit checks are tracked in the backlog. Phase 2 has been specified but not implemented: the original private PDF will be sent directly to OpenAI without a local PDF-reading library, and OpenAI will return faithful text only. The supplied automotive diagnostic prompt has been accepted and database-aligned as the separate Phase 3 baseline.
 
 ## Run locally
 

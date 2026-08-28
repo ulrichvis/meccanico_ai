@@ -28,7 +28,8 @@ The domain core does not know about React, the PDF format, or the SDK of any spe
 ```text
 SourceAdapter
   → IngestedSource
-  → ContentExtractor
+  → Private original file
+  → AI file-input text extraction
   → PageContent[]
   → KnowledgeExtractor
   → unknown raw output
@@ -39,6 +40,12 @@ SourceAdapter
   → Transactional persistence as unreviewed records
   → Optional admin review and correction
 ```
+
+The content and knowledge stages are deliberately separate. Phase 2 sends the original PDF directly to OpenAI and produces faithful, page-aware source text only. Phase 3 consumes that persisted text to extract structured automotive knowledge. A text-extraction model must not diagnose, summarize, normalize, or populate domain entities.
+
+Phase 2 does not add a PDF-reading or local preflight library. Native, scanned, and mixed PDFs use the same original-file input path. The selected model, transfer method, attempt, prompt version, quality result, and escalation reason are traceable. See `docs/TEXT_EXTRACTION.md`.
+
+Phase 3 uses the separately versioned `automotive-structure-v1` prompt specified in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md`. Its `requiresHumanReview` result is an advisory prioritization signal stored with the validated artifact; it never becomes a persistence gate. The normalizer, not the model, assigns database identifiers, normalized labels, lifecycle state, and `reviewStatus = unreviewed`.
 
 The target orchestration function is:
 
@@ -80,10 +87,10 @@ src/
 │   ├── source.types.ts
 │   └── adapters/
 │       └── pdf-source.adapter.ts
-├── pdf/
-│   └── pdf-text.extractor.ts
 ├── ai/
 │   ├── ai-client.ts
+│   ├── pdf-text.extractor.ts
+│   ├── model-router.ts
 │   └── automotive-knowledge.extractor.ts
 ├── extraction/
 │   ├── process-source.ts
@@ -92,6 +99,7 @@ src/
 ├── schemas/
 │   └── extraction.schema.ts
 ├── prompts/
+│   ├── pdf-text-extraction.prompt.ts
 │   └── automotive-extraction.prompt.ts
 ├── services/
 │   ├── source.service.ts
@@ -194,6 +202,12 @@ Review status is a data-quality signal, not an ingestion gate. Lifecycle status 
 - Transaction failure: roll back the entire relational case write.
 - UI messages remain understandable; technical details belong in logs.
 
+## Visual-content boundary
+
+PDFs may contain diagrams and photographs that will be useful to mechanics in a later version. The original private PDF is retained, so those assets are not lost. Phase 2 may transcribe visible text from a scanned page, but it does not extract, describe, classify, or interpret visual content.
+
+A future visual-content adapter may create page-region assets and link them to evidence. It must preserve the original image separately from any AI description and must not be coupled to the PDF format. No visual asset schema is required for the current phase.
+
 ## Future conversational read path
 
 ```text
@@ -248,10 +262,12 @@ SUPABASE_DOCUMENTS_BUCKET=technical-sources
 MAX_UPLOAD_SIZE_MB=20
 MAX_UPLOAD_FILES_PER_BATCH=20
 OPENAI_API_KEY=
-OPENAI_EXTRACTION_MODEL=
+OPENAI_TEXT_MODEL_PRIMARY=gpt-5.6-luna
+OPENAI_TEXT_MODEL_ESCALATION=gpt-5.6-terra
+OPENAI_TEXT_MODEL_EXCEPTIONAL=gpt-5.6-sol
 ```
 
-OpenAI variables become mandatory only in Phase 3.
+OpenAI variables become mandatory when Phase 2 implementation begins. Model identifiers are configuration defaults and must not be scattered through application code. Phase 3 uses separately named automotive-extraction configuration.
 
 ## Minimum observability
 
@@ -262,4 +278,6 @@ Each processing run must be traceable with:
 - current step;
 - duration of each step;
 - prompt version and model name;
+- PDF transfer method, quality-gate result, and escalation reason;
+- token usage when a model reports it;
 - structured errors without sensitive data.

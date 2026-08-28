@@ -62,14 +62,16 @@ erDiagram
 | `title`         | text nullable    | Explicit, extracted, or human-edited title. |
 | `language`      | text nullable    | Language code when known.                   |
 | `page_count`    | integer nullable | Number of pages.                            |
-| `pages_json`    | JSONB nullable   | `{ page, text }` array for the MVP.         |
-| `metadata_json` | JSONB nullable   | Non-domain metadata.                        |
+| `pages_json`    | JSONB nullable   | Ordered `{ pageNumber, text }` values for the MVP. |
+| `metadata_json` | JSONB nullable   | Non-domain metadata, file-input method, extraction method, and quality results. |
 | `created_at`    | timestamptz      | Creation date.                              |
 | `content_hash`  | nullable         | SHA-256 of file to avoid duplications       |
 
 `pages_json` provides a simple starting point. A `document_pages` table may replace it if search requirements or volume justify the change.
 
 `documents.language` describes the source content language. It is independent from the frontend locale. English or Italian UI selection must never alter extracted evidence or source-language metadata.
+
+During Phase 2, `pages_json` and `raw_text` contain faithful source text only. They must not contain a summary, normalized automotive entities, inferred repairs, or translated wording. `metadata_json` may record the file-transfer method, model route, prompt version, and validation results. This avoids adding domain meaning to ingestion storage.
 
 ### `extraction_jobs`
 
@@ -86,6 +88,44 @@ erDiagram
 | `raw_ai_output`    | JSONB nullable       | Immutable raw model output.                                    |
 | `validated_output` | JSONB nullable       | Output conforming to the Zod contract.                         |
 | `created_at`       | timestamptz          | Creation date.                                                 |
+
+In Phase 2, `extraction_jobs` stores every OpenAI PDF text-extraction attempt. File-transfer and result-quality facts are stored in `documents.metadata_json` and structured logs. A version prefix distinguishes stages, for example `text-extraction-v1` for Phase 2 and `automotive-structure-v1` for Phase 3. Each escalation creates a new job so earlier raw output remains immutable.
+
+The current schema intentionally has no token-usage fields. Token counts, duration, outcome, and escalation reason are logged during the initial implementation. Persistent usage fields require a separate decision based on operational reporting needs; they are not a prerequisite for Phase 2.
+
+## Prompt-to-database boundary
+
+The structured automotive response planned for Phase 3 is an exchange contract, not a mirror of database rows. Temporary references in the response allow the normalizer to resolve relationships before database-generated UUIDs exist.
+
+| Structured concept | Relational destination |
+| --- | --- |
+| source metadata | `sources` and `documents` |
+| case summary and complaint | `cases` |
+| vehicle applicability | `vehicles` and `case_vehicles` |
+| primary and related DTCs | `dtcs` and `case_dtcs` |
+| symptoms, causes, solutions, components | normalized entity and case-association tables |
+| checks and measurements | `diagnostic_checks` and `measurements` |
+| procedures, materials, outcomes | `repair_procedures`, `parts_materials`, and `repair_outcomes` |
+| excerpts and page references | `source_evidence` |
+| causal or diagnostic links | `relationships` |
+
+This mapping guides the Phase 3 prompt: it must preserve multiple cases, temporary entity references, evidence, explicit-versus-inferred origin, confidence for inferences, and the distinctions enforced by the database. It must not request database IDs, normalized names, timestamps, review state, or lifecycle state from the model.
+
+The accepted `automotive-structure-v1` prompt requires several explicit application-level mappings:
+
+- `vehicles` and `repairOutcomes` are arrays because the schema supports several of each per case;
+- AI JSON uses camelCase while Prisma performs the snake-case database mapping;
+- `requiresHumanReview` and `uncertainties` remain extraction-artifact metadata in `validated_output`; the recommendation is advisory and does not block persistence;
+- every persisted evidence item requires an exact non-empty excerpt because `source_evidence.excerpt` is non-null;
+- generic graph nodes are limited to `dtc`, `symptom`, `cause`, `diagnostic_check`, `solution`, and `repair_outcome`;
+- measurement-to-check, procedure-to-solution, and outcome-to-solution connections use dedicated references that the normalizer converts to foreign keys;
+- DTC normalization is performed by application code after extraction, while the model preserves the source code and description.
+
+Adaptation and programming steps, post-repair verification, and vehicle-specific conditions remain explicit in procedure wording during the MVP. A dedicated procedure subtype or conditions column should be considered only if real extractions show that preserving wording is insufficient for reliable retrieval.
+
+## Future visual assets
+
+The original file in private Storage preserves diagrams and photographs during the text-only phases. No image is extracted into its own record in Phase 2. A later multimodal design may add page coordinates, object paths, source-image hashes, observed text, model descriptions, and evidence links. That design must keep original visual assets separate from AI interpretations and requires a dedicated migration only when the feature enters scope.
 
 ## Domain tables
 

@@ -41,8 +41,8 @@ Initially searches stored cases by DTC, make, model, or engine. In the later pro
 
 1. The operator opens `/upload` and uploads a PDF.
 2. The file is stored, and a `Source` is created with the `uploaded` status.
-3. Text is extracted page by page.
-4. The AI identifies and structures one or more cases.
+3. The original private PDF is sent directly to OpenAI, which returns faithful page-aware text without automotive interpretation.
+4. In a separate phase, the versioned automotive prompt identifies and structures zero, one, or several cases from that validated text, while reporting important uncertainties as a non-blocking review recommendation.
 5. Raw output is preserved, then validated and normalized.
 6. Every structurally valid normalized case is stored with `reviewStatus = "unreviewed"`.
 7. The case becomes available in the admin knowledge base without waiting for human review.
@@ -87,7 +87,7 @@ A technical case may contain:
 
 ## Initial out of scope
 
-- Full industrial OCR or vision;
+- extraction or interpretation of diagrams and photographs during the text-only phases;
 - WhatsApp or email integrations;
 - statistical probability calculation;
 - embeddings, a vector database, RAG, and the final chatbot;
@@ -106,6 +106,7 @@ A technical case may contain:
 | Inference | An interpretation proposed by the AI from context. |
 | Evidence | A page, excerpt, or other anchor linking data to its source. |
 | Raw extraction | The model's complete, non-normalized response. |
+| Page-aware text | Faithful source-language text associated with its original PDF page before automotive analysis. |
 | Unreviewed data | Structurally valid normalized information stored automatically before human review. |
 | Reviewed data | Information inspected by a human without necessarily requiring changes. |
 | Corrected data | Information modified by a human while retaining traceability to the extraction. |

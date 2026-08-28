@@ -22,19 +22,22 @@ The roadmap progresses through vertical slices. A phase must work end to end bef
 
 A valid PDF can be uploaded, stored, and represented in the database without an AI call. The dashboard and upload flow work in both English and Italian without hard-coded user-facing copy.
 
-## Phase 2 — Text extraction
+## Phase 2 — Source text extraction
 
 ### Deliverables
 
-- Page-by-page text extraction.
+- Direct server-side transfer of the original private PDF to OpenAI.
+- OpenAI text extraction through PDF file input without a local PDF-reading library.
 - Persistence of `{ page, text }` and document metadata.
-- `ExtractionJob` creation and tracking.
-- Detection of documents without usable text.
-- Architecture prepared for a future OCR/vision adapter.
+- Strict validation and quality gates for the common content contract.
+- `ExtractionJob` history for every model attempt.
+- Cost-aware routing, bounded escalation, and token observability.
+- One file-input path for native, scanned, and mixed PDFs.
+- Preservation of the original PDF for future visual extraction.
 
 ### Expected outcome
 
-The textual content of a native PDF can be viewed with its page numbers, and failures are recoverable.
+An uploaded PDF is sent directly to OpenAI and produces faithful, source-language, page-aware text without creating automotive cases. Invalid output can use bounded retry or escalation. Failures preserve the original file and remain recoverable.
 
 ## Phase 3 — Structured AI extraction
 
@@ -46,6 +49,9 @@ The textual content of a native PDF can be viewed with its page numbers, and fai
 - Preservation of `rawAiOutput` and `validatedOutput`.
 - Invalid-output and retry handling.
 - Explicit distinction between facts and inferences.
+- Model routing that is separate from the Phase 2 text-extraction policy.
+- Database-aligned handling of multiple vehicles, multiple outcomes, uncertainty, evidence excerpts, and dedicated relationship references.
+- Advisory `requiresHumanReview` signaling that never blocks valid persistence.
 
 ### Expected outcome
 
@@ -115,7 +121,8 @@ The chat interface and generated responses must support English and Italian. Con
 
 The exact order will be decided from actual usage:
 
-- OCR/vision and new sources;
+- extraction and evidence linking for diagrams and photographs;
+- additional source adapters;
 - editorial versioning of cases;
 - statistics based on confirmed repairs;
 - embeddings and hybrid search;
