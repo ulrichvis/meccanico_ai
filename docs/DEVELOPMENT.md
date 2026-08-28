@@ -25,7 +25,7 @@ On PowerShell, copy the environment file with:
 Copy-Item .env.example .env.local
 ```
 
-The current environment schema provides safe defaults, so `.env.local` is optional until database and Storage work begins.
+The current environment schema provides safe defaults for commands that do not access external services. `.env.local` is required before applying migrations or running database queries.
 
 ## Standard commands
 
@@ -36,8 +36,37 @@ The current environment schema provides safe defaults, so `.env.local` is option
 | `pnpm i18n:check` | Verify locale catalog syntax and key parity. |
 | `pnpm typecheck` | Check TypeScript without producing a build. |
 | `pnpm build` | Verify the production build. |
+| `pnpm db:format` | Format `prisma/schema.prisma`. |
+| `pnpm db:validate` | Validate the Prisma schema without connecting to PostgreSQL. |
+| `pnpm db:generate` | Regenerate the typed Prisma client. |
+| `pnpm db:migrate:dev --name <name>` | Create and apply a migration during development. |
+| `pnpm db:migrate:deploy` | Apply committed migrations to the configured database. |
+| `pnpm db:migrate:status` | Compare committed migrations with the configured database. |
+| `pnpm db:verify` | Verify the live connection and a transactional `Source` create/read operation. |
+| `pnpm db:studio` | Open Prisma Studio with the migration connection. |
 
-Prisma commands will be added in Phase 1, point 2 when the database layer is implemented.
+`pnpm build` and `pnpm install` regenerate Prisma Client automatically. Schema validation and client generation work while database variables are empty; migration and query commands require credentials.
+
+## Supabase database setup
+
+The repository intentionally contains no database credentials. When you are ready to connect the existing Supabase project:
+
+1. Copy `.env.example` to `.env.local` if the local file does not already exist.
+2. In the Supabase project dashboard, open **Connect** and copy the PostgreSQL connection strings.
+3. Set `DATABASE_URL` to the transaction pooler connection string on port `6543` for serverless or auto-scaling application traffic. A persistent server may instead use its appropriate pooled connection.
+4. Set `DIRECT_URL` to the direct connection string on port `5432`. If the development network cannot reach the IPv6 direct endpoint, use the Supavisor session pooler on port `5432`.
+5. Keep both values server-side. Percent-encode special characters in the database password when required by URL syntax.
+6. Apply the committed migration and run the live verification:
+
+```bash
+pnpm db:migrate:deploy
+pnpm db:migrate:status
+pnpm db:verify
+```
+
+The verification creates, reads, and removes a synthetic `Source` inside one transaction. It does not leave a test row behind. A successful run prints only a success message and never prints a connection string.
+
+All application tables have row-level security enabled with no public policies. Prisma must connect with the trusted server-side database role supplied by Supabase. Do not put `DATABASE_URL` or `DIRECT_URL` in a `NEXT_PUBLIC_` variable.
 
 ## Target Supabase configuration
 
@@ -54,6 +83,8 @@ Prisma commands will be added in Phase 1, point 2 when the database layer is imp
 - Never modify a migration already applied to a shared environment.
 - Separate complex data migrations from structural migrations.
 - Before production, verify a migration against both an empty database and a database containing representative examples.
+- Add unsupported PostgreSQL features such as `CHECK` constraints directly to a create-only migration before applying it.
+- Use `DIRECT_URL` for Prisma CLI operations and `DATABASE_URL` only for application runtime queries.
 
 ## Code conventions
 

@@ -69,7 +69,7 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 
 ## Current status
 
-Phase 1, point 1 is complete: the Next.js application foundation, strict development tooling, environment validation, and route-neutral English/Italian text localization are implemented. The next task is Phase 1, point 2 in [the backlog](docs/TASKS.md): PostgreSQL and Prisma setup.
+Phase 1, point 1 is complete. The local implementation for point 2 is also ready: Prisma ORM, the PostgreSQL domain schema, the initial migration, and the database verification command are implemented. Applying the migration and running the live verification remain pending until Supabase connection strings are added locally. See [the development guide](docs/DEVELOPMENT.md#supabase-database-setup).
 
 ## Run locally
 
@@ -79,6 +79,8 @@ pnpm dev
 ```
 
 Then open `http://localhost:3000`. Use the language selector to switch all displayed text between English and Italian without changing the route.
+
+Database credentials are intentionally absent from the repository. Copy `.env.example` to `.env.local`, add the two Supabase PostgreSQL connection strings, and follow the [database setup procedure](docs/DEVELOPMENT.md#supabase-database-setup).
 
 ## Non-negotiable rules
 

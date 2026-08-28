@@ -13,14 +13,25 @@ const optionalUrl = z.preprocess(
   z.url().optional(),
 );
 
+const optionalPostgresUrl = z.preprocess(
+  emptyStringToUndefined,
+  z
+    .string()
+    .regex(
+      /^postgres(?:ql)?:\/\//,
+      "Database URLs must start with postgres:// or postgresql://.",
+    )
+    .optional(),
+);
+
 const serverEnvironmentSchema = z.object({
   NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),
   NEXT_PUBLIC_APP_URL: optionalUrl.default("http://localhost:3000"),
   MAX_UPLOAD_SIZE_MB: z.coerce.number().positive().default(20),
-  DATABASE_URL: optionalString,
-  DIRECT_URL: optionalString,
+  DATABASE_URL: optionalPostgresUrl,
+  DIRECT_URL: optionalPostgresUrl,
   NEXT_PUBLIC_SUPABASE_URL: optionalUrl,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalString,
   SUPABASE_SERVICE_ROLE_KEY: optionalString,

@@ -1,0 +1,492 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SourceType {
+  PDF               @map("pdf")
+  EMAIL             @map("email")
+  WHATSAPP          @map("whatsapp")
+  TEXT              @map("text")
+  AUDIO             @map("audio")
+  DIAGNOSTIC_REPORT @map("diagnostic_report")
+  OTHER             @map("other")
+
+  @@map("source_type")
+}
+
+enum SourceStatus {
+  UPLOADED        @map("uploaded")
+  EXTRACTING_TEXT @map("extracting_text")
+  TEXT_EXTRACTED  @map("text_extracted")
+  PROCESSING      @map("processing")
+  PERSISTED       @map("persisted")
+  SCHEMA_INVALID  @map("schema_invalid")
+  FAILED          @map("failed")
+
+  @@map("source_status")
+}
+
+enum ExtractionJobStatus {
+  PENDING        @map("pending")
+  RUNNING        @map("running")
+  COMPLETED      @map("completed")
+  SCHEMA_INVALID @map("schema_invalid")
+  FAILED         @map("failed")
+
+  @@map("extraction_job_status")
+}
+
+enum CaseStatus {
+  ACTIVE   @map("active")
+  REJECTED @map("rejected")
+  ARCHIVED @map("archived")
+
+  @@map("case_status")
+}
+
+enum ReviewStatus {
+  UNREVIEWED @map("unreviewed")
+  REVIEWED   @map("reviewed")
+  CORRECTED  @map("corrected")
+
+  @@map("review_status")
+}
+
+enum RelationOrigin {
+  EXPLICIT_SOURCE @map("explicit_source")
+  AI_INFERENCE    @map("ai_inference")
+  HUMAN_ADDED     @map("human_added")
+
+  @@map("relation_origin")
+}
+
+enum DtcRelationshipType {
+  PRIMARY           @map("primary")
+  POSSIBLE_CAUSE    @map("possible_cause")
+  CONSEQUENCE       @map("consequence")
+  ASSOCIATED_FAULT  @map("associated_fault")
+  ALTERNATIVE_FAULT @map("alternative_fault")
+  SAME_SYSTEM       @map("same_system")
+  SECONDARY_CODE    @map("secondary_code")
+  UNCLEAR           @map("unclear")
+
+  @@map("dtc_relationship_type")
+}
+
+enum EvidenceType {
+  THEORETICAL_POSSIBLE_SOLUTION @map("theoretical_possible_solution")
+  MANUFACTURER_DOCUMENTATION    @map("manufacturer_documentation")
+  TECHNICAL_BULLETIN            @map("technical_bulletin")
+  WORKSHOP_REPORT               @map("workshop_report")
+  REAL_CASE                     @map("real_case")
+  CONFIRMED_REPAIR              @map("confirmed_repair")
+  MULTIPLE_CONFIRMED_CASES      @map("multiple_confirmed_cases")
+  UNCLEAR                       @map("unclear")
+
+  @@map("evidence_type")
+}
+
+enum RelationshipNodeType {
+  DTC              @map("dtc")
+  SYMPTOM          @map("symptom")
+  CAUSE            @map("cause")
+  DIAGNOSTIC_CHECK @map("diagnostic_check")
+  SOLUTION         @map("solution")
+  REPAIR_OUTCOME   @map("repair_outcome")
+
+  @@map("relationship_node_type")
+}
+
+model Source {
+  id               String           @id @default(uuid()) @db.Uuid
+  type             SourceType
+  status           SourceStatus     @default(UPLOADED)
+  originalFilename String?          @map("original_filename")
+  mimeType         String?          @map("mime_type")
+  storagePath      String?          @map("storage_path")
+  rawText          String?          @map("raw_text")
+  author           String?
+  sourceDate       DateTime?        @map("source_date") @db.Timestamptz(6)
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  documents        Document[]
+  extractionJobs   ExtractionJob[]
+  cases            Case[]
+  evidence         SourceEvidence[]
+
+  @@index([status, createdAt(sort: Desc)], map: "sources_status_created_at_idx")
+  @@map("sources")
+}
+
+model Document {
+  id           String   @id @default(uuid()) @db.Uuid
+  sourceId     String   @map("source_id") @db.Uuid
+  title        String?
+  language     String?
+  pageCount    Int?     @map("page_count")
+  pagesJson    Json?    @map("pages_json") @db.JsonB
+  metadataJson Json?    @map("metadata_json") @db.JsonB
+  contentHash  String?  @unique(map: "documents_content_hash_key") @map("content_hash")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  source       Source   @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  cases        Case[]
+
+  @@index([sourceId], map: "documents_source_id_idx")
+  @@map("documents")
+}
+
+model ExtractionJob {
+  id              String              @id @default(uuid()) @db.Uuid
+  sourceId        String              @map("source_id") @db.Uuid
+  status          ExtractionJobStatus @default(PENDING)
+  model           String?
+  promptVersion   String?             @map("prompt_version")
+  startedAt       DateTime?           @map("started_at") @db.Timestamptz(6)
+  finishedAt      DateTime?           @map("finished_at") @db.Timestamptz(6)
+  error           String?
+  rawAiOutput     Json?               @map("raw_ai_output") @db.JsonB
+  validatedOutput Json?               @map("validated_output") @db.JsonB
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  source          Source              @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  cases           Case[]
+
+  @@index([sourceId, createdAt(sort: Desc)], map: "extraction_jobs_source_id_created_at_idx")
+  @@map("extraction_jobs")
+}
+
+model Case {
+  id                 String            @id @default(uuid()) @db.Uuid
+  sourceId           String            @map("source_id") @db.Uuid
+  documentId         String?           @map("document_id") @db.Uuid
+  extractionJobId    String?           @map("extraction_job_id") @db.Uuid
+  caseType           String?           @map("case_type")
+  title              String?
+  complaint          String?
+  problemDescription String?           @map("problem_description")
+  analysisSummary    String?           @map("analysis_summary")
+  status             CaseStatus        @default(ACTIVE)
+  reviewStatus       ReviewStatus      @default(UNREVIEWED) @map("review_status")
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  reviewedAt         DateTime?         @map("reviewed_at") @db.Timestamptz(6)
+  reviewNotes        String?           @map("review_notes")
+  source             Source            @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  document           Document?         @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  extractionJob      ExtractionJob?    @relation(fields: [extractionJobId], references: [id], onDelete: SetNull)
+  vehicles           CaseVehicle[]
+  dtcs               CaseDtc[]
+  symptoms           CaseSymptom[]
+  causes             CaseCause[]
+  solutions          CaseSolution[]
+  components         CaseComponent[]
+  diagnosticChecks   DiagnosticCheck[]
+  measurements       Measurement[]
+  repairProcedures   RepairProcedure[]
+  partsMaterials     PartMaterial[]
+  repairOutcomes     RepairOutcome[]
+  evidence           SourceEvidence[]
+  relationships      Relationship[]
+
+  @@index([sourceId], map: "cases_source_id_idx")
+  @@index([documentId], map: "cases_document_id_idx")
+  @@index([extractionJobId], map: "cases_extraction_job_id_idx")
+  @@index([status, reviewStatus, createdAt(sort: Desc)], map: "cases_status_review_created_at_idx")
+  @@map("cases")
+}
+
+model Vehicle {
+  id                String        @id @default(uuid()) @db.Uuid
+  brand             String?
+  model             String?
+  generation        String?
+  yearFrom          Int?          @map("year_from")
+  yearTo            Int?          @map("year_to")
+  engineDescription String?       @map("engine_description")
+  engineCode        String?       @map("engine_code")
+  fuelType          String?       @map("fuel_type")
+  power             String?
+  transmission      String?
+  cases             CaseVehicle[]
+
+  @@index([brand, model, engineCode], map: "vehicles_brand_model_engine_code_idx")
+  @@map("vehicles")
+}
+
+model CaseVehicle {
+  id                String         @id @default(uuid()) @db.Uuid
+  caseId            String         @map("case_id") @db.Uuid
+  vehicleId         String         @map("vehicle_id") @db.Uuid
+  relationOrigin    RelationOrigin @map("relation_origin")
+  confidence        Decimal?       @db.Decimal(5, 4)
+  compatibilityNote String?        @map("compatibility_note")
+  case              Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  vehicle           Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+
+  @@unique([caseId, vehicleId], map: "case_vehicles_case_id_vehicle_id_key")
+  @@index([vehicleId], map: "case_vehicles_vehicle_id_idx")
+  @@map("case_vehicles")
+}
+
+model Dtc {
+  id             String    @id @default(uuid()) @db.Uuid
+  code           String
+  normalizedCode String    @unique(map: "dtcs_normalized_code_key") @map("normalized_code")
+  description    String?
+  cases          CaseDtc[]
+
+  @@map("dtcs")
+}
+
+model CaseDtc {
+  id               String              @id @default(uuid()) @db.Uuid
+  caseId           String              @map("case_id") @db.Uuid
+  dtcId            String              @map("dtc_id") @db.Uuid
+  isPrimary        Boolean             @default(false) @map("is_primary")
+  relationshipType DtcRelationshipType @map("relationship_type")
+  relationOrigin   RelationOrigin      @map("relation_origin")
+  confidence       Decimal?            @db.Decimal(5, 4)
+  case             Case                @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  dtc              Dtc                 @relation(fields: [dtcId], references: [id], onDelete: Restrict)
+
+  @@unique([caseId, dtcId], map: "case_dtcs_case_id_dtc_id_key")
+  @@unique([caseId], map: "case_dtcs_one_primary_per_case_key", where: { isPrimary: true })
+  @@index([dtcId], map: "case_dtcs_dtc_id_idx")
+  @@map("case_dtcs")
+}
+
+model Symptom {
+  id             String        @id @default(uuid()) @db.Uuid
+  normalizedName String        @unique(map: "symptoms_normalized_name_key") @map("normalized_name")
+  cases          CaseSymptom[]
+
+  @@map("symptoms")
+}
+
+model CaseSymptom {
+  id             String         @id @default(uuid()) @db.Uuid
+  caseId         String         @map("case_id") @db.Uuid
+  symptomId      String         @map("symptom_id") @db.Uuid
+  description    String?
+  relationOrigin RelationOrigin @map("relation_origin")
+  confidence     Decimal?       @db.Decimal(5, 4)
+  case           Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  symptom        Symptom        @relation(fields: [symptomId], references: [id], onDelete: Restrict)
+
+  @@unique([caseId, symptomId], map: "case_symptoms_case_id_symptom_id_key")
+  @@index([symptomId], map: "case_symptoms_symptom_id_idx")
+  @@map("case_symptoms")
+}
+
+model Cause {
+  id             String      @id @default(uuid()) @db.Uuid
+  normalizedName String      @unique(map: "causes_normalized_name_key") @map("normalized_name")
+  cases          CaseCause[]
+
+  @@map("causes")
+}
+
+model CaseCause {
+  id                    String         @id @default(uuid()) @db.Uuid
+  caseId                String         @map("case_id") @db.Uuid
+  causeId               String         @map("cause_id") @db.Uuid
+  description           String?
+  probabilitySource     String?        @map("probability_source")
+  probabilityCalculated Decimal?       @map("probability_calculated") @db.Decimal(5, 4)
+  relationOrigin        RelationOrigin @map("relation_origin")
+  confidence            Decimal?       @db.Decimal(5, 4)
+  case                  Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  cause                 Cause          @relation(fields: [causeId], references: [id], onDelete: Restrict)
+
+  @@unique([caseId, causeId], map: "case_causes_case_id_cause_id_key")
+  @@index([causeId], map: "case_causes_cause_id_idx")
+  @@map("case_causes")
+}
+
+model Solution {
+  id             String         @id @default(uuid()) @db.Uuid
+  normalizedName String         @unique(map: "solutions_normalized_name_key") @map("normalized_name")
+  cases          CaseSolution[]
+
+  @@map("solutions")
+}
+
+model CaseSolution {
+  id                    String            @id @default(uuid()) @db.Uuid
+  caseId                String            @map("case_id") @db.Uuid
+  solutionId            String            @map("solution_id") @db.Uuid
+  description           String?
+  probabilitySource     String?           @map("probability_source")
+  probabilityCalculated Decimal?          @map("probability_calculated") @db.Decimal(5, 4)
+  repairConfirmed       Boolean?          @map("repair_confirmed")
+  repairSuccessful      Boolean?          @map("repair_successful")
+  relationOrigin        RelationOrigin    @map("relation_origin")
+  confidence            Decimal?          @db.Decimal(5, 4)
+  case                  Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  solution              Solution          @relation(fields: [solutionId], references: [id], onDelete: Restrict)
+  procedures            RepairProcedure[]
+  outcomes              RepairOutcome[]
+
+  @@unique([caseId, solutionId], map: "case_solutions_case_id_solution_id_key")
+  @@index([solutionId], map: "case_solutions_solution_id_idx")
+  @@map("case_solutions")
+}
+
+model Component {
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String
+  normalizedName String          @unique(map: "components_normalized_name_key") @map("normalized_name")
+  componentType  String?         @map("component_type")
+  cases          CaseComponent[]
+
+  @@map("components")
+}
+
+model CaseComponent {
+  id             String         @id @default(uuid()) @db.Uuid
+  caseId         String         @map("case_id") @db.Uuid
+  componentId    String         @map("component_id") @db.Uuid
+  role           String?
+  relationOrigin RelationOrigin @map("relation_origin")
+  confidence     Decimal?       @db.Decimal(5, 4)
+  case           Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  component      Component      @relation(fields: [componentId], references: [id], onDelete: Restrict)
+
+  @@unique([caseId, componentId], map: "case_components_case_id_component_id_key")
+  @@index([componentId], map: "case_components_component_id_idx")
+  @@map("case_components")
+}
+
+model DiagnosticCheck {
+  id             String         @id @default(uuid()) @db.Uuid
+  caseId         String         @map("case_id") @db.Uuid
+  description    String
+  expectedResult String?        @map("expected_result")
+  actualResult   String?        @map("actual_result")
+  interpretation String?
+  sequenceOrder  Int?           @map("sequence_order")
+  relationOrigin RelationOrigin @map("relation_origin")
+  confidence     Decimal?       @db.Decimal(5, 4)
+  case           Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  measurements   Measurement[]
+
+  @@index([caseId], map: "diagnostic_checks_case_id_idx")
+  @@map("diagnostic_checks")
+}
+
+model Measurement {
+  id                String           @id @default(uuid()) @db.Uuid
+  caseId            String           @map("case_id") @db.Uuid
+  diagnosticCheckId String?          @map("diagnostic_check_id") @db.Uuid
+  parameter         String
+  valueText         String?          @map("value_text")
+  numericValue      Decimal?         @map("numeric_value") @db.Decimal(20, 8)
+  unit              String?
+  conditions        String?
+  minValue          Decimal?         @map("min_value") @db.Decimal(20, 8)
+  maxValue          Decimal?         @map("max_value") @db.Decimal(20, 8)
+  relationOrigin    RelationOrigin   @map("relation_origin")
+  confidence        Decimal?         @db.Decimal(5, 4)
+  case              Case             @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  diagnosticCheck   DiagnosticCheck? @relation(fields: [diagnosticCheckId], references: [id], onDelete: SetNull)
+
+  @@index([caseId], map: "measurements_case_id_idx")
+  @@index([diagnosticCheckId], map: "measurements_diagnostic_check_id_idx")
+  @@map("measurements")
+}
+
+model RepairProcedure {
+  id             String         @id @default(uuid()) @db.Uuid
+  caseId         String         @map("case_id") @db.Uuid
+  caseSolutionId String?        @map("case_solution_id") @db.Uuid
+  sequenceOrder  Int            @map("sequence_order")
+  instruction    String
+  relationOrigin RelationOrigin @map("relation_origin")
+  confidence     Decimal?       @db.Decimal(5, 4)
+  case           Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  caseSolution   CaseSolution?  @relation(fields: [caseSolutionId], references: [id], onDelete: SetNull)
+
+  @@index([caseId], map: "repair_procedures_case_id_idx")
+  @@index([caseSolutionId], map: "repair_procedures_case_solution_id_idx")
+  @@map("repair_procedures")
+}
+
+model PartMaterial {
+  id             String         @id @default(uuid()) @db.Uuid
+  caseId         String         @map("case_id") @db.Uuid
+  name           String
+  partNumber     String?        @map("part_number")
+  manufacturer   String?
+  notes          String?
+  relationOrigin RelationOrigin @map("relation_origin")
+  confidence     Decimal?       @db.Decimal(5, 4)
+  case           Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId], map: "parts_materials_case_id_idx")
+  @@map("parts_materials")
+}
+
+model RepairOutcome {
+  id                  String        @id @default(uuid()) @db.Uuid
+  caseId              String        @map("case_id") @db.Uuid
+  caseSolutionId      String?       @map("case_solution_id") @db.Uuid
+  attempted           Boolean?
+  successful          Boolean?
+  confirmed           Boolean?
+  caseCount           Int?          @map("case_count")
+  successfulCaseCount Int?          @map("successful_case_count")
+  notes               String?
+  case                Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  caseSolution        CaseSolution? @relation(fields: [caseSolutionId], references: [id], onDelete: SetNull)
+
+  @@index([caseId], map: "repair_outcomes_case_id_idx")
+  @@index([caseSolutionId], map: "repair_outcomes_case_solution_id_idx")
+  @@map("repair_outcomes")
+}
+
+model SourceEvidence {
+  id             String         @id @default(uuid()) @db.Uuid
+  sourceId       String         @map("source_id") @db.Uuid
+  caseId         String         @map("case_id") @db.Uuid
+  entityType     String?        @map("entity_type")
+  entityId       String?        @map("entity_id") @db.Uuid
+  pageNumber     Int?           @map("page_number")
+  excerpt        String
+  evidenceType   EvidenceType   @map("evidence_type")
+  relationOrigin RelationOrigin @map("relation_origin")
+  confidence     Decimal?       @db.Decimal(5, 4)
+  source         Source         @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  case           Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  relationships  Relationship[]
+
+  @@index([sourceId], map: "source_evidence_source_id_idx")
+  @@index([caseId], map: "source_evidence_case_id_idx")
+  @@index([entityType, entityId], map: "source_evidence_entity_idx")
+  @@map("source_evidence")
+}
+
+model Relationship {
+  id               String               @id @default(uuid()) @db.Uuid
+  caseId           String               @map("case_id") @db.Uuid
+  fromType         RelationshipNodeType @map("from_type")
+  fromId           String               @map("from_id") @db.Uuid
+  relationshipType String               @map("relationship_type")
+  toType           RelationshipNodeType @map("to_type")
+  toId             String               @map("to_id") @db.Uuid
+  relationOrigin   RelationOrigin       @map("relation_origin")
+  confidence       Decimal?             @db.Decimal(5, 4)
+  sourceEvidenceId String?              @map("source_evidence_id") @db.Uuid
+  case             Case                 @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  sourceEvidence   SourceEvidence?      @relation(fields: [sourceEvidenceId], references: [id], onDelete: SetNull)
+
+  @@index([caseId], map: "relationships_case_id_idx")
+  @@index([fromType, fromId], map: "relationships_from_node_idx")
+  @@index([toType, toId], map: "relationships_to_node_idx")
+  @@index([sourceEvidenceId], map: "relationships_source_evidence_id_idx")
+  @@map("relationships")
+}

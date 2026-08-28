@@ -146,6 +146,8 @@ This structure is a target, not a requirement to create empty files. Each direct
 - Encapsulate Prisma in repositories when queries become complex.
 - Write a case graph in one transaction.
 - Never expose a Prisma model directly as a public API contract.
+- Use the pooled PostgreSQL connection for runtime queries and the direct or session connection for migrations.
+- Keep Supabase Data API access closed by default: all application tables have row-level security enabled without public policies.
 
 ## Primary states
 

@@ -19,11 +19,12 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ### 2. Database
 
-- [ ] Install and configure Prisma for PostgreSQL.
-- [ ] Translate the model in `docs/DATA_MODEL.md` into `schema.prisma`.
-- [ ] Include tables required by future phases without implementing their logic.
-- [ ] Add confidence constraints, DTC uniqueness, and essential indexes.
-- [ ] Generate and apply the initial migration.
+- [x] Install and configure Prisma for PostgreSQL.
+- [x] Translate the model in `docs/DATA_MODEL.md` into `schema.prisma`.
+- [x] Include tables required by future phases without implementing their logic.
+- [x] Add confidence constraints, DTC uniqueness, and essential indexes.
+- [x] Generate the initial migration.
+- [ ] Apply the initial migration to Supabase after local connection strings are provided.
 - [ ] Verify the connection and a `Source` create/read operation.
 
 ### 3. Storage
@@ -135,3 +136,4 @@ This file is the project's operational tracker. Check only tasks that are actual
 | 2026-08-25 | Documentation | Made human review non-blocking and documented the future mechanic-facing conversational assistant. | Cross-checked product, architecture, data, roadmap, and ADR terminology. |
 | 2026-08-25 | Documentation | Established English as the development language and English/Italian as required frontend locales. | Added i18n architecture, catalog rules, and Phase 1 verification criteria. |
 | 2026-08-25 | Phase 1.1 | Initialized the application, tooling, environment schema, bilingual catalogs, language selector, and responsive shell. | i18n check, ESLint, TypeScript, production build, and desktop/mobile browser verification passed. |
+| 2026-08-28 | Phase 1.2 | Added Prisma ORM, the PostgreSQL domain schema, database constraints, the initial migration, and a live connection verification command. | Local schema generation and static checks passed; Supabase deployment and live create/read verification await local credentials. |
