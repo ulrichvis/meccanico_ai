@@ -39,6 +39,9 @@ const serverEnvironmentSchema = z.object({
   SUPABASE_DOCUMENTS_BUCKET: optionalString.default("technical-sources"),
   OPENAI_API_KEY: optionalString,
   OPENAI_EXTRACTION_MODEL: optionalString,
+  OPENAI_EXTRACTION_MODEL_ESCALATION: optionalString,
+  OPENAI_EXTRACTION_MODEL_EXCEPTIONAL: optionalString,
+  OPENAI_EXTRACTION_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(3).default(2),
 });
 
 export const env = serverEnvironmentSchema.parse({
@@ -54,4 +57,7 @@ export const env = serverEnvironmentSchema.parse({
   SUPABASE_DOCUMENTS_BUCKET: process.env.SUPABASE_DOCUMENTS_BUCKET,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_EXTRACTION_MODEL: process.env.OPENAI_EXTRACTION_MODEL,
+  OPENAI_EXTRACTION_MODEL_ESCALATION: process.env.OPENAI_EXTRACTION_MODEL_ESCALATION,
+  OPENAI_EXTRACTION_MODEL_EXCEPTIONAL: process.env.OPENAI_EXTRACTION_MODEL_EXCEPTIONAL,
+  OPENAI_EXTRACTION_MAX_ATTEMPTS: process.env.OPENAI_EXTRACTION_MAX_ATTEMPTS,
 });

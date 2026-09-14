@@ -49,6 +49,9 @@ The current environment schema provides safe defaults for commands that do not a
 | `pnpm storage:verify` | Verify a live upload, signed retrieval, and cleanup with a synthetic PDF. |
 | `pnpm upload:verify` | Verify the running upload endpoint, database persistence, retry idempotency, invalid-content rejection, and cleanup. |
 | `pnpm openai:verify-pdf [source-id]` | Send one eligible private PDF directly to OpenAI and validate its page-aware text response without persisting it. |
+| `pnpm source:process --list` | List recent PDF source identifiers and statuses for operator selection. |
+| `pnpm source:process <source-id>` | Extract one private PDF and persist validated text, pages, metadata, and attempt history. |
+| `pnpm extraction:verify` | Verify persistence, retries, concurrency, stale recovery, and rollback in Supabase using synthetic responses and temporary records; no OpenAI charge. |
 
 `pnpm build` and `pnpm install` regenerate Prisma Client automatically. Schema validation and client generation work while database variables are empty; migration and query commands require credentials.
 
@@ -128,6 +131,33 @@ pnpm openai:verify-pdf
 ```
 
 Pass a source UUID as the optional argument to select a specific uploaded PDF. This command performs a real billable OpenAI request. It verifies the private Storage object's existence, PDF content type, non-zero size, and configured size ceiling; creates a ten-minute signed URL; sends the complete PDF as a Responses API file input; and validates the strict structured response. It writes no extracted text or status changes to the database and logs neither document content nor the signed URL.
+
+## Persisted text extraction verification
+
+Use the existing OpenAI key and primary model in `.env.local`. Optional escalation/exceptional model settings are listed in `.env.example`; they remain empty until intentionally configured. Two attempts are allowed per invocation by default. The operator command is a real billable extraction and preserves its results:
+
+```bash
+pnpm source:process --list
+pnpm source:process <source-id>
+pnpm source:process <source-id>
+```
+
+The first successful invocation returns `completed` with the document ID. Repeating it returns `already_processed` without another model call. Inspect the source status (`text_extracted`), `raw_text`, document pages/metadata, and completed extraction job in the database. There must be exactly one accepted document from this flow, with `unreviewed` metadata.
+
+The same processor is available from `/sources/[sourceId]`. For a manual UI check:
+
+1. Open `/sources` and follow the action for an uploaded source.
+2. Start extraction and verify the localized processing state; on a retryable failure, the same control becomes a retry action.
+3. After success, verify title, author, source date, source language, page and character counts, model, prompt version, warnings, and extraction history.
+4. Expand each page and compare the saved source-language text with the original PDF. The recap must not translate or summarize it.
+5. Switch between English and Italian and verify that interface text changes without changing the route or source text.
+6. Repeat at a narrow mobile viewport and confirm that the page has no horizontal overflow.
+
+The recap reads saved database content and never causes an additional model call. Browser payloads and logs must not include signed URLs, Storage paths, credentials, raw provider responses, or internal provider errors.
+
+For failure behavior, run `pnpm extraction:verify`. It creates UUID-scoped synthetic records, uses the real OpenAI response adapter with simulated responses, and checks malformed schema, empty text, NUL preservation, refusals, bounded escalation, later retry, simultaneous invocation, stale-worker ownership, and transactional rollback. It deletes only the synthetic records it created in a final cleanup transaction and never uploads or removes Storage objects.
+
+A source interrupted by a process exit can be retried after ten minutes. Do not manually change its status while a worker is active. A database failure may leave a running job for recovery; raw responses already saved remain attached to that job.
 
 ## Migration conventions
 

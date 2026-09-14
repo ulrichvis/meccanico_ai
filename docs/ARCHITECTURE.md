@@ -263,9 +263,16 @@ MAX_UPLOAD_SIZE_MB=20
 MAX_UPLOAD_FILES_PER_BATCH=20
 OPENAI_API_KEY=
 OPENAI_EXTRACTION_MODEL=gpt-5.6-luna
+OPENAI_EXTRACTION_MODEL_ESCALATION=
+OPENAI_EXTRACTION_MODEL_EXCEPTIONAL=
+OPENAI_EXTRACTION_MAX_ATTEMPTS=2
 ```
 
-OpenAI variables are mandatory only when Phase 2 extraction runs. The first implementation uses one configurable model and objective quality checks will determine whether later escalation tiers are justified. Model identifiers must not be scattered through application code. Phase 3 will use separately named automotive-extraction configuration.
+OpenAI credentials and the primary model are mandatory only when Phase 2 extraction runs. Optional higher tiers are selected only after schema/output-quality failure, within a one-to-three attempt cap (two by default). Model identifiers must not be scattered through application code. Phase 3 will use separately named automotive-extraction configuration.
+
+The implemented Phase 2 entry point is `src/services/process-source.server.ts`; its framework-independent pipeline and repository live in `src/extraction/`. The trusted operator CLI and the source-detail API route use the same processor. Short source-row locks serialize acquisition and writes while OpenAI runs outside database transactions. A successful final transaction stores the text/document and completes the job atomically. See [ADR 0012](decisions/0012-text-extraction-persistence-and-retries.md) for retry, ownership, and audit semantics.
+
+`/sources/[sourceId]` is the operator boundary for starting or retrying extraction and reading its result. Its server repository returns only persisted, presentation-safe fields: document metadata, page-aware source text, deterministic warnings, model and prompt version, timing, safe attempt status/error categories, and token usage. Raw provider responses, signed Storage URLs, storage paths, credentials, and internal error details stay server-side. No AI call is made to generate the recap. See [ADR 0013](decisions/0013-safe-extraction-operations-and-recap.md).
 
 ## Minimum observability
 

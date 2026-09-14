@@ -141,7 +141,10 @@ export class OpenAIPdfTextExtractor {
     this.model = options.model;
   }
 
-  async extract(fileUrl: string): Promise<OpenAIPdfTextExtractionResult> {
+  async extract(
+    fileUrl: string,
+    onRawResponse?: (rawResponse: unknown) => Promise<void>,
+  ): Promise<OpenAIPdfTextExtractionResult> {
     let response: Response;
 
     try {
@@ -191,7 +194,22 @@ export class OpenAIPdfTextExtractor {
       );
     }
 
-    const body: unknown = await response.json().catch(() => null);
+    let responseText: string;
+    try {
+      responseText = await response.text();
+    } catch (error) {
+      throw new OpenAITextExtractionError("OPENAI_REQUEST_FAILED", response.status, null, { cause: error });
+    }
+    let body: unknown;
+    try {
+      body = JSON.parse(responseText) as unknown;
+    } catch {
+      body = responseText;
+    }
+
+    // Persist the response before any provider-status or schema validation.
+    // Storage failures must stop processing rather than trigger another paid call.
+    await onRawResponse?.(body);
 
     if (!response.ok) {
       const providerError = openAIErrorSchema.safeParse(body);

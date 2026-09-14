@@ -129,7 +129,9 @@
       "filename": "Filename",
       "type": "Type",
       "status": "Status",
-      "uploadedAt": "Uploaded"
+      "uploadedAt": "Uploaded",
+      "action": "Action",
+      "view": "View"
     },
     "type": {
       "pdf": "PDF",
@@ -149,6 +151,111 @@
       "schemaInvalid": "Needs review",
       "failed": "Failed",
       "unknown": "Unknown"
+    }
+  },
+  "sourceDetail": {
+    "back": "Back to sources",
+    "eyebrow": "Source detail",
+    "loading": "Loading document…",
+    "unknown": "Not available",
+    "error": {
+      "title": "This document could not be loaded",
+      "description": "The stored source was not modified. Try loading it again.",
+      "retry": "Try again"
+    },
+    "notFound": {
+      "title": "Document not found",
+      "description": "This source does not exist or is no longer available.",
+      "action": "Return to sources"
+    },
+    "actions": {
+      "extract": "Extract text",
+      "extracting": "Extracting text…",
+      "retry": "Retry extraction",
+      "errors": {
+        "invalidSource": "This source reference is invalid.",
+        "notFound": "This source could not be found.",
+        "notEligible": "This document cannot be extracted in its current state.",
+        "busy": "Text extraction is already in progress. Reload this page shortly.",
+        "failed": "Text extraction failed. The attempt was saved and can be retried.",
+        "unavailable": "The extraction service is unavailable. Please try again."
+      }
+    },
+    "empty": {
+      "title": "Ready for text extraction",
+      "description": "Start extraction to create the page-aware text and document recap.",
+      "failedTitle": "Extraction needs another attempt",
+      "failedDescription": "The previous attempt was saved. You can safely retry this document."
+    },
+    "summary": {
+      "eyebrow": "Extraction recap",
+      "untitled": "Extracted document",
+      "unreviewed": "Unreviewed",
+      "author": "Author",
+      "sourceDate": "Source date",
+      "language": "Source language",
+      "pages": "Pages",
+      "characters": "Characters",
+      "model": "Extraction model",
+      "extractedAt": "Extracted",
+      "prompt": "Prompt version"
+    },
+    "quality": {
+      "label": "Page text quality",
+      "readable": "readable",
+      "partial": "partial",
+      "unreadable": "unreadable",
+      "count": "{quality}: {count}"
+    },
+    "warnings": {
+      "title": "Extraction warnings",
+      "withPage": "Page {page}: {message}",
+      "pagePartial": "some text could not be recovered",
+      "pageEmpty": "no text was recovered",
+      "pageUnreadable": "the page was reported as unreadable",
+      "duplicatePage": "the text resembles another long page",
+      "unicodeReplacement": "the text contains a replacement character",
+      "unknown": "the extraction reported a quality warning"
+    },
+    "pages": {
+      "eyebrow": "Saved source text",
+      "title": "Text by page",
+      "countOne": "{count} page",
+      "countMany": "{count} pages",
+      "page": "Page {page}",
+      "noText": "No readable text was recovered from this page."
+    },
+    "history": {
+      "eyebrow": "Processing record",
+      "title": "Extraction history",
+      "countOne": "{count} attempt",
+      "countMany": "{count} attempts",
+      "empty": "No extraction attempt has been recorded yet.",
+      "attempt": "Attempt {number}",
+      "model": "Model",
+      "startedAt": "Started",
+      "duration": "Duration",
+      "seconds": "{value} s",
+      "tokens": "Token usage",
+      "tokenCounts": "{input} input · {output} output · {total} total"
+    },
+    "attemptStatus": {
+      "pending": "Pending",
+      "running": "Running",
+      "completed": "Completed",
+      "schemaInvalid": "Invalid output",
+      "failed": "Failed",
+      "unknown": "Unknown"
+    },
+    "attemptErrors": {
+      "interrupted": "The processing worker was interrupted and the source became available for retry.",
+      "refused": "The extraction provider did not process this document.",
+      "incomplete": "The provider returned an incomplete response.",
+      "invalidResponse": "The provider response could not be read.",
+      "invalidStructure": "The extracted result did not match the required structure.",
+      "qualityFailed": "The extracted text did not pass the quality checks.",
+      "fileInvalid": "The stored file did not pass the PDF checks.",
+      "generic": "This attempt could not be completed."
     }
   },
   "footer": {

@@ -129,7 +129,9 @@
       "filename": "Nome file",
       "type": "Tipo",
       "status": "Stato",
-      "uploadedAt": "Caricato"
+      "uploadedAt": "Caricato",
+      "action": "Azione",
+      "view": "Apri"
     },
     "type": {
       "pdf": "PDF",
@@ -149,6 +151,111 @@
       "schemaInvalid": "Da verificare",
       "failed": "Non riuscito",
       "unknown": "Sconosciuto"
+    }
+  },
+  "sourceDetail": {
+    "back": "Torna alle fonti",
+    "eyebrow": "Dettaglio della fonte",
+    "loading": "Caricamento del documento…",
+    "unknown": "Non disponibile",
+    "error": {
+      "title": "Impossibile caricare questo documento",
+      "description": "La fonte salvata non è stata modificata. Prova a caricarla di nuovo.",
+      "retry": "Riprova"
+    },
+    "notFound": {
+      "title": "Documento non trovato",
+      "description": "Questa fonte non esiste o non è più disponibile.",
+      "action": "Torna alle fonti"
+    },
+    "actions": {
+      "extract": "Estrai il testo",
+      "extracting": "Estrazione del testo…",
+      "retry": "Ripeti l'estrazione",
+      "errors": {
+        "invalidSource": "Il riferimento della fonte non è valido.",
+        "notFound": "Impossibile trovare questa fonte.",
+        "notEligible": "Questo documento non può essere estratto nel suo stato attuale.",
+        "busy": "L'estrazione del testo è già in corso. Ricarica la pagina tra poco.",
+        "failed": "L'estrazione del testo non è riuscita. Il tentativo è stato salvato e può essere ripetuto.",
+        "unavailable": "Il servizio di estrazione non è disponibile. Riprova."
+      }
+    },
+    "empty": {
+      "title": "Pronto per l'estrazione del testo",
+      "description": "Avvia l'estrazione per creare il testo suddiviso per pagina e il riepilogo del documento.",
+      "failedTitle": "L'estrazione richiede un altro tentativo",
+      "failedDescription": "Il tentativo precedente è stato salvato. Puoi riprovare questo documento in sicurezza."
+    },
+    "summary": {
+      "eyebrow": "Riepilogo dell'estrazione",
+      "untitled": "Documento estratto",
+      "unreviewed": "Non verificato",
+      "author": "Autore",
+      "sourceDate": "Data della fonte",
+      "language": "Lingua della fonte",
+      "pages": "Pagine",
+      "characters": "Caratteri",
+      "model": "Modello di estrazione",
+      "extractedAt": "Estratto",
+      "prompt": "Versione del prompt"
+    },
+    "quality": {
+      "label": "Qualità del testo delle pagine",
+      "readable": "leggibili",
+      "partial": "parziali",
+      "unreadable": "illeggibili",
+      "count": "{quality}: {count}"
+    },
+    "warnings": {
+      "title": "Avvisi sull'estrazione",
+      "withPage": "Pagina {page}: {message}",
+      "pagePartial": "non è stato possibile recuperare parte del testo",
+      "pageEmpty": "non è stato recuperato alcun testo",
+      "pageUnreadable": "la pagina è stata segnalata come illeggibile",
+      "duplicatePage": "il testo è simile a quello di un'altra pagina lunga",
+      "unicodeReplacement": "il testo contiene un carattere sostitutivo",
+      "unknown": "l'estrazione ha segnalato un avviso sulla qualità"
+    },
+    "pages": {
+      "eyebrow": "Testo della fonte salvato",
+      "title": "Testo per pagina",
+      "countOne": "{count} pagina",
+      "countMany": "{count} pagine",
+      "page": "Pagina {page}",
+      "noText": "Non è stato recuperato alcun testo leggibile da questa pagina."
+    },
+    "history": {
+      "eyebrow": "Registro di elaborazione",
+      "title": "Cronologia delle estrazioni",
+      "countOne": "{count} tentativo",
+      "countMany": "{count} tentativi",
+      "empty": "Non è stato ancora registrato alcun tentativo di estrazione.",
+      "attempt": "Tentativo {number}",
+      "model": "Modello",
+      "startedAt": "Avviato",
+      "duration": "Durata",
+      "seconds": "{value} s",
+      "tokens": "Utilizzo dei token",
+      "tokenCounts": "{input} input · {output} output · {total} totali"
+    },
+    "attemptStatus": {
+      "pending": "In attesa",
+      "running": "In corso",
+      "completed": "Completato",
+      "schemaInvalid": "Output non valido",
+      "failed": "Non riuscito",
+      "unknown": "Sconosciuto"
+    },
+    "attemptErrors": {
+      "interrupted": "Il processo è stato interrotto e la fonte è nuovamente disponibile per un tentativo.",
+      "refused": "Il fornitore di estrazione non ha elaborato questo documento.",
+      "incomplete": "Il fornitore ha restituito una risposta incompleta.",
+      "invalidResponse": "Non è stato possibile leggere la risposta del fornitore.",
+      "invalidStructure": "Il risultato estratto non rispetta la struttura richiesta.",
+      "qualityFailed": "Il testo estratto non ha superato i controlli di qualità.",
+      "fileInvalid": "Il file salvato non ha superato i controlli PDF.",
+      "generic": "Non è stato possibile completare questo tentativo."
     }
   },
   "footer": {

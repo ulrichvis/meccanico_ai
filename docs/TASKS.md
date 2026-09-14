@@ -119,43 +119,49 @@ Phase 2 ends with validated page-aware text. It must not create automotive cases
 - [x] Allow scanned-page text transcription while forbidding descriptions or interpretations of diagrams and photographs.
 - [x] Require source-language text, ordered one-based page numbers, and explicit unreadable-page handling.
 - [x] Validate every model response with Zod.
-- [ ] Persist every raw attempt through the Phase 2 orchestration history.
+- [x] Persist every raw attempt through the Phase 2 orchestration history.
 - [x] Verify the configured model and PDF-input behavior against official OpenAI documentation and a live private-PDF transfer.
 
 #### 2.4 Model routing and quality gates
 
-- [ ] Centralize configurable primary, escalation, and exceptional model tiers; never scatter model identifiers through the code.
-- [ ] Send every eligible PDF to the primary configured model without local difficulty classification.
-- [ ] Validate page ordering, uniqueness, returned page count, non-empty coverage, Unicode quality, duplicated content, and absence of automotive interpretation.
-- [ ] Escalate only after a measurable schema or output-quality failure with a recorded reason.
-- [ ] Cap retries and escalation so one source never calls every tier automatically.
-- [ ] Document that completeness cannot be independently proven without a local parser and preserve the original PDF and extraction history for audit.
+- [x] Centralize configurable primary, escalation, and exceptional model tiers; never scatter model identifiers through the code.
+- [x] Send every eligible PDF to the primary configured model without local difficulty classification.
+- [x] Validate page ordering, uniqueness, returned page count, non-empty coverage, and Unicode quality; report repeated long page text and partial/empty pages as warnings.
+- [ ] Manually verify fidelity and absence of invented automotive interpretation against representative PDFs; deterministic text checks cannot prove source fidelity.
+- [x] Escalate only after a measurable schema or output-quality failure with a recorded reason.
+- [x] Cap retries and escalation (two attempts by default, configurable from one to three); optional higher tiers require configuration and a failed earlier attempt.
+- [x] Document that completeness cannot be independently proven without a local parser and preserve the original PDF and extraction history for audit.
 
 #### 2.5 Persistence and status orchestration
 
-- [ ] Implement the text-extraction service independently from routes and React components.
-- [ ] Transition `Source` through `uploaded -> extracting_text -> text_extracted` or `failed` with recoverable errors.
-- [ ] Persist accepted content in `Source.rawText`, `Document.pagesJson`, and `Document.metadataJson`.
-- [ ] Store the file-transfer method, model route, extraction method, quality result, and reason codes as non-domain metadata.
-- [ ] Create an `ExtractionJob` for every model attempt and distinguish Phase 2 with a `text-extraction-v1`-style version.
-- [ ] Keep every retry as a new job and never overwrite an earlier raw or validated output.
-- [ ] Ensure OpenAI never writes directly to Supabase.
-- [ ] Make `processSource(sourceId)` idempotent or safe to retry without duplicate `Document` records.
+- [x] Implement the text-extraction service independently from routes and React components.
+- [x] Transition `Source` through `uploaded -> extracting_text -> text_extracted` or `failed` with recoverable errors.
+- [x] Persist accepted content in `Source.rawText`, `Document.pagesJson`, and `Document.metadataJson`.
+- [x] Store the file-transfer method, model route, extraction method, quality result, and reason codes as non-domain metadata.
+- [x] Create an `ExtractionJob` for every model attempt and distinguish Phase 2 with a `text-extraction-v1`-style version.
+- [x] Keep every retry as a new job and never overwrite an earlier raw or validated output.
+- [x] Ensure OpenAI never writes directly to Supabase.
+- [x] Make `processSource(sourceId)` idempotent or safe to retry without duplicate `Document` records.
+- [x] Recover interrupted attempts after ten minutes and prevent a superseded worker from modifying the new attempt.
+- [x] Provide a trusted operator command, `pnpm source:process <source-id>`, before the UI trigger is implemented.
 
 #### 2.6 Cost, privacy, and observability
 
-- [ ] Log `sourceId`, `extractionJobId`, processing step, duration, model, version, outcome, escalation reason, and returned token categories without logging document content.
-- [ ] Keep the OpenAI API key server-only and validate all new environment variables.
-- [ ] Use temporary private file transfer and delete or expire provider-side files when applicable.
-- [ ] Never leak service-role credentials or signed document URLs in logs, model output, or client payloads.
-- [ ] Decide later, from operational needs, whether persistent token-usage columns are necessary; do not block Phase 2 on a cost-dashboard schema.
+- [x] Log `sourceId`, `extractionJobId`, processing step, duration, model, version, outcome, escalation reason, and returned token categories without logging document content.
+- [x] Keep the OpenAI API key server-only and validate all new environment variables.
+- [x] Use temporary private file transfer and delete or expire provider-side files when applicable.
+- [x] Never leak service-role credentials or signed document URLs in logs, model output, or client payloads.
+- [x] Decide later, from operational needs, whether persistent token-usage columns are necessary; do not block Phase 2 on a cost-dashboard schema.
 
 #### 2.7 Minimal processing UI
 
-- [ ] Add a source action or controlled trigger for text extraction.
-- [ ] Display localized extraction states and retryable errors on the source list or a source detail page.
-- [ ] Keep routes and components thin and put every new user-facing string in both locale catalogs.
-- [ ] Do not expose raw document content or technical provider errors unnecessarily.
+- [x] Add a source action or controlled trigger for text extraction.
+- [x] Display localized extraction states and retryable errors on the source list or a source detail page.
+- [x] Keep routes and components thin and put every new user-facing string in both locale catalogs.
+- [x] Do not expose raw document content or technical provider errors unnecessarily.
+- [x] Add `/sources/[sourceId]` with a recap built from persisted data after successful extraction: title, author, source date, language, page/character counts, page quality, warnings, and expandable source-language text per page.
+- [x] Include processing date, model, and attempt history in the recap, with all interface text supplied by the English and Italian catalogs.
+- [x] Read the recap from saved content without an additional AI summarization call; add automotive entities only after Phases 3 and 4.
 
 #### 2.8 Phase 2 verification
 
@@ -163,10 +169,10 @@ Phase 2 ends with validated page-aware text. It must not create automotive cases
 - [ ] A native PDF produces ordered, faithful page text without any local PDF-reading dependency.
 - [ ] A scan-only PDF can return visible text without producing descriptions of photographs or diagrams.
 - [ ] A mixed PDF preserves page numbers and reports unreadable pages without inventing content.
-- [ ] Invalid model output is stored, marked safely, and creates no domain record.
-- [ ] Retrying a failed source preserves the previous attempt and avoids duplicate documents.
-- [ ] Photos and diagrams remain in the original private PDF and are not separately extracted or interpreted.
-- [ ] `pnpm lint`, `pnpm i18n:check`, `pnpm typecheck`, and `pnpm build` pass.
+- [x] Invalid model output is stored, marked safely, and creates no domain record (synthetic integration verification).
+- [x] Retrying a failed source preserves the previous attempt and avoids duplicate documents (synthetic integration verification).
+- [x] Photos and diagrams remain in the original private PDF and are not separately extracted or interpreted.
+- [x] `pnpm lint`, `pnpm i18n:check`, `pnpm typecheck`, and `pnpm build` pass.
 - [ ] English and Italian processing states, errors, and actions are manually verified.
 
 ### Phase 3 — Structured automotive AI
@@ -257,3 +263,5 @@ Phase 3 consumes only the validated page-aware text produced by Phase 2. It does
 | 2026-08-29 | Documentation | Simplified Phase 2 to send every original PDF directly to OpenAI, removed the planned local PDF parser and preflight, and retained bounded validation, audit history, and future visual extraction. | Cross-checked the plan against the Prisma schema, architecture rules, and official Responses API PDF file-input documentation; no code or schema changes made. |
 | 2026-08-29 | Documentation | Accepted the supplied automotive diagnostic-structure prompt as the Phase 3 baseline and adapted its contract to the existing relational schema. | Verified multiple-vehicle and outcome cardinality, evidence nullability, supported graph nodes, dedicated foreign-key links, non-blocking review semantics, PDF input, and Structured Outputs; no code or schema changes made. |
 | 2026-08-29 | Phase 2.1–2.3 | Added the strict page-aware text contract, versioned transcription-only prompt, server-only Responses API adapter, private Storage eligibility checks, and ten-minute signed-URL PDF transfer. | Catalog parity, lint, types, and build passed; a live three-page private PDF returned validated ordered text with the configured model without persisting extracted content. |
+| 2026-09-14 | Phase 2.4–2.5 | Added deterministic quality checks, bounded optional model escalation, raw-response history, source ownership/recovery, atomic text/document persistence, and a trusted processing CLI. Added the persisted-data recap to point 2.7. | Synthetic Supabase integration checks passed for failure/retry, history, concurrency, stale ownership, encoding, and rollback. One real PDF was extracted and persisted; repeating processing returned the same document without another OpenAI call. Static checks and production build passed. Representative scan/mixed-document fidelity checks remain open. |
+| 2026-09-14 | Phase 2.6–2.7 | Added centralized content-safe extraction logs, a thin idempotent processing endpoint, source detail reads, bilingual extract/retry controls, and a persisted-data recap with page text, warnings, model, timing, token use, and attempt history. | Verified the real saved extraction in English and Italian, expanded original-language page text, the uploaded-source action, mobile layout without horizontal overflow, clean browser errors, and an idempotent API response without a new model call. Catalog parity, lint, types, and production build passed; representative PDF checks remain in point 2.8. |

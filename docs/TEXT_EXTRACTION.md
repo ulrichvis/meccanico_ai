@@ -77,7 +77,7 @@ Use the Responses API with PDF file input and a strict JSON Schema equivalent to
 
 Model identifiers are centralized in configuration and recorded on every attempt.
 
-The current first route uses the server-only `OPENAI_EXTRACTION_MODEL` setting. The configured `gpt-5.6-luna` model was verified against the Responses API with PDF input and strict Structured Outputs on 2026-08-29. Escalation tiers will be introduced only when representative fixtures provide measurable reasons for them; model identifiers remain configuration rather than business rules.
+The first route uses the server-only `OPENAI_EXTRACTION_MODEL` setting. Optional `OPENAI_EXTRACTION_MODEL_ESCALATION` and `OPENAI_EXTRACTION_MODEL_EXCEPTIONAL` settings select higher tiers. They have no hard-coded defaults and remain inactive until configured. `OPENAI_EXTRACTION_MAX_ATTEMPTS` defaults to two and accepts one to three. If no next tier is configured, a permitted retry uses the same model. An exceptional tier can only follow a configured escalation tier, within the attempt cap.
 
 Because the application does not inspect PDF content locally, it does not classify a document as `easy`, `medium`, or `hard` before the first request. Routing policy:
 
@@ -90,6 +90,8 @@ Because the application does not inspect PDF content locally, it does not classi
 
 Objective escalation reasons may include invalid schema, missing pages, empty output for a non-empty file, broken page ordering, a model-reported inability to read important content, or a result that fails the configured text-quality gate.
 
+The implemented automatic retry policy covers invalid/incomplete structured responses and failed text-quality gates. A refusal, HTTP/API failure, network failure, Storage failure, or database failure stops the run; it can be retried explicitly after addressing the cause. Each attempt receives a fresh signed URL. The current prompt version is `text-extraction-v1.1`, which also treats instructions inside the PDF as content rather than executable instructions.
+
 ## 2.4 Quality gates
 
 A successful result must satisfy all of the following:
@@ -100,7 +102,11 @@ A successful result must satisfy all of the following:
 - no summaries or automotive entities introduced;
 - acceptable non-empty text coverage unless the model explicitly reports unreadable pages;
 - valid Unicode without systematic corruption;
-- no duplicate page content caused by a malformed response.
+- repeated long page content is flagged for inspection; legitimate repeated pages are retained.
+
+The `text-quality-v1` gate rejects completely empty documents, NUL/unpaired-surrogate strings, and systematic replacement-character corruption (at least three replacement characters representing at least 1% of a page). Partial pages, empty individual pages, isolated replacement characters, and normalized identical page text of at least 200 characters produce warnings. They do not require human approval to persist usable text. Original wording is never rewritten by these checks.
+
+The schema prevents automotive fields from being added to the contract, but software cannot distinguish a faithful transcription of diagnostic prose from invented diagnostic prose without source comparison. Fidelity, visual non-interpretation, and the real page count remain representative-document verification requirements, not claims made by the deterministic quality gate.
 
 Without a local PDF parser, the application cannot independently prove that every source character or page was recovered. The original PDF, raw model output, model identity, prompt version, and retry history therefore remain essential audit evidence. Human review remains optional and is not a persistence prerequisite for structurally valid text.
 
@@ -121,6 +127,14 @@ Use a version prefix such as `text-extraction-v1` to distinguish Phase 2 attempt
 The schema has no dedicated token-usage columns. During Phase 2, log model, input/output/cached/reasoning/total tokens when returned, duration, outcome, and escalation reason with `sourceId` and `extractionJobId`. Decide later whether persistent usage columns are justified.
 
 OpenAI never writes directly to Supabase. The application validates the response, then writes through its own repositories and status transitions.
+
+Implemented orchestration uses short transactions and locks the source row before its jobs. Network calls run outside transactions. An active source returns `busy`, an existing document returns `already_processed`, and a failed source can start a new job. A ten-minute stale-attempt window allows a later explicit invocation to recover a crashed worker; the five-minute OpenAI timeout is shorter than that window. Ownership checks prevent stale workers from changing replacement jobs. Existing accepted documents and historical artifacts are not overwritten.
+
+The final transaction inserts the document, stores `Source.rawText`, updates the source to `text_extracted`, and completes the job together. No domain rows are created. `Document.metadataJson.reviewStatus` is `unreviewed`, with no human-review gate. Ambiguous or partial source dates remain verbatim in metadata; only a valid complete `YYYY-MM-DD` date populates `Source.sourceDate`.
+
+Raw responses are saved before status/JSON-schema validation in `rawAiOutput` as `{ format: "response-json-string-v1", responseJson, route, triggerReason }`. `responseJson` is a JSON-encoded string so malformed model text, NUL, and unpaired surrogates remain recoverable in PostgreSQL JSONB; the signed transfer URL is redacted if echoed. `validatedOutput` contains `{ content, quality, usage, responseId }` after schema validation. For unsafe text encoding, the content remains recoverable from the raw artifact and the validated envelope contains quality/usage/response ID only. A transport failure with no response is recorded as a failed job with a null response artifact.
+
+If the database itself is unavailable, the application stops rather than launching another model attempt without audit storage. A running job left by a crash or database outage can be recovered on a later invocation after the stale-attempt window; no process can guarantee writing an in-flight response during a complete database outage.
 
 ## 2.6 Images, diagrams, and photographs
 

@@ -75,6 +75,7 @@ export function SourcesDashboard({ sources }: { sources: RecentSource[] }) {
               <span role="columnheader">{t("sources.table.type")}</span>
               <span role="columnheader">{t("sources.table.status")}</span>
               <span role="columnheader">{t("sources.table.uploadedAt")}</span>
+              <span role="columnheader">{t("sources.table.action")}</span>
             </div>
             {sources.map((source) => (
               <article className="source-row" role="row" key={source.id}>
@@ -100,6 +101,13 @@ export function SourcesDashboard({ sources }: { sources: RecentSource[] }) {
                 >
                   {dateFormatter.format(new Date(source.createdAt))}
                 </time>
+                <Link
+                  className="source-detail-link"
+                  href={`/sources/${source.id}`}
+                  role="cell"
+                >
+                  {t("sources.table.view")}
+                </Link>
               </article>
             ))}
           </div>

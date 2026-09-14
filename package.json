@@ -22,7 +22,9 @@
     "storage:check": "tsx scripts/check-storage.ts",
     "storage:verify": "tsx scripts/verify-storage.ts",
     "upload:verify": "tsx scripts/verify-upload.ts",
-    "openai:verify-pdf": "tsx scripts/verify-openai-pdf-transfer.ts"
+    "openai:verify-pdf": "tsx scripts/verify-openai-pdf-transfer.ts",
+    "source:process": "tsx scripts/process-source.ts",
+    "extraction:verify": "tsx scripts/verify-extraction-persistence.ts"
   },
   "engines": {
     "node": "24.19.x",

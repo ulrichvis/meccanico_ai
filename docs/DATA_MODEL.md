@@ -69,6 +69,8 @@ erDiagram
 
 `pages_json` provides a simple starting point. A `document_pages` table may replace it if search requirements or volume justify the change.
 
+The implemented Phase 2 pages also contain `textQuality` and nullable `uncertainty`. Metadata records `reviewStatus: unreviewed`, the extraction job, model route, quality report, author, source date as written, and token usage. Partial dates stay in metadata; only a complete valid ISO date populates `sources.source_date`. No database migration was required for these JSON fields.
+
 `documents.language` describes the source content language. It is independent from the frontend locale. English or Italian UI selection must never alter extracted evidence or source-language metadata.
 
 During Phase 2, `pages_json` and `raw_text` contain faithful source text only. They must not contain a summary, normalized automotive entities, inferred repairs, or translated wording. `metadata_json` may record the file-transfer method, model route, prompt version, and validation results. This avoids adding domain meaning to ingestion storage.
@@ -273,6 +275,8 @@ The initial SQL migration adds database features that are not fully represented 
 Check constraints are kept in the migration SQL because Prisma ORM does not currently express PostgreSQL `CHECK` constraints in the Prisma Schema Language. Any future migration must preserve these constraints explicitly.
 
 ## Admin edits and traceability
+
+Phase 2 `raw_ai_output` uses a `response-json-string-v1` envelope containing the JSON-encoded response string, model route, and retry trigger. This preserves malformed text safely in JSONB and redacts an echoed signed access URL. `validated_output` stores the content, quality report, usage, and response ID; unsafe encodings are retained in the raw envelope instead of inserted as PostgreSQL text. Completed and failed jobs are immutable through the processing service. The document recap planned for point 2.7 will read these persisted fields without generating another AI summary.
 
 The raw and validated AI outputs are immutable audit artifacts. Editing a normalized case changes domain records, not those extraction artifacts. At minimum, the case stores `updated_at`, `review_status`, `reviewed_at`, and optional `review_notes`. When authentication is introduced, edits should also record the responsible actor and a revision history.
 

@@ -75,10 +75,12 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Separate text and knowledge extraction decision](docs/decisions/0009-separate-text-recovery-from-knowledge-extraction.md)
 - [Database-aligned automotive prompt decision](docs/decisions/0010-database-aligned-automotive-prompt.md)
 - [Short-lived signed URL for OpenAI PDF transfer](docs/decisions/0011-short-lived-signed-url-openai-transfer.md)
+- [Text extraction persistence and retries](docs/decisions/0012-text-extraction-persistence-and-retries.md)
+- [Safe extraction operations and persisted recap](docs/decisions/0013-safe-extraction-operations-and-recap.md)
 
 ## Current status
 
-Phase 1 is complete. Phase 2 is active: its strict page-aware contract, transcription-only prompt, server-only OpenAI adapter, and direct private-PDF transfer are implemented and live-verified. Persistence, retry history, quality routing, and the processing UI remain in the Phase 2 backlog. The automotive diagnostic prompt remains the separate Phase 3 baseline.
+Phase 1 is complete. Phase 2 now includes direct private-PDF transfer, text-quality checks, bounded model routing, persisted page-aware text, safe structured observability, and attempt history. Operators can start or retry extraction from `/sources/[sourceId]` and inspect a bilingual recap built exclusively from saved data. The remaining Phase 2 work is representative native, scan-only, and mixed-PDF verification. The automotive diagnostic prompt remains the separate Phase 3 baseline.
 
 ## Run locally
 
