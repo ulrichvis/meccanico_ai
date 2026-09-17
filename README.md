@@ -61,6 +61,7 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Automotive extraction prompt specification](docs/AUTOMOTIVE_EXTRACTION_PROMPT.md)
 - [Phase 2 text extraction plan](docs/TEXT_EXTRACTION.md)
 - [Phase 2 verification report](docs/PHASE_2_VERIFICATION.md)
+- [Phase 3 verification report](docs/PHASE_3_VERIFICATION.md)
 - [Development guide](docs/DEVELOPMENT.md)
 - [Frontend internationalization](docs/I18N.md)
 - [Roadmap](docs/ROADMAP.md)
@@ -78,10 +79,12 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Short-lived signed URL for OpenAI PDF transfer](docs/decisions/0011-short-lived-signed-url-openai-transfer.md)
 - [Text extraction persistence and retries](docs/decisions/0012-text-extraction-persistence-and-retries.md)
 - [Safe extraction operations and persisted recap](docs/decisions/0013-safe-extraction-operations-and-recap.md)
+- [Replaceable automotive AI adapter](docs/decisions/0014-replaceable-automotive-ai-adapter.md)
+- [Bounded automotive analysis and audit history](docs/decisions/0015-bounded-automotive-analysis-and-audit.md)
 
 ## Current status
 
-Phases 1 and 2 are complete. The application accepts private PDFs, sends native, scanned, and mixed documents directly to OpenAI, validates and persists page-aware source text, retains safe attempt history, and provides a bilingual extraction recap. Phase 2 was verified with controlled native, scan-only, mixed, visual-only, and unreadable-page inputs. Phase 3, structured automotive knowledge extraction, requires explicit product approval before implementation.
+Phases 1, 2, and 3 are complete. Structured automotive analysis has been verified with live representative inputs, while normalization and domain-table persistence remain intentionally disabled. Phase 4 is the next phase and requires explicit approval before implementation.
 
 ## Run locally
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for Phase 3 planning; implementation has not started.
+Accepted and verified. The strict contract, versioned prompt, provider adapter, quality gates, persistence orchestration, and representative live evaluation are complete through Phase 3.5.
 
 ## Context
 
@@ -31,3 +31,6 @@ Adopt the supplied prompt as the semantic baseline for `automotive-structure-v1`
 - The existing schema is sufficient for the initial implementation.
 - Some procedure subtype detail remains in original wording until real extraction results justify a dedicated database field.
 - Prompt regression scenarios must cover multiple cases, vehicles, DTCs, outcomes, evidence, uncertainty, measurements, and contradictory variants.
+- `src/schemas/automotive-extraction.schema.ts` is the canonical exchange contract. Its generated JSON Schema and inferred TypeScript type must remain mechanically aligned.
+- `src/prompts/automotive-extraction.prompt.ts` keeps stable developer instructions separate from deterministic, validated dynamic source input. The JSON Schema is supplied separately through Structured Outputs.
+- Temporary references are unique within a case. Generic graph references are type-checked, and dedicated measurement, procedure, and outcome references are validated separately.

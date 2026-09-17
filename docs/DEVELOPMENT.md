@@ -52,6 +52,13 @@ The current environment schema provides safe defaults for commands that do not a
 | `pnpm source:process --list` | List recent PDF source identifiers and statuses for operator selection. |
 | `pnpm source:process <source-id>` | Extract one private PDF and persist validated text, pages, metadata, and attempt history. |
 | `pnpm extraction:verify` | Verify persistence, retries, concurrency, stale recovery, and rollback in Supabase using synthetic responses and temporary records; no OpenAI charge. |
+| `pnpm automotive-schema:verify` | Verify the strict automotive extraction contract and cross-reference invariants locally. |
+| `pnpm automotive-prompt:verify` | Verify prompt semantics and page-input isolation locally. |
+| `pnpm automotive-adapter:verify` | Verify the OpenAI automotive Structured Outputs adapter with synthetic responses; no OpenAI charge. |
+| `pnpm automotive-persistence:verify` | Verify Phase 3 quality gates, bounded escalation, audit history, idempotency, and zero domain writes in Supabase using temporary records; no OpenAI charge. |
+| `pnpm automotive-live:verify` | Run three representative structured-analysis checks against the configured OpenAI model; this makes billable API calls. |
+| `pnpm automotive:process --list` | List sources whose saved Phase 2 text is eligible for structured automotive analysis. |
+| `pnpm automotive:process <source-id>` | Send one source's saved page-aware text to OpenAI and preserve the Phase 3 attempt; this is billable and does not normalize domain rows. |
 
 `pnpm build` and `pnpm install` regenerate Prisma Client automatically. Schema validation and client generation work while database variables are empty; migration and query commands require credentials.
 
@@ -158,6 +165,29 @@ The recap reads saved database content and never causes an additional model call
 For failure behavior, run `pnpm extraction:verify`. It creates UUID-scoped synthetic records, uses the real OpenAI response adapter with simulated responses, and checks malformed schema, empty text, NUL preservation, refusals, bounded escalation, later retry, simultaneous invocation, stale-worker ownership, and transactional rollback. It deletes only the synthetic records it created in a final cleanup transaction and never uploads or removes Storage objects.
 
 A source interrupted by a process exit can be retried after ten minutes. Do not manually change its status while a worker is active. A database failure may leave a running job for recovery; raw responses already saved remain attached to that job.
+
+## Automotive structured-analysis adapter verification
+
+Phase 3 uses `OPENAI_AUTOMOTIVE_MODEL` and `OPENAI_AUTOMOTIVE_REASONING_EFFORT` independently from the Phase 2 transcription model. The model remains optional until real automotive analysis is invoked; reasoning effort defaults to `medium` when omitted.
+
+Run the non-billable adapter verification with:
+
+```bash
+pnpm automotive-schema:verify
+pnpm automotive-prompt:verify
+pnpm automotive-adapter:verify
+pnpm automotive-persistence:verify
+```
+
+The adapter verification injects synthetic provider responses. It confirms the Responses API request shape, strict generated JSON Schema, prompt/input separation, raw-response callback, Zod revalidation, usage mapping, refusals, incomplete responses, provider errors, and schema failures. It does not read `.env.local`, contact OpenAI, write to Supabase, or log document content.
+
+The persistence verification uses the configured Supabase database but never contacts OpenAI. It creates temporary Phase 2-like text records, checks a measurable semantic failure followed by one configured escalation, verifies one immutable `ExtractionJob` per attempt, confirms idempotent completion and non-retryable provider failure, and proves that no normalized automotive row is created. It deletes only its own UUID-scoped records in a final cleanup transaction.
+
+Real automotive processing requires `OPENAI_AUTOMOTIVE_MODEL`. Optional escalation and exceptional models must be distinct and are considered only after schema, incomplete-response, malformed-response, or deterministic semantic failure. `OPENAI_AUTOMOTIVE_MAX_ATTEMPTS` is bounded from one to three and defaults to two. A successful Phase 3 job intentionally leaves its source in `processing`; Phase 4 will own the transaction that creates domain rows and advances the source to `persisted`.
+
+The application therefore makes two separate OpenAI calls in the complete ingestion path. Phase 2 sends the original PDF for faithful page-aware transcription. Phase 3 later sends only that saved text through `automotive:process` for semantic classification. The source-list UI does not trigger the second call yet; automatic orchestration belongs to Phase 4, after normalization can persist the accepted structure atomically.
+
+`pnpm automotive-live:verify` uses only three synthetic text inputs. It covers generic applicability, multiple DTCs without a forced primary code, diagnostic checks versus repairs, qualitative frequency, multiple independent cases, measurements, contradictory procedures, repair outcomes, incomplete text, and the visual-only boundary. It prints aggregate counts and token usage but does not print complete provider responses or create database rows. See `docs/PHASE_3_VERIFICATION.md`.
 
 ## Migration conventions
 

@@ -266,9 +266,18 @@ OPENAI_EXTRACTION_MODEL=gpt-5.6-luna
 OPENAI_EXTRACTION_MODEL_ESCALATION=
 OPENAI_EXTRACTION_MODEL_EXCEPTIONAL=
 OPENAI_EXTRACTION_MAX_ATTEMPTS=2
+OPENAI_AUTOMOTIVE_MODEL=
+OPENAI_AUTOMOTIVE_MODEL_ESCALATION=
+OPENAI_AUTOMOTIVE_MODEL_EXCEPTIONAL=
+OPENAI_AUTOMOTIVE_MAX_ATTEMPTS=2
+OPENAI_AUTOMOTIVE_REASONING_EFFORT=medium
 ```
 
-OpenAI credentials and the primary model are mandatory only when Phase 2 extraction runs. Optional higher tiers are selected only after schema/output-quality failure, within a one-to-three attempt cap (two by default). Model identifiers must not be scattered through application code. Phase 3 will use separately named automotive-extraction configuration.
+OpenAI credentials and the Phase 2 primary model are mandatory only when PDF text extraction runs. Optional Phase 2 higher tiers are selected only after schema/output-quality failure, within a one-to-three attempt cap (two by default). Phase 3 has the same bounded, separately configured routing shape: only a distinct higher model may follow a measurable schema or semantic failure. Provider request failures and refusals are not automatically retried. Its provider-neutral contract lives in `src/ai/automotive-knowledge-extractor.ts`, while the OpenAI Responses implementation lives in `src/ai/openai-automotive-knowledge-extractor.ts`. Model identifiers must not be scattered through application code.
+
+Phase 3 orchestration reuses `ExtractionJob` rather than adding a stage-specific audit table. A short transaction locks the source and creates one running job; the OpenAI call runs outside the transaction; later short transactions preserve raw and validated artifacts and finish the attempt. Every escalation creates a new job. Accepted structured output leaves the source in `processing` until Phase 4 atomically normalizes it; no `Case` or related domain row is written in Phase 3. `requiresHumanReview` remains advisory: the quality gate checks that the flag truthfully reflects partial or unreadable input, but no human action is required before persistence.
+
+The Phase 3 provider call happens after Phase 2 has persisted page-aware text. For controlled operation before Phase 4, `pnpm automotive:process <source-id>` invokes that second call explicitly. The normal application UI does not invoke it yet because an accepted result cannot advance to `persisted` until the Phase 4 normalizer can write the complete relational graph in one transaction.
 
 The implemented Phase 2 entry point is `src/services/process-source.server.ts`; its framework-independent pipeline and repository live in `src/extraction/`. The trusted operator CLI and the source-detail API route use the same processor. Short source-row locks serialize acquisition and writes while OpenAI runs outside database transactions. A successful final transaction stores the text/document and completes the job atomically. See [ADR 0012](decisions/0012-text-extraction-persistence-and-retries.md) for retry, ownership, and audit semantics.
 

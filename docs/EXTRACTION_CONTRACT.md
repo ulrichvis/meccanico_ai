@@ -4,6 +4,8 @@ This document describes the target domain contract for Phase 3 structured automo
 
 The accepted prompt behavior and database-specific adaptations are defined in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md` under prompt version `automotive-structure-v1`.
 
+The strict contract is implemented in `src/schemas/automotive-extraction.schema.ts`. It exports inferred TypeScript types and a draft-7 JSON Schema used by the OpenAI Structured Outputs adapter. The versioned instructions and validated page-input builder live in `src/prompts/automotive-extraction.prompt.ts`, and the provider-neutral extraction interface lives in `src/ai/automotive-knowledge-extractor.ts`. Deterministic post-response checks verify evidence page/excerpt traceability, uncertainty page validity, and honest review signaling for partial input. Run the `automotive-*:verify` commands documented in `docs/DEVELOPMENT.md` to exercise these boundaries without a billable OpenAI call.
+
 ## Input boundary
 
 Phase 3 receives validated, page-aware text already stored by Phase 2. The knowledge model is not responsible for OCR, PDF parsing, image extraction, or rewriting the source. Its input includes the original filename as metadata and ordered `{ pageNumber, text }` content so evidence remains traceable.
@@ -69,6 +71,8 @@ type ExtractedCase = {
 Internal identifiers in the response are temporary references used to connect elements before database insertion.
 
 The response must not contain database UUIDs, normalized database keys, timestamps, source status, case lifecycle status, or review status. Those values belong to the application and normalizer, not the model.
+
+Every extracted case and extractable entity uses a temporary `ref`. References are unique across one case. Generic relationship endpoints are checked against their declared node type, while measurements, repair procedures, and repair outcomes use their dedicated `diagnosticCheckRef` or `solutionRef` fields. An evidence `targetRef` may address any registered item in the same case, and a relationship may reference evidence from that case.
 
 ## Common types
 
@@ -219,9 +223,9 @@ The prompt implemented in code must have a version identifier and communicate at
 
 > You are an automotive technical knowledge extraction engine. Analyze the source and reconstruct its diagnostic structure. Extract only information supported by the source. Never complete missing vehicle data from general automotive knowledge. Distinguish explicit facts from AI inference. Do not treat all DTC codes as equivalent. Keep symptoms, causes, components, diagnostic checks, measurements, repairs and outcomes separate. A proposed repair is not a confirmed repair. If no probability is explicitly provided, set `probabilitySource` to null. Preserve uncertainty and trace important information to the source.
 
-This text is a compact functional baseline. The complete behavioral specification in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md`, the structured schema, examples, and page segmentation instructions must be assembled into the final versioned prompt.
+This text is a compact functional baseline. The implemented `automotive-structure-v1` instructions assemble the complete behavioral specification in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md`. The strict JSON Schema remains separate and will be supplied by the OpenAI adapter through Structured Outputs.
 
-The prompt and JSON Schema must be reviewed against `docs/DATA_MODEL.md` before implementation. It must expose enough temporary references to map evidence and relationships, while avoiding fields that the application can determine safely, such as normalized labels, database identifiers, timestamps, and `reviewStatus = "unreviewed"`.
+The prompt and JSON Schema have been reviewed against `docs/DATA_MODEL.md`. They expose temporary references for evidence and relationships while avoiding fields that the application can determine safely, such as normalized labels, database identifiers, timestamps, and `reviewStatus = "unreviewed"`.
 
 Model routing for structured analysis is independent from Phase 2 text extraction. Model names, reasoning effort, retry limits, and escalation rules are centralized. Start with the primary configured model, then escalate only after a measurable schema or semantic quality failure. Never call every model tier automatically.
 

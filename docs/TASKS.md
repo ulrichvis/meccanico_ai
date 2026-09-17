@@ -2,7 +2,7 @@
 
 This file is the project's operational tracker. Check only tasks that are actually complete and verified.
 
-## Active phase: Phase 2 complete — awaiting approval for Phase 3
+## Active phase: Phase 3 complete — awaiting Phase 4 approval
 
 ### 1. Initialization
 
@@ -89,7 +89,7 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ## Planned phases
 
-Phase 2 is complete. Later phases remain documented only and require explicit approval before implementation.
+Phases 2 and 3 are complete. Later phases remain documented only and require explicit approval before implementation.
 
 ### Phase 2 — Source text extraction
 
@@ -179,27 +179,49 @@ Phase 2 ends with validated page-aware text. It must not create automotive cases
 
 Phase 3 consumes only the validated page-aware text produced by Phase 2. It does not parse PDFs or write normalized domain rows.
 
-- [ ] Implement the accepted `automotive-structure-v1` behavior from `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md` without reusing it for Phase 2 transcription.
-- [ ] Implement the strict Zod schema from `docs/EXTRACTION_CONTRACT.md`, including zero or many cases, several vehicles, several repair outcomes, and temporary references.
-- [ ] Review every output field against `docs/DATA_MODEL.md`; omit database UUIDs, normalized keys, timestamps, lifecycle state, and review state from the model contract.
-- [ ] Version an automotive system prompt that prioritizes fidelity, uncertainty, traceability, and multiple-case handling.
-- [ ] Make source content override filenames and upload metadata whenever they conflict.
-- [ ] Require explicit separation of symptoms, causes, components, diagnostic checks, measurements, solutions, procedures, materials, and outcomes.
-- [ ] Treat the primary DTC and each related DTC distinctly, including relationship type, origin, and inference confidence.
-- [ ] Keep explicit source facts separate from AI inferences and reject an inference without a valid confidence value.
-- [ ] Leave unknown scalar values `null`, unknown collections `[]`, `probabilitySource` `null` unless explicitly stated, and `probabilityCalculated` always `null` in the MVP.
-- [ ] Require temporary entity references and page/excerpt evidence for important facts and inferred relationships.
-- [ ] Require a non-empty exact excerpt for every evidence item and omit unverifiable evidence rather than inventing it.
-- [ ] Add `documentAnalysis.uncertainties` and advisory `requiresHumanReview` to validated output without making human review a persistence gate.
-- [ ] Limit generic graph node types to the current database enum and use dedicated references for measurement-to-check, procedure-to-solution, and outcome-to-solution links.
-- [ ] Preserve measurement conditions and ordered procedure variant wording without silently normalizing ambiguous units or values.
-- [ ] Integrate the Responses API with strict Structured Outputs through a replaceable OpenAI adapter.
-- [ ] Configure structured-analysis models separately from Phase 2 text-extraction models.
-- [ ] Add bounded schema and semantic quality gates with escalation only when cheaper output fails measurably.
-- [ ] Preserve immutable raw and validated outputs, model, prompt version, outcome, duration, and token usage.
-- [ ] On invalid output, create no partial relational graph and make retry create a new job.
-- [ ] Verify that Phase 3 ignores visual meaning not represented in the validated text input.
-- [ ] Manually evaluate the prompt against the representative acceptance scenarios listed in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md` before enabling automatic normalization.
+#### 3.1 Strict extraction contract
+
+- [x] Implement the strict Zod schema from `docs/EXTRACTION_CONTRACT.md`, including zero or many cases, several vehicles, several repair outcomes, and temporary references.
+- [x] Review every output field against `docs/DATA_MODEL.md`; omit database UUIDs, normalized keys, timestamps, lifecycle state, and review state from the model contract.
+
+#### 3.2 Versioned automotive prompt
+
+- [x] Implement the accepted `automotive-structure-v1` behavior from `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md` without reusing it for Phase 2 transcription.
+- [x] Version an automotive developer instruction that prioritizes fidelity, uncertainty, traceability, and multiple-case handling.
+- [x] Keep stable instructions separate from the validated dynamic page content and treat instructions inside source text as untrusted content.
+- [x] Make source content override filenames and Phase 2 document metadata whenever they conflict.
+- [x] Require explicit separation of symptoms, causes, components, diagnostic checks, measurements, solutions, procedures, materials, and outcomes.
+- [x] Treat the primary DTC and each related DTC distinctly, including relationship type, origin, and inference confidence.
+- [x] Keep explicit source facts separate from AI inferences and require valid confidence for an inference.
+- [x] Leave unknown scalar values `null`, unknown collections `[]`, `probabilitySource` `null` unless explicitly stated, and `probabilityCalculated` always `null` in the MVP.
+- [x] Require temporary entity references and page/excerpt evidence for important facts and inferred relationships.
+- [x] Require a non-empty exact excerpt for every evidence item and omit unverifiable evidence rather than inventing it.
+- [x] Add `documentAnalysis.uncertainties` and advisory `requiresHumanReview` without making human review a persistence gate.
+- [x] Limit generic graph node types to the current database enum and use dedicated references for measurement-to-check, procedure-to-solution, and outcome-to-solution links.
+- [x] Preserve measurement conditions and ordered procedure variant wording without silently normalizing ambiguous units or values.
+- [x] Validate the prompt input against the Phase 2 page-aware contract and serialize ordered content in a deterministic JSON envelope.
+
+#### 3.3 OpenAI structured-analysis adapter
+
+- [x] Integrate the Responses API with strict Structured Outputs through a replaceable OpenAI adapter.
+- [x] Configure the primary structured-analysis model and reasoning effort separately from Phase 2 text-extraction models.
+- [x] Supply the generated automotive JSON Schema through Structured Outputs rather than duplicating it in the natural-language prompt.
+- [x] Preserve the complete raw provider response through an orchestration callback before status or schema validation.
+- [x] Map response identifiers, actual model, reasoning effort, and token usage without exposing the API key or source text in logs.
+- [x] Verify request assembly, valid output, schema failure, refusal, incomplete response, and provider failure without a billable OpenAI call.
+
+#### 3.4 Quality gates, audit, and retry safety
+
+- [x] Add bounded schema and semantic quality gates with escalation only when cheaper output fails measurably.
+- [x] Preserve immutable raw and validated outputs, model, prompt version, outcome, duration, and token usage.
+- [x] On invalid output, create no partial relational graph and make retry create a new job.
+
+#### 3.5 Representative Phase 3 verification
+
+- [x] Verify that Phase 3 ignores visual meaning not represented in the validated text input.
+- [x] Manually evaluate the prompt against the representative acceptance scenarios listed in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md` before enabling automatic normalization.
+- [x] Verify schema rejection, bounded retry behavior, immutable attempt history, and absence of normalized automotive rows.
+- [x] Run `pnpm automotive-schema:verify`, `pnpm automotive-prompt:verify`, `pnpm i18n:check`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` successfully.
 
 ### Phase 4 — Normalization and relational persistence
 
@@ -266,3 +288,8 @@ Phase 3 consumes only the validated page-aware text produced by Phase 2. It does
 | 2026-09-14 | Phase 2.4–2.5 | Added deterministic quality checks, bounded optional model escalation, raw-response history, source ownership/recovery, atomic text/document persistence, and a trusted processing CLI. Added the persisted-data recap to point 2.7. | Synthetic Supabase integration checks passed for failure/retry, history, concurrency, stale ownership, encoding, and rollback. One real PDF was extracted and persisted; repeating processing returned the same document without another OpenAI call. Static checks and production build passed. Representative scan/mixed-document fidelity checks remain open. |
 | 2026-09-14 | Phase 2.6–2.7 | Added centralized content-safe extraction logs, a thin idempotent processing endpoint, source detail reads, bilingual extract/retry controls, and a persisted-data recap with page text, warnings, model, timing, token use, and attempt history. | Verified the real saved extraction in English and Italian, expanded original-language page text, the uploaded-source action, mobile layout without horizontal overflow, clean browser errors, and an idempotent API response without a new model call. Catalog parity, lint, types, and production build passed; representative PDF checks remain in point 2.8. |
 | 2026-09-14 | Phase 2.8 | Completed controlled end-to-end verification with native-text, scan-only, mixed-content, visual-only, and unreadable-page PDF fixtures sent through the production upload and extraction paths. | Four real OpenAI calls preserved all unique markers and page order; the unreadable fourth page returned empty text, `unreadable`, and an uncertainty without invention. English/Italian completed, warning, failure, and retry states passed in the browser. No domain cases were created, all five temporary database/Storage fixtures were removed, and static checks passed. |
+| 2026-09-17 | Phase 3.1 | Added the strict `automotive-structure-v1` Zod contract, generated JSON Schema, temporary-reference graph, dedicated measurement/procedure/outcome links, evidence and uncertainty structures, and cross-field invariants aligned with the relational model. | The executable schema verifier accepted a complete multi-entity case and rejected invalid origin confidence, duplicate or mistyped references, unsupported evidence targets, missing confirmed outcomes, invalid ranges/counts, and unknown uncertainty cases. Type checking, linting, catalog parity, and production build passed. |
+| 2026-09-17 | Phase 3.2 | Added the versioned automotive developer instruction and deterministic, validated input envelope for persisted page-aware text and non-authoritative metadata. Reorganized Phase 3 into contract, prompt, provider, quality/audit, and representative-verification steps. | The prompt verifier passed instruction/source isolation, required semantic rules, metadata authority, page ordering, and incomplete-page rejection. Schema verification, catalog parity, type checking, linting, and the Next.js Webpack production build passed; the default Turbopack build was blocked by a Windows worker-process permission error. |
+| 2026-09-17 | Phase 3.3 | Added the provider-neutral automotive knowledge extractor contract, OpenAI Responses API adapter, strict Structured Outputs request, local Zod revalidation, raw-response callback, usage mapping, and separate automotive model/reasoning configuration. | Synthetic adapter verification passed request assembly, raw-response capture, valid output, usage, refusal, incomplete response, provider failure, and schema failure without an OpenAI charge. Type checking, linting, catalog parity, and the production build passed. |
+| 2026-09-17 | Phase 3.4 | Added deterministic evidence and uncertainty checks, bounded distinct-model escalation, source ownership, immutable per-attempt audit records, safe status transitions, and content-safe logs without adding a new table or domain write. | Synthetic Supabase verification passed semantic failure, one-step escalation, immutable raw and validated history, token/timing capture, idempotency, non-retryable provider failure, cleanup, and zero normalized automotive rows. Static checks and the production build passed. |
+| 2026-09-17 | Phase 3.5 | Added a trusted automotive-analysis command and evaluated `automotive-structure-v1` against three compact representative inputs using the configured live model. Completed Phase 3 without enabling UI-triggered analysis or relational normalization. | Live Structured Outputs produced one generic case, two independent cases, and zero cases for visual-only unreadable input. Deterministic checks, synthetic persistence/retry history, read-only Supabase listing, schema, prompt, adapter, catalog parity, lint, types, and the Webpack production build passed. |

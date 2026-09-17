@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -24,7 +24,13 @@
     "upload:verify": "tsx scripts/verify-upload.ts",
     "openai:verify-pdf": "tsx scripts/verify-openai-pdf-transfer.ts",
     "source:process": "tsx scripts/process-source.ts",
-    "extraction:verify": "tsx scripts/verify-extraction-persistence.ts"
+    "extraction:verify": "tsx scripts/verify-extraction-persistence.ts",
+    "automotive-schema:verify": "tsx scripts/verify-automotive-extraction-schema.ts",
+    "automotive-prompt:verify": "tsx scripts/verify-automotive-extraction-prompt.ts",
+    "automotive-adapter:verify": "tsx scripts/verify-openai-automotive-adapter.ts",
+    "automotive-persistence:verify": "tsx scripts/verify-automotive-extraction-persistence.ts",
+    "automotive-live:verify": "tsx scripts/verify-live-automotive-extraction.ts",
+    "automotive:process": "tsx scripts/process-automotive-source.ts"
   },
   "engines": {
     "node": "24.19.x",

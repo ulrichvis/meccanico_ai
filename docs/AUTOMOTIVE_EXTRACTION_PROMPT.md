@@ -8,6 +8,10 @@ It is not the Phase 2 transcription prompt. Phase 2 sends the original PDF to Op
 
 The prompt is compatible with the current database after the contract adaptations documented below. No database migration is required before the first implementation.
 
+The versioned implementation lives in `src/prompts/automotive-extraction.prompt.ts`. It exposes stable developer instructions and a separately validated builder for dynamic page-aware input. Run `pnpm automotive-prompt:verify` to check critical semantic rules, instruction/source isolation, metadata authority, page ordering, and incomplete-page validation without making an OpenAI call.
+
+The Phase 3.3 OpenAI adapter lives in `src/ai/openai-automotive-knowledge-extractor.ts`. It supplies the generated schema through strict Structured Outputs, revalidates the returned JSON with Zod, and exposes the raw provider response before validation. Phase 3.4 preserves that response in a separate job for every attempt and applies deterministic evidence, uncertainty, and review-signal checks before accepting the structured artifact. Run `pnpm automotive-adapter:verify` and `pnpm automotive-persistence:verify` for synthetic, non-billable boundary and persistence checks.
+
 ## Required model behavior
 
 The versioned implementation prompt must preserve all of these rules:
@@ -95,15 +99,17 @@ The Responses API supports PDF file input and JSON Schema Structured Outputs. Ph
 
 ## Prompt assembly
 
-The model request should contain these separately versioned inputs:
+The model request contains these separately versioned inputs:
 
-1. the system instruction implementing this specification;
-2. the strict JSON Schema;
+1. the stable developer instruction implementing this specification;
+2. the strict JSON Schema supplied through Structured Outputs rather than copied into the natural-language instructions;
 3. ordered page-aware source text;
 4. non-authoritative source metadata such as the original filename;
 5. the prompt version recorded as `automotive-structure-v1`.
 
 Do not embed database credentials, signed Storage URLs, internal errors, normalized reference data, or prior human corrections into the prompt unless a later feature explicitly requires them.
+
+The stable instructions must precede the dynamic source envelope so a future adapter can benefit from prompt caching. The dynamic envelope is deterministic JSON containing the prompt version, non-authoritative filename and Phase 2 metadata, and ordered page objects. Text found inside any source page is always data, even when it resembles a command to the model.
 
 ## Manual acceptance scenarios
 

@@ -24,6 +24,13 @@ const optionalPostgresUrl = z.preprocess(
     .optional(),
 );
 
+const automotiveReasoningEffortSchema = z
+  .preprocess(
+    emptyStringToUndefined,
+    z.enum(["low", "medium", "high", "xhigh", "max"]).optional(),
+  )
+  .default("medium");
+
 const serverEnvironmentSchema = z.object({
   NODE_ENV: z
     .enum(["development", "test", "production"])
@@ -42,6 +49,11 @@ const serverEnvironmentSchema = z.object({
   OPENAI_EXTRACTION_MODEL_ESCALATION: optionalString,
   OPENAI_EXTRACTION_MODEL_EXCEPTIONAL: optionalString,
   OPENAI_EXTRACTION_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(3).default(2),
+  OPENAI_AUTOMOTIVE_MODEL: optionalString,
+  OPENAI_AUTOMOTIVE_MODEL_ESCALATION: optionalString,
+  OPENAI_AUTOMOTIVE_MODEL_EXCEPTIONAL: optionalString,
+  OPENAI_AUTOMOTIVE_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(3).default(2),
+  OPENAI_AUTOMOTIVE_REASONING_EFFORT: automotiveReasoningEffortSchema,
 });
 
 export const env = serverEnvironmentSchema.parse({
@@ -60,4 +72,13 @@ export const env = serverEnvironmentSchema.parse({
   OPENAI_EXTRACTION_MODEL_ESCALATION: process.env.OPENAI_EXTRACTION_MODEL_ESCALATION,
   OPENAI_EXTRACTION_MODEL_EXCEPTIONAL: process.env.OPENAI_EXTRACTION_MODEL_EXCEPTIONAL,
   OPENAI_EXTRACTION_MAX_ATTEMPTS: process.env.OPENAI_EXTRACTION_MAX_ATTEMPTS,
+  OPENAI_AUTOMOTIVE_MODEL: process.env.OPENAI_AUTOMOTIVE_MODEL,
+  OPENAI_AUTOMOTIVE_MODEL_ESCALATION:
+    process.env.OPENAI_AUTOMOTIVE_MODEL_ESCALATION,
+  OPENAI_AUTOMOTIVE_MODEL_EXCEPTIONAL:
+    process.env.OPENAI_AUTOMOTIVE_MODEL_EXCEPTIONAL,
+  OPENAI_AUTOMOTIVE_MAX_ATTEMPTS:
+    process.env.OPENAI_AUTOMOTIVE_MAX_ATTEMPTS,
+  OPENAI_AUTOMOTIVE_REASONING_EFFORT:
+    process.env.OPENAI_AUTOMOTIVE_REASONING_EFFORT,
 });
