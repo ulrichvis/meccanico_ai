@@ -2,7 +2,7 @@
 
 This file is the project's operational tracker. Check only tasks that are actually complete and verified.
 
-## Active phase: Phase 2 — Source text extraction
+## Active phase: Phase 2 complete — awaiting approval for Phase 3
 
 ### 1. Initialization
 
@@ -89,7 +89,7 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ## Planned phases
 
-Phase 2 is active. Later phases remain documented only and require explicit approval before implementation.
+Phase 2 is complete. Later phases remain documented only and require explicit approval before implementation.
 
 ### Phase 2 — Source text extraction
 
@@ -99,7 +99,7 @@ Phase 2 ends with validated page-aware text. It must not create automotive cases
 
 - [x] Approve the Phase 2 scope and acceptance criteria before coding.
 - [x] Define a strict Zod contract for ordered page content, text quality, uncertainty, and source metadata.
-- [ ] Select representative private fixtures: native text, scan-only, mixed text/scan, garbled Unicode, sparse pages, and a document containing useful diagrams or photographs.
+- [x] Select representative private fixtures: native text, scan-only, mixed text/scan, malformed Unicode boundaries, sparse/unreadable pages, and visual-only material. Controlled PDFs cover file-input fidelity; synthetic adapter responses cover unsafe Unicode that cannot be represented reliably as a normal PDF fixture.
 - [x] Record the source language without translating or rewriting source text.
 - [x] Confirm that missing metadata remains `null` and missing page text remains an empty string only when the page is known to exist.
 
@@ -127,7 +127,7 @@ Phase 2 ends with validated page-aware text. It must not create automotive cases
 - [x] Centralize configurable primary, escalation, and exceptional model tiers; never scatter model identifiers through the code.
 - [x] Send every eligible PDF to the primary configured model without local difficulty classification.
 - [x] Validate page ordering, uniqueness, returned page count, non-empty coverage, and Unicode quality; report repeated long page text and partial/empty pages as warnings.
-- [ ] Manually verify fidelity and absence of invented automotive interpretation against representative PDFs; deterministic text checks cannot prove source fidelity.
+- [x] Manually verify fidelity and absence of invented automotive interpretation against representative PDFs; deterministic text checks cannot prove source fidelity.
 - [x] Escalate only after a measurable schema or output-quality failure with a recorded reason.
 - [x] Cap retries and escalation (two attempts by default, configurable from one to three); optional higher tiers require configuration and a failed earlier attempt.
 - [x] Document that completeness cannot be independently proven without a local parser and preserve the original PDF and extraction history for audit.
@@ -165,15 +165,15 @@ Phase 2 ends with validated page-aware text. It must not create automotive cases
 
 #### 2.8 Phase 2 verification
 
-- [ ] Native, scan-only, and mixed PDFs are each sent directly to OpenAI through the same initial file-input path.
-- [ ] A native PDF produces ordered, faithful page text without any local PDF-reading dependency.
-- [ ] A scan-only PDF can return visible text without producing descriptions of photographs or diagrams.
-- [ ] A mixed PDF preserves page numbers and reports unreadable pages without inventing content.
+- [x] Native, scan-only, and mixed PDFs are each sent directly to OpenAI through the same initial file-input path.
+- [x] A native PDF produces ordered, faithful page text without any local PDF-reading dependency.
+- [x] A scan-only PDF can return visible text without producing descriptions of photographs or diagrams.
+- [x] A mixed PDF preserves page numbers and reports unreadable pages without inventing content.
 - [x] Invalid model output is stored, marked safely, and creates no domain record (synthetic integration verification).
 - [x] Retrying a failed source preserves the previous attempt and avoids duplicate documents (synthetic integration verification).
 - [x] Photos and diagrams remain in the original private PDF and are not separately extracted or interpreted.
 - [x] `pnpm lint`, `pnpm i18n:check`, `pnpm typecheck`, and `pnpm build` pass.
-- [ ] English and Italian processing states, errors, and actions are manually verified.
+- [x] English and Italian processing states, errors, and actions are manually verified.
 
 ### Phase 3 — Structured automotive AI
 
@@ -265,3 +265,4 @@ Phase 3 consumes only the validated page-aware text produced by Phase 2. It does
 | 2026-08-29 | Phase 2.1–2.3 | Added the strict page-aware text contract, versioned transcription-only prompt, server-only Responses API adapter, private Storage eligibility checks, and ten-minute signed-URL PDF transfer. | Catalog parity, lint, types, and build passed; a live three-page private PDF returned validated ordered text with the configured model without persisting extracted content. |
 | 2026-09-14 | Phase 2.4–2.5 | Added deterministic quality checks, bounded optional model escalation, raw-response history, source ownership/recovery, atomic text/document persistence, and a trusted processing CLI. Added the persisted-data recap to point 2.7. | Synthetic Supabase integration checks passed for failure/retry, history, concurrency, stale ownership, encoding, and rollback. One real PDF was extracted and persisted; repeating processing returned the same document without another OpenAI call. Static checks and production build passed. Representative scan/mixed-document fidelity checks remain open. |
 | 2026-09-14 | Phase 2.6–2.7 | Added centralized content-safe extraction logs, a thin idempotent processing endpoint, source detail reads, bilingual extract/retry controls, and a persisted-data recap with page text, warnings, model, timing, token use, and attempt history. | Verified the real saved extraction in English and Italian, expanded original-language page text, the uploaded-source action, mobile layout without horizontal overflow, clean browser errors, and an idempotent API response without a new model call. Catalog parity, lint, types, and production build passed; representative PDF checks remain in point 2.8. |
+| 2026-09-14 | Phase 2.8 | Completed controlled end-to-end verification with native-text, scan-only, mixed-content, visual-only, and unreadable-page PDF fixtures sent through the production upload and extraction paths. | Four real OpenAI calls preserved all unique markers and page order; the unreadable fourth page returned empty text, `unreadable`, and an uncertainty without invention. English/Italian completed, warning, failure, and retry states passed in the browser. No domain cases were created, all five temporary database/Storage fixtures were removed, and static checks passed. |

@@ -24,6 +24,8 @@ A valid PDF can be uploaded, stored, and represented in the database without an 
 
 ## Phase 2 — Source text extraction
 
+Status: complete and verified. See [Phase 2 verification report](PHASE_2_VERIFICATION.md).
+
 ### Deliverables
 
 - Direct server-side transfer of the original private PDF to OpenAI.
