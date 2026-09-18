@@ -34,7 +34,9 @@
     "automotive-normalizer:verify": "tsx scripts/verify-automotive-normalizer.ts",
     "automotive-graph:verify": "tsx scripts/verify-automotive-graph-persistence.ts",
     "automotive-orchestration:verify": "tsx scripts/verify-automotive-orchestration.ts",
-    "structured-recap:verify": "tsx scripts/verify-structured-recap.ts"
+    "structured-recap:verify": "tsx scripts/verify-structured-recap.ts",
+    "case-edit-schema:verify": "node --experimental-strip-types scripts/verify-case-edit-schema.mjs",
+    "case-review-save:verify": "tsx scripts/verify-case-review-save.ts"
   },
   "engines": {
     "node": "24.19.x",

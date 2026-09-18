@@ -181,6 +181,20 @@
         "unavailable": "The extraction service is unavailable. Please try again."
       }
     },
+    "automotiveAnalysis": {
+      "start": "Analyze and structure",
+      "analyzing": "Analyzing technical data…",
+      "retry": "Retry structured analysis",
+      "errors": {
+        "invalidSource": "This source reference is invalid.",
+        "notFound": "This source could not be found.",
+        "notReady": "Extract the document text before starting structured analysis.",
+        "notEligible": "This document cannot be analyzed in its current state.",
+        "busy": "Structured analysis is already in progress. Reload this page shortly.",
+        "failed": "Structured analysis failed. The attempt was saved and can be retried.",
+        "unavailable": "The structured analysis service is unavailable. Please try again."
+      }
+    },
     "empty": {
       "title": "Ready for text extraction",
       "description": "Start extraction to create the page-aware text and document recap.",
@@ -349,6 +363,137 @@
       "qualityFailed": "The extracted text did not pass the quality checks.",
       "fileInvalid": "The stored file did not pass the PDF checks.",
       "generic": "This attempt could not be completed."
+    }
+  },
+  "caseReview": {
+    "eyebrow": "Case review",
+    "loading": "Loading case…",
+    "back": "Back to source",
+    "open": "Review this case",
+    "sourceContext": "Source: {filename}",
+    "analysisSummary": "Analysis summary",
+    "reviewNotes": "Review notes",
+    "relationships": {
+      "title": "Relationships",
+      "nodeTypes": {
+        "dtc": "DTC",
+        "symptom": "Symptom",
+        "cause": "Cause",
+        "diagnosticCheck": "Diagnostic check",
+        "solution": "Solution",
+        "repairOutcome": "Repair outcome",
+        "unknown": "Item"
+      }
+    },
+    "notFound": {
+      "title": "Case not found",
+      "description": "This case does not exist or is no longer available.",
+      "action": "Back to sources"
+    },
+    "error": {
+      "title": "The case could not be loaded",
+      "description": "The stored case is temporarily unavailable. Try again without changing the source data.",
+      "retry": "Try again"
+    }
+  },
+  "caseEdit": {
+    "eyebrow": "Optional correction",
+    "title": "Edit structured case",
+    "description": "Correct the stored technical structure while keeping the original extraction unchanged.",
+    "saveNotice": "Saving validates and updates the complete case atomically while keeping the original extraction unchanged.",
+    "actions": {
+      "add": "Add item",
+      "addMeasurement": "Add measurement",
+      "addOutcome": "Add outcome",
+      "addProcedure": "Add procedure",
+      "moveDown": "Move down",
+      "moveUp": "Move up",
+      "remove": "Remove",
+      "save": "Save case",
+      "saving": "Saving..."
+    },
+    "sections": {
+      "metadata": "Case information",
+      "measurements": "Measurements",
+      "outcomes": "Repair outcomes",
+      "procedures": "Repair procedures"
+    },
+    "labels": {
+      "attempted": "Attempted",
+      "brand": "Brand",
+      "caseCount": "Case count",
+      "compatibilityNote": "Compatibility note",
+      "componentType": "Component type",
+      "conditions": "Conditions",
+      "confirmed": "Confirmed",
+      "description": "Description",
+      "dtcCode": "DTC code",
+      "engineCode": "Engine code",
+      "engineDescription": "Engine description",
+      "evidenceType": "Evidence type",
+      "excerpt": "Source excerpt",
+      "fuelType": "Fuel type",
+      "generation": "Generation",
+      "instruction": "Instruction",
+      "manufacturer": "Manufacturer",
+      "maxValue": "Maximum value",
+      "minValue": "Minimum value",
+      "model": "Model",
+      "name": "Name",
+      "notes": "Notes",
+      "numericValue": "Numeric value",
+      "pageNumber": "Page number",
+      "parameter": "Parameter",
+      "partNumber": "Part number",
+      "power": "Power",
+      "primaryDtc": "Primary DTC",
+      "probabilitySource": "Frequency stated by the source",
+      "relationshipEvidence": "Supporting evidence",
+      "relationshipFrom": "From",
+      "relationshipTo": "To",
+      "relationshipType": "Relationship type",
+      "repairConfirmed": "Repair confirmed",
+      "repairSuccessful": "Repair successful",
+      "role": "Role",
+      "successful": "Successful",
+      "successfulCaseCount": "Successful case count",
+      "title": "Case title",
+      "transmission": "Transmission",
+      "unit": "Unit",
+      "unnamedOutcome": "Unnamed outcome",
+      "valueText": "Value as stated",
+      "yearFrom": "Year from",
+      "yearTo": "Year to"
+    },
+    "lifecycle": {
+      "title": "Review and lifecycle",
+      "description": "Reviewing confirms the current content. Rejecting or archiving removes the case from the normal active-case flow without deleting it.",
+      "actions": {
+        "review": "Mark as reviewed",
+        "reject": "Reject case",
+        "archive": "Archive case"
+      },
+      "confirm": {
+        "reject": "Reject this case? It will remain traceable but will no longer be active.",
+        "archive": "Archive this case? It will remain traceable but will no longer be active."
+      },
+      "feedback": {
+        "updating": "Updating the case status...",
+        "reviewed": "The case was marked as reviewed.",
+        "rejected": "The case was rejected without being deleted.",
+        "archived": "The case was archived without being deleted.",
+        "stale": "This case changed after you opened it. Reload the page before changing its status.",
+        "invalid": "This status change is no longer available. Reload the page.",
+        "error": "The case status could not be updated. Try again."
+      }
+    },
+    "validation": {
+      "conflict": "A shared reference is used by another case and cannot be changed here. Use a different DTC code or component name.",
+      "error": "The case could not be saved. Try again.",
+      "invalid": "Review the required fields, numeric values, and relationships before saving.",
+      "saved": "The case was saved successfully.",
+      "saving": "Saving the complete case...",
+      "stale": "This case changed after you opened it. Reload the page before saving again."
     }
   },
   "footer": {

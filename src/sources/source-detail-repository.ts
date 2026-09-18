@@ -49,11 +49,13 @@ type OriginFields = {
 };
 
 export interface AutomotiveCaseDetail {
+  analysisSummary: string | null;
   caseType: string | null;
   causes: Array<OriginFields & {
     description: string | null;
     id: string;
     name: string;
+    nodeId: string;
     probabilitySource: string | null;
   }>;
   complaint: string | null;
@@ -61,6 +63,7 @@ export interface AutomotiveCaseDetail {
     componentType: string | null;
     id: string;
     name: string;
+    nodeId: string;
     role: string | null;
   }>;
   createdAt: string;
@@ -87,9 +90,11 @@ export interface AutomotiveCaseDetail {
     description: string | null;
     id: string;
     isPrimary: boolean;
+    nodeId: string;
     relationshipType: string;
   }>;
   evidence: Array<OriginFields & {
+    entityId: string | null;
     entityType: string | null;
     evidenceType: string;
     excerpt: string;
@@ -105,11 +110,29 @@ export interface AutomotiveCaseDetail {
     partNumber: string | null;
   }>;
   problemDescription: string | null;
+  relationships: Array<OriginFields & {
+    evidence: {
+      excerpt: string;
+      pageNumber: number | null;
+    } | null;
+    fromId: string;
+    fromLabel: string | null;
+    fromType: string;
+    id: string;
+    relationshipType: string;
+    sourceEvidenceId: string | null;
+    toId: string;
+    toLabel: string | null;
+    toType: string;
+  }>;
+  reviewedAt: string | null;
+  reviewNotes: string | null;
   reviewStatus: string;
   solutions: Array<OriginFields & {
     description: string | null;
     id: string;
     name: string;
+    nodeId: string;
     outcomes: Array<{
       attempted: boolean | null;
       caseCount: number | null;
@@ -133,8 +156,10 @@ export interface AutomotiveCaseDetail {
     description: string | null;
     id: string;
     name: string;
+    nodeId: string;
   }>;
   title: string | null;
+  updatedAt: string;
   vehicles: Array<OriginFields & {
     brand: string | null;
     compatibilityNote: string | null;
@@ -231,10 +256,11 @@ export async function getSourceDetail(
         orderBy: [{ createdAt: "asc" }, { id: "asc" }],
         select: {
           caseType: true,
+          analysisSummary: true,
           causes: {
             orderBy: { id: "asc" },
             select: {
-              cause: { select: { normalizedName: true } },
+              cause: { select: { id: true, normalizedName: true } },
               confidence: true,
               description: true,
               id: true,
@@ -247,7 +273,7 @@ export async function getSourceDetail(
             orderBy: { id: "asc" },
             select: {
               component: {
-                select: { componentType: true, name: true },
+                select: { componentType: true, id: true, name: true },
               },
               confidence: true,
               id: true,
@@ -288,7 +314,7 @@ export async function getSourceDetail(
             orderBy: [{ isPrimary: "desc" }, { id: "asc" }],
             select: {
               confidence: true,
-              dtc: { select: { code: true, description: true } },
+              dtc: { select: { code: true, description: true, id: true } },
               id: true,
               isPrimary: true,
               relationOrigin: true,
@@ -299,6 +325,7 @@ export async function getSourceDetail(
             orderBy: [{ pageNumber: "asc" }, { id: "asc" }],
             select: {
               confidence: true,
+              entityId: true,
               entityType: true,
               evidenceType: true,
               excerpt: true,
@@ -321,6 +348,24 @@ export async function getSourceDetail(
             },
           },
           problemDescription: true,
+          relationships: {
+            orderBy: { id: "asc" },
+            select: {
+              confidence: true,
+              fromId: true,
+              fromType: true,
+              id: true,
+              relationshipType: true,
+              relationOrigin: true,
+              sourceEvidence: {
+                select: { excerpt: true, id: true, pageNumber: true },
+              },
+              toId: true,
+              toType: true,
+            },
+          },
+          reviewedAt: true,
+          reviewNotes: true,
           reviewStatus: true,
           solutions: {
             orderBy: { id: "asc" },
@@ -354,7 +399,7 @@ export async function getSourceDetail(
               relationOrigin: true,
               repairConfirmed: true,
               repairSuccessful: true,
-              solution: { select: { normalizedName: true } },
+              solution: { select: { id: true, normalizedName: true } },
             },
           },
           status: true,
@@ -365,10 +410,11 @@ export async function getSourceDetail(
               description: true,
               id: true,
               relationOrigin: true,
-              symptom: { select: { normalizedName: true } },
+              symptom: { select: { id: true, normalizedName: true } },
             },
           },
           title: true,
+          updatedAt: true,
           vehicles: {
             orderBy: { id: "asc" },
             select: {
@@ -434,13 +480,37 @@ export async function getSourceDetail(
 
   return {
     author: source.author,
-    automotiveCases: source.cases.map((storedCase) => ({
+    automotiveCases: source.cases.map((storedCase) => {
+      function relationshipNodeLabel(type: string, id: string): string | null {
+        switch (type) {
+          case "DTC":
+            return storedCase.dtcs.find((item) => item.dtc.id === id)?.dtc.code ?? null;
+          case "SYMPTOM":
+            return storedCase.symptoms.find((item) => item.symptom.id === id)?.symptom.normalizedName ?? null;
+          case "CAUSE":
+            return storedCase.causes.find((item) => item.cause.id === id)?.cause.normalizedName ?? null;
+          case "DIAGNOSTIC_CHECK":
+            return storedCase.diagnosticChecks.find((item) => item.id === id)?.description ?? null;
+          case "SOLUTION":
+            return storedCase.solutions.find((item) => item.solution.id === id)?.solution.normalizedName ?? null;
+          case "REPAIR_OUTCOME":
+            return storedCase.solutions
+              .flatMap((item) => item.outcomes)
+              .find((item) => item.id === id)?.notes ?? null;
+          default:
+            return null;
+        }
+      }
+
+      return {
+      analysisSummary: storedCase.analysisSummary,
       caseType: storedCase.caseType,
       causes: storedCase.causes.map((item) => ({
         confidence: item.confidence?.toString() ?? null,
         description: item.description,
         id: item.id,
         name: item.cause.normalizedName,
+        nodeId: item.cause.id,
         probabilitySource: item.probabilitySource,
         relationOrigin: item.relationOrigin,
       })),
@@ -450,6 +520,7 @@ export async function getSourceDetail(
         confidence: item.confidence?.toString() ?? null,
         id: item.id,
         name: item.component.name,
+        nodeId: item.component.id,
         relationOrigin: item.relationOrigin,
         role: item.role,
       })),
@@ -482,11 +553,13 @@ export async function getSourceDetail(
         description: item.dtc.description,
         id: item.id,
         isPrimary: item.isPrimary,
+        nodeId: item.dtc.id,
         relationOrigin: item.relationOrigin,
         relationshipType: item.relationshipType,
       })),
       evidence: storedCase.evidence.map((item) => ({
         confidence: item.confidence?.toString() ?? null,
+        entityId: item.entityId,
         entityType: item.entityType,
         evidenceType: item.evidenceType,
         excerpt: item.excerpt,
@@ -505,12 +578,29 @@ export async function getSourceDetail(
         relationOrigin: item.relationOrigin,
       })),
       problemDescription: storedCase.problemDescription,
+      relationships: storedCase.relationships.map((item) => ({
+        confidence: item.confidence?.toString() ?? null,
+        evidence: item.sourceEvidence,
+        fromId: item.fromId,
+        fromLabel: relationshipNodeLabel(item.fromType, item.fromId),
+        fromType: item.fromType,
+        id: item.id,
+        relationshipType: item.relationshipType,
+        relationOrigin: item.relationOrigin,
+        sourceEvidenceId: item.sourceEvidence?.id ?? null,
+        toId: item.toId,
+        toLabel: relationshipNodeLabel(item.toType, item.toId),
+        toType: item.toType,
+      })),
+      reviewedAt: storedCase.reviewedAt?.toISOString() ?? null,
+      reviewNotes: storedCase.reviewNotes,
       reviewStatus: storedCase.reviewStatus,
       solutions: storedCase.solutions.map((item) => ({
         confidence: item.confidence?.toString() ?? null,
         description: item.description,
         id: item.id,
         name: item.solution.normalizedName,
+        nodeId: item.solution.id,
         outcomes: item.outcomes,
         probabilitySource: item.probabilitySource,
         procedures: item.procedures.map((procedure) => ({
@@ -530,9 +620,11 @@ export async function getSourceDetail(
         description: item.description,
         id: item.id,
         name: item.symptom.normalizedName,
+        nodeId: item.symptom.id,
         relationOrigin: item.relationOrigin,
       })),
       title: storedCase.title,
+      updatedAt: storedCase.updatedAt.toISOString(),
       vehicles: storedCase.vehicles.map((item) => ({
         ...item.vehicle,
         compatibilityNote: item.compatibilityNote,
@@ -540,7 +632,8 @@ export async function getSourceDetail(
         id: item.id,
         relationOrigin: item.relationOrigin,
       })),
-    })),
+      };
+    }),
     characterCount:
       document?.quality?.characterCount ?? source.rawText?.length ?? 0,
     createdAt: source.createdAt.toISOString(),
@@ -570,4 +663,28 @@ export async function getSourceDetail(
     type: source.type,
     updatedAt: source.updatedAt.toISOString(),
   };
+}
+
+export async function getCaseReviewSource(
+  caseId: string,
+): Promise<SourceDetail | null> {
+  const parsedCaseId = z.uuid().safeParse(caseId);
+
+  if (!parsedCaseId.success) return null;
+
+  const storedCase = await getDatabaseClient().case.findUnique({
+    where: { id: parsedCaseId.data },
+    select: { sourceId: true },
+  });
+
+  if (!storedCase) return null;
+
+  const source = await getSourceDetail(storedCase.sourceId);
+  const selectedCase = source?.automotiveCases.find(
+    (item) => item.id === parsedCaseId.data,
+  );
+
+  if (!source || !selectedCase) return null;
+
+  return { ...source, automotiveCases: [selectedCase] };
 }

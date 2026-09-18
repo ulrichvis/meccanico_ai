@@ -55,6 +55,16 @@ Phase 4.3 composes the Phase 3 processor with accepted-artifact loading, pure no
 
 Phase 4.4 reads the persisted relational graph directly on the server and maps database values to a serializable presentation DTO before passing them to the interactive source-detail component. The recap never reads or exposes the raw provider response. English and Italian catalogs translate interface labels, statuses, and empty states only; case wording, technical identifiers, procedures, measurements, and evidence are displayed in the source document language without automatic translation. A persisted zero-case source receives an explicit empty recap instead of an invented case.
 
+Phase 5.1 adds a read-only `/cases/[caseId]/review` route for one persisted case. It resolves the case to its owning source on the server, reuses the established serializable source-detail presentation model, and filters that model to the selected case. The read model now resolves generic relationship endpoints to human-readable labels while retaining their typed identifiers, origin, confidence, and supporting evidence. This avoids a second public data contract before editing exists and keeps search, queues, and filters in Phase 6.
+
+Phase 5.2 exposes the existing automotive processing orchestration through a thin `POST /api/sources/[sourceId]/automotive-analysis` route. The source-detail UI offers the action only after page-aware text exists and no persisted result is present. The route validates the source identifier, maps internal failures to stable transport codes, and delegates OpenAI, retry, audit, normalization, and transactional persistence behavior to the established application service. The client prevents duplicate submissions, displays localized progress and retry feedback, and refreshes the server read model after completion. Provider output and database details remain server-side.
+
+Phase 5.3 maps the server-owned case presentation DTO into one explicit client edit contract validated by Zod. The contract carries stable identifiers for case-owned records and typed relationship endpoints without exposing Prisma models. The form covers metadata, applicability, DTC roles, symptoms, causes, components, checks, measurements, solutions, procedures, outcomes, parts, evidence, and supported relationships; reordering is limited to diagnostic and repair sequences. The form performs complete local validation through one Save action but intentionally performs no database write. Phase 5.4 owns the transactional mutation, shared-reference safeguards, optimistic concurrency, and review audit transition.
+
+Phase 5.4 sends the complete validated edit contract to a thin case endpoint and one application service. The persistence repository checks the submitted `updatedAt`, updates or rebuilds the entire case-owned graph in one Prisma transaction, and rejects stale edits before they can overwrite newer data. Reusable reference rows are resolved by conservative keys; a shared DTC or component is never silently changed when another case uses it. Existing provenance is retained for submitted rows and newly added rows use `human_added`. Technical changes mark the case `corrected`; an unchanged submission explicitly marks an unreviewed case `reviewed`. The source, document, and extraction-job artifacts are not part of the mutation.
+
+Phase 5.5 adds a separate lifecycle command to the same thin case endpoint. A Zod-validated `PATCH` payload carries the case identifier, current `updatedAt`, and one explicit `review`, `reject`, or `archive` action. The repository applies the optimistic-concurrency check in a short transaction. Review updates only the quality signal and preserves `corrected`; reject and archive update only the lifecycle status and are allowed from `active`. The UI requires confirmation before reject or archive. No action deletes the case or changes its source and extraction artifacts.
+
 The target orchestration function is:
 
 ```ts
@@ -71,7 +81,7 @@ src/
 │   ├── page.tsx
 │   ├── upload/page.tsx
 │   ├── sources/page.tsx
-│   ├── extractions/[id]/review/page.tsx
+│   ├── cases/[caseId]/review/page.tsx
 │   ├── cases/page.tsx
 │   ├── cases/[id]/page.tsx
 │   └── api/
@@ -202,6 +212,8 @@ status: active → rejected
 
 Review status is a data-quality signal, not an ingestion gate. Lifecycle status controls whether a case participates in normal retrieval. A case is persisted as soon as machine validation and normalization succeed. Admin review may happen later and must not overwrite the raw or validated extraction.
 
+Lifecycle changes are explicit state transitions rather than case edits. In the MVP, rejected and archived cases remain terminal, traceable records; restore, hard deletion, approval chains, assignments, comments, and role-based workflows remain outside the scope.
+
 ## Error handling
 
 - Upload failure: leave no orphaned `Source`, or use the `failed` status if the record already exists.
@@ -285,7 +297,7 @@ OpenAI credentials and the Phase 2 primary model are mandatory only when PDF tex
 
 Phase 3 orchestration reuses `ExtractionJob` rather than adding a stage-specific audit table. A short transaction locks the source and creates one running job; the OpenAI call runs outside the transaction; later short transactions preserve raw and validated artifacts and finish the attempt. Every escalation creates a new job. Accepted structured output leaves the source in `processing` until Phase 4 atomically normalizes it; no `Case` or related domain row is written in Phase 3. `requiresHumanReview` remains advisory: the quality gate checks that the flag truthfully reflects partial or unreadable input, but no human action is required before persistence.
 
-The Phase 3 provider call happens after Phase 2 has persisted page-aware text. `pnpm automotive:process <source-id>` now runs the complete knowledge-processing path: it performs structured analysis only when no accepted job exists, normalizes the accepted artifact, persists the graph, and advances the source atomically. The normal application UI does not invoke this path yet; the structured recap and its controlled UI action remain in Phase 4.4.
+The Phase 3 provider call happens after Phase 2 has persisted page-aware text. Both `pnpm automotive:process <source-id>` and the source-detail **Analyze and structure** action run the same complete knowledge-processing path: it performs structured analysis only when no accepted job exists, normalizes the accepted artifact, persists the graph, and advances the source atomically.
 
 The implemented Phase 2 entry point is `src/services/process-source.server.ts`; its framework-independent pipeline and repository live in `src/extraction/`. The trusted operator CLI and the source-detail API route use the same processor. Short source-row locks serialize acquisition and writes while OpenAI runs outside database transactions. A successful final transaction stores the text/document and completes the job atomically. See [ADR 0012](decisions/0012-text-extraction-persistence-and-retries.md) for retry, ownership, and audit semantics.
 

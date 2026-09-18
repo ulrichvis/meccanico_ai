@@ -181,6 +181,20 @@
         "unavailable": "Il servizio di estrazione non è disponibile. Riprova."
       }
     },
+    "automotiveAnalysis": {
+      "start": "Analizza e struttura",
+      "analyzing": "Analisi dei dati tecnici…",
+      "retry": "Ripeti l'analisi strutturata",
+      "errors": {
+        "invalidSource": "Il riferimento della fonte non è valido.",
+        "notFound": "Impossibile trovare questa fonte.",
+        "notReady": "Estrai il testo del documento prima di avviare l'analisi strutturata.",
+        "notEligible": "Questo documento non può essere analizzato nel suo stato attuale.",
+        "busy": "L'analisi strutturata è già in corso. Ricarica la pagina tra poco.",
+        "failed": "L'analisi strutturata non è riuscita. Il tentativo è stato salvato e può essere ripetuto.",
+        "unavailable": "Il servizio di analisi strutturata non è disponibile. Riprova."
+      }
+    },
     "empty": {
       "title": "Pronto per l'estrazione del testo",
       "description": "Avvia l'estrazione per creare il testo suddiviso per pagina e il riepilogo del documento.",
@@ -349,6 +363,137 @@
       "qualityFailed": "Il testo estratto non ha superato i controlli di qualità.",
       "fileInvalid": "Il file salvato non ha superato i controlli PDF.",
       "generic": "Non è stato possibile completare questo tentativo."
+    }
+  },
+  "caseReview": {
+    "eyebrow": "Verifica del caso",
+    "loading": "Caricamento del caso…",
+    "back": "Torna alla fonte",
+    "open": "Verifica questo caso",
+    "sourceContext": "Fonte: {filename}",
+    "analysisSummary": "Riepilogo dell'analisi",
+    "reviewNotes": "Note di verifica",
+    "relationships": {
+      "title": "Relazioni",
+      "nodeTypes": {
+        "dtc": "DTC",
+        "symptom": "Sintomo",
+        "cause": "Causa",
+        "diagnosticCheck": "Controllo diagnostico",
+        "solution": "Soluzione",
+        "repairOutcome": "Esito della riparazione",
+        "unknown": "Elemento"
+      }
+    },
+    "notFound": {
+      "title": "Caso non trovato",
+      "description": "Questo caso non esiste o non è più disponibile.",
+      "action": "Torna alle fonti"
+    },
+    "error": {
+      "title": "Impossibile caricare il caso",
+      "description": "Il caso salvato non è temporaneamente disponibile. Riprova senza modificare i dati della fonte.",
+      "retry": "Riprova"
+    }
+  },
+  "caseEdit": {
+    "eyebrow": "Correzione facoltativa",
+    "title": "Modifica il caso strutturato",
+    "description": "Correggi la struttura tecnica salvata mantenendo invariata l'estrazione originale.",
+    "saveNotice": "Il salvataggio convalida e aggiorna atomicamente l'intero caso mantenendo invariata l'estrazione originale.",
+    "actions": {
+      "add": "Aggiungi elemento",
+      "addMeasurement": "Aggiungi misurazione",
+      "addOutcome": "Aggiungi risultato",
+      "addProcedure": "Aggiungi procedura",
+      "moveDown": "Sposta giù",
+      "moveUp": "Sposta su",
+      "remove": "Rimuovi",
+      "save": "Salva il caso",
+      "saving": "Salvataggio..."
+    },
+    "sections": {
+      "metadata": "Informazioni del caso",
+      "measurements": "Misurazioni",
+      "outcomes": "Risultati della riparazione",
+      "procedures": "Procedure di riparazione"
+    },
+    "labels": {
+      "attempted": "Tentata",
+      "brand": "Marca",
+      "caseCount": "Numero di casi",
+      "compatibilityNote": "Nota di compatibilità",
+      "componentType": "Tipo di componente",
+      "conditions": "Condizioni",
+      "confirmed": "Confermata",
+      "description": "Descrizione",
+      "dtcCode": "Codice DTC",
+      "engineCode": "Codice motore",
+      "engineDescription": "Descrizione del motore",
+      "evidenceType": "Tipo di prova",
+      "excerpt": "Estratto dalla fonte",
+      "fuelType": "Tipo di carburante",
+      "generation": "Generazione",
+      "instruction": "Istruzione",
+      "manufacturer": "Produttore",
+      "maxValue": "Valore massimo",
+      "minValue": "Valore minimo",
+      "model": "Modello",
+      "name": "Nome",
+      "notes": "Note",
+      "numericValue": "Valore numerico",
+      "pageNumber": "Numero di pagina",
+      "parameter": "Parametro",
+      "partNumber": "Codice ricambio",
+      "power": "Potenza",
+      "primaryDtc": "DTC principale",
+      "probabilitySource": "Frequenza indicata dalla fonte",
+      "relationshipEvidence": "Prova di supporto",
+      "relationshipFrom": "Da",
+      "relationshipTo": "A",
+      "relationshipType": "Tipo di relazione",
+      "repairConfirmed": "Riparazione confermata",
+      "repairSuccessful": "Riparazione riuscita",
+      "role": "Ruolo",
+      "successful": "Riuscita",
+      "successfulCaseCount": "Numero di casi riusciti",
+      "title": "Titolo del caso",
+      "transmission": "Trasmissione",
+      "unit": "Unità",
+      "unnamedOutcome": "Risultato senza nome",
+      "valueText": "Valore come indicato",
+      "yearFrom": "Anno da",
+      "yearTo": "Anno a"
+    },
+    "lifecycle": {
+      "title": "Verifica e ciclo di vita",
+      "description": "La verifica conferma il contenuto attuale. Il rifiuto o l'archiviazione rimuovono il caso dal normale flusso dei casi attivi senza eliminarlo.",
+      "actions": {
+        "review": "Segna come verificato",
+        "reject": "Rifiuta il caso",
+        "archive": "Archivia il caso"
+      },
+      "confirm": {
+        "reject": "Rifiutare questo caso? Rimarrà tracciabile ma non sarà più attivo.",
+        "archive": "Archiviare questo caso? Rimarrà tracciabile ma non sarà più attivo."
+      },
+      "feedback": {
+        "updating": "Aggiornamento dello stato del caso...",
+        "reviewed": "Il caso è stato segnato come verificato.",
+        "rejected": "Il caso è stato rifiutato senza essere eliminato.",
+        "archived": "Il caso è stato archiviato senza essere eliminato.",
+        "stale": "Questo caso è cambiato dopo l'apertura. Ricarica la pagina prima di modificarne lo stato.",
+        "invalid": "Questa modifica di stato non è più disponibile. Ricarica la pagina.",
+        "error": "Non è stato possibile aggiornare lo stato del caso. Riprova."
+      }
+    },
+    "validation": {
+      "conflict": "Un riferimento condiviso è usato da un altro caso e non può essere modificato qui. Usa un codice DTC o un nome componente diverso.",
+      "error": "Non è stato possibile salvare il caso. Riprova.",
+      "invalid": "Controlla i campi obbligatori, i valori numerici e le relazioni prima di salvare.",
+      "saved": "Il caso è stato salvato correttamente.",
+      "saving": "Salvataggio dell'intero caso...",
+      "stale": "Questo caso è cambiato dopo l'apertura. Ricarica la pagina prima di salvare di nuovo."
     }
   },
   "footer": {

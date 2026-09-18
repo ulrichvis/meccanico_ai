@@ -2,7 +2,7 @@
 
 This file is the project's operational tracker. Check only tasks that are actually complete and verified.
 
-## Next phase: Phase 5 — Optional admin review and editing
+## Next phase: Phase 6 — Search and browsing
 
 ### 1. Initialization
 
@@ -270,11 +270,55 @@ Phase 4 converts an accepted Phase 3 artifact into the existing relational model
 
 ### Phase 5 — Optional admin review and editing
 
-- [ ] Build the review screen.
-- [ ] Allow editing of all useful entities.
-- [ ] Highlight inferences.
-- [ ] Allow cases to be marked as reviewed, corrected, rejected, or archived.
-- [ ] Preserve raw and validated extraction artifacts after edits.
+Phase 5 adds a small operator-only correction workflow for one persisted case at a time. It must reuse the Phase 4 relational graph, preserve the original extraction audit trail, and avoid drafts, autosave, bulk editing, complex permissions, or editorial version history in the MVP.
+
+#### 5.1 Case review page and read model
+
+- [x] Add a localized `/cases/[caseId]/review` page linked from each case in the existing source recap.
+- [x] Load one complete persisted case through a serializable server-side read model, including its source, evidence, relationships, lifecycle status, and review status.
+- [x] Keep extracted technical content in the source language while translating only interface copy through the English and Italian catalogs.
+- [x] Show explicit-source and AI-inference indicators, confidence where available, and the original evidence needed to review the case.
+- [x] Keep the page focused on one case; case browsing, search, filters, and a global review queue remain in Phase 6.
+
+#### 5.2 UI-triggered structured analysis
+
+- [x] Add a localized **Analyze and structure** action to the source detail page when text extraction is complete and no persisted automotive result exists.
+- [x] Call the existing idempotent automotive processing orchestration through a thin server endpoint; do not duplicate provider, normalization, or persistence logic in the route or component.
+- [x] Show clear pending, success, zero-case, retryable failure, and non-retryable failure states in English and Italian.
+- [x] Refresh the source detail after completion so persisted cases and their **Review this case** actions appear without using the terminal.
+- [x] Prevent duplicate submissions while processing and preserve all existing raw and validated extraction history.
+
+#### 5.3 Minimal editable case form
+
+- [x] Define one Zod-validated edit contract for useful persisted fields instead of exposing Prisma models to the client.
+- [x] Allow editing of case metadata and review notes; vehicle applicability; DTCs and the primary DTC; symptoms; causes; components; diagnostic checks and measurements; solutions, procedures, and outcomes; parts; evidence; and supported relationships.
+- [x] Support only the list operations needed by the relational graph: add, edit, remove, and reorder where sequence is meaningful.
+- [x] Preserve the distinction between causes, checks, proposed repairs, confirmed repairs, and outcomes.
+- [x] Use one explicit Save action. Do not add autosave, drafts, rich-text editing, bulk editing, or a generic schema-driven form builder.
+
+#### 5.4 Transactional save and audit safety
+
+- [x] Implement one application service that validates the complete edit payload and saves the case graph in a single Prisma transaction.
+- [x] Update case-owned associations without silently modifying shared reference data used by other cases.
+- [x] Use `updatedAt` as a simple optimistic-concurrency check so an older form cannot overwrite a newer edit.
+- [x] Mark a changed case as `corrected`, set `reviewedAt`, and store optional review notes; allow an unchanged case to be explicitly marked `reviewed`.
+- [x] Keep the originating `Source`, `Document`, and every `ExtractionJob.rawAiOutput` and `validatedOutput` immutable.
+- [x] Return localized, actionable validation and stale-edit feedback without exposing database or provider details.
+
+#### 5.5 Lifecycle actions
+
+- [x] Add explicit actions to mark a case as reviewed, rejected, or archived without deleting it.
+- [x] Keep lifecycle status separate from review status and require confirmation before rejecting or archiving.
+- [x] Keep rejected and archived cases traceable to their source and immutable extraction artifacts.
+- [x] Do not add hard deletion, approval chains, assignments, comments, or multi-user roles in the MVP.
+
+#### 5.6 Phase 5 verification
+
+- [x] Verify a complete case can be edited, saved, reloaded, and corrected without changing another case that shares reference data.
+- [x] Verify invalid input, stale edits, and forced database failures leave no partial graph.
+- [x] Verify reviewed, corrected, rejected, and archived transitions while preserving raw and validated extraction artifacts.
+- [x] Manually verify source-language technical content, inference indicators, validation feedback, confirmations, and success states in English and Italian at desktop and mobile widths.
+- [x] Run catalog parity, lint, type checking, focused Phase 5 verification commands, Prisma validation, and the production build successfully.
 
 ### Phase 6 — Search and browsing
 
@@ -330,3 +374,11 @@ Phase 4 converts an accepted Phase 3 artifact into the existing relational model
 | 2026-09-18 | Phase 4.3 | Connected completed Phase 3 artifacts to revalidation, normalization, atomic graph persistence, and the final source transition through one reusable application service. Added idempotent recovery and explicit zero-case completion without placeholder rows. | The live Supabase orchestration verifier completed normal and zero-case sources, preserved immutable job output, retried both without another synthetic model call or duplicate row, and removed all isolated fixtures. Type checking and linting passed. |
 | 2026-09-18 | Phase 4.4 | Added the structured automotive recap to source details with cases, applicability, DTCs, symptoms, causes, components, checks, measurements, solutions, procedures, outcomes, parts, and evidence. Kept source-derived technical content untranslated while localizing only interface copy. | A temporary Italian Supabase fixture verified complete relational reads and source-language preservation. English/Italian desktop and 390 px mobile checks passed without horizontal overflow or browser warnings, and the fixture was removed. Type checking, linting, and catalog parity passed. |
 | 2026-09-18 | Phase 4.5 | Completed the Phase 4 verification matrix and closed normalization and relational persistence. | Pure normalization, two-case/two-DTC atomic persistence, complete rollback, immutable artifacts, retry idempotence, zero-case completion, initial `active`/`unreviewed` state, source-language recap, bilingual desktop/mobile UI, schema validation, catalog parity, lint, types, and production build passed. Every temporary Supabase fixture was removed and no OpenAI request was made. |
+| 2026-09-18 | Phase 5 planning | Split optional admin review into a one-case review page, a minimal explicit form, transactional save safety, lifecycle actions, and focused verification. Explicitly excluded drafts, autosave, bulk editing, hard deletion, approval workflows, roles, and editorial version history from the MVP. | Cross-checked the plan against the existing case graph, review and lifecycle enums, immutable extraction artifacts, Phase 6 search boundary, and bilingual source-language display rules. No code or schema change was made. |
+| 2026-09-18 | Phase 5.1 | Added a localized case-review route linked from the source recap and reused the complete Phase 4 presentation model for one selected case. Extended the read model with review metadata and resolved graph relationships without exposing provider output. | An isolated Italian Supabase case opened from its source in English and Italian with unchanged technical wording, visible inference/confidence/evidence/relationship signals, a working back link, and no 390 px horizontal overflow. The fixture was removed. Catalog parity, lint, and type checking passed. |
+| 2026-09-18 | Phase 5 planning | Added the missing UI-triggered structured-analysis step before case editing so operators can complete the PDF-to-review workflow without a trusted terminal command. | Cross-checked the new step against the existing idempotent automotive orchestration, immutable extraction history, bilingual UI rules, and Phase 5 review dependency. No runtime code was added. |
+| 2026-09-18 | Phase 5.2 | Added a bilingual source-detail action and thin POST route that run the existing idempotent automotive analysis and persistence orchestration, then refresh the persisted recap. | The action rendered on a real text-extracted PDF in English and Italian with no browser warnings. Invalid and missing source requests returned stable 400 and 404 errors without an OpenAI call. Catalog parity, lint, types, Prisma validation, and the production build passed. |
+| 2026-09-18 | Phase 5.3 | Added one explicit Zod-backed case correction form for the complete useful relational graph, including stable typed relationship targets and meaningful sequence controls. Kept saving local to the form boundary so transactional persistence remains isolated in Phase 5.4. | Contract verification rejected invalid primary-DTC and relationship references. A temporary Italian Supabase case verified prefilled source-language data, add/edit behavior, explicit validation, English/Italian interface switching, and a clean browser console; the fixture was removed. Catalog parity, lint, types, Prisma validation, and the production build passed. |
+| 2026-09-18 | Phase 5.4 | Connected the complete case form to a server-validated application service and atomic Prisma save with `updatedAt` concurrency, shared-reference protection, review audit transitions, and immutable extraction artifacts. | An isolated Supabase verifier saved a complete corrected graph, marked an unchanged case reviewed, rejected stale and unsafe shared-reference edits with rollback, preserved another case and raw/validated artifacts, and removed its fixtures. Catalog parity, schema verification, Prisma validation, lint, types, and production build passed. |
+| 2026-09-18 | Phase 5.5 | Added explicit reviewed, rejected, and archived lifecycle commands with optimistic concurrency, separate lifecycle and review state, confirmation before non-active transitions, and no deletion. | Synthetic Supabase cases verified every transition, terminal cross-transition rejection, retained case rows, corrected-status preservation, and unchanged extraction artifacts. English and Italian success and confirmation copy remained in catalog parity. |
+| 2026-09-18 | Phase 5.6 | Completed the Phase 5 verification matrix and closed optional admin review and editing. | A complete existing graph was saved and reloaded, shared references remained unchanged, stale and invalid edits were rejected, a forced relational constraint failure rolled back fully, all lifecycle transitions passed, and the guarded browser fixture verified English/Italian source-language behavior at desktop and 390 px widths before cleanup. Focused checks, Prisma validation, catalog parity, lint, types, and production build passed. |

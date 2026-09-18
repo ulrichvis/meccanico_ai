@@ -42,6 +42,8 @@ export class AutomotiveGraphPersistenceError extends Error {
   }
 }
 
+const AUTOMOTIVE_GRAPH_TRANSACTION_TIMEOUT_MS = 30_000;
+
 const acceptedExtractionArtifactSchema = z.object({
   content: automotiveExtractionSchema,
   quality: z.object({ accepted: z.literal(true) }),
@@ -497,23 +499,26 @@ export class AutomotiveGraphRepository {
       extractionJobId: z.uuid().parse(rawInput.extractionJobId),
     };
 
-    return this.database.$transaction(async (transaction) => {
-      await assertPersistenceOwnership(transaction, input, ["PROCESSING"]);
-      const existingCase = await transaction.case.findFirst({
-        where: { extractionJobId: input.extractionJobId },
-        select: { id: true },
-      });
-      if (existingCase) {
-        throw new AutomotiveGraphPersistenceError("EXTRACTION_ALREADY_PERSISTED");
-      }
-      const caseIds: string[] = [];
+    return this.database.$transaction(
+      async (transaction) => {
+        await assertPersistenceOwnership(transaction, input, ["PROCESSING"]);
+        const existingCase = await transaction.case.findFirst({
+          where: { extractionJobId: input.extractionJobId },
+          select: { id: true },
+        });
+        if (existingCase) {
+          throw new AutomotiveGraphPersistenceError("EXTRACTION_ALREADY_PERSISTED");
+        }
+        const caseIds: string[] = [];
 
-      for (const normalizedCase of input.extraction.cases) {
-        caseIds.push(await persistCase(transaction, input, normalizedCase));
-      }
+        for (const normalizedCase of input.extraction.cases) {
+          caseIds.push(await persistCase(transaction, input, normalizedCase));
+        }
 
-      return { caseIds };
-    });
+        return { caseIds };
+      },
+      { timeout: AUTOMOTIVE_GRAPH_TRANSACTION_TIMEOUT_MS },
+    );
   }
 
   async persistAndCompleteSource(
@@ -526,52 +531,55 @@ export class AutomotiveGraphRepository {
       extractionJobId: z.uuid().parse(rawInput.extractionJobId),
     };
 
-    return this.database.$transaction(async (transaction) => {
-      const sourceStatus = await assertPersistenceOwnership(
-        transaction,
-        input,
-        ["PROCESSING", "PERSISTED"],
-      );
-      const existingCases = await transaction.case.findMany({
-        where: { extractionJobId: input.extractionJobId },
-        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-        select: { id: true },
-      });
-
-      if (
-        existingCases.length > 0 &&
-        existingCases.length !== input.extraction.cases.length
-      ) {
-        throw new AutomotiveGraphPersistenceError(
-          "PERSISTED_CASE_COUNT_MISMATCH",
+    return this.database.$transaction(
+      async (transaction) => {
+        const sourceStatus = await assertPersistenceOwnership(
+          transaction,
+          input,
+          ["PROCESSING", "PERSISTED"],
         );
-      }
+        const existingCases = await transaction.case.findMany({
+          where: { extractionJobId: input.extractionJobId },
+          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+          select: { id: true },
+        });
 
-      if (sourceStatus === "PERSISTED") {
-        if (existingCases.length !== input.extraction.cases.length) {
+        if (
+          existingCases.length > 0 &&
+          existingCases.length !== input.extraction.cases.length
+        ) {
           throw new AutomotiveGraphPersistenceError(
             "PERSISTED_CASE_COUNT_MISMATCH",
           );
         }
-        return {
-          status: "already_persisted",
-          caseIds: existingCases.map((item) => item.id),
-        };
-      }
 
-      const caseIds = existingCases.map((item) => item.id);
-      if (existingCases.length === 0) {
-        for (const normalizedCase of input.extraction.cases) {
-          caseIds.push(await persistCase(transaction, input, normalizedCase));
+        if (sourceStatus === "PERSISTED") {
+          if (existingCases.length !== input.extraction.cases.length) {
+            throw new AutomotiveGraphPersistenceError(
+              "PERSISTED_CASE_COUNT_MISMATCH",
+            );
+          }
+          return {
+            status: "already_persisted",
+            caseIds: existingCases.map((item) => item.id),
+          };
         }
-      }
 
-      await transaction.source.update({
-        where: { id: input.sourceId },
-        data: { status: "PERSISTED" },
-      });
+        const caseIds = existingCases.map((item) => item.id);
+        if (existingCases.length === 0) {
+          for (const normalizedCase of input.extraction.cases) {
+            caseIds.push(await persistCase(transaction, input, normalizedCase));
+          }
+        }
 
-      return { status: "persisted", caseIds };
-    });
+        await transaction.source.update({
+          where: { id: input.sourceId },
+          data: { status: "PERSISTED" },
+        });
+
+        return { status: "persisted", caseIds };
+      },
+      { timeout: AUTOMOTIVE_GRAPH_TRANSACTION_TIMEOUT_MS },
+    );
   }
 }

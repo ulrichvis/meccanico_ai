@@ -63,6 +63,7 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Phase 2 verification report](docs/PHASE_2_VERIFICATION.md)
 - [Phase 3 verification report](docs/PHASE_3_VERIFICATION.md)
 - [Phase 4 verification report](docs/PHASE_4_VERIFICATION.md)
+- [Phase 5 verification report](docs/PHASE_5_VERIFICATION.md)
 - [Development guide](docs/DEVELOPMENT.md)
 - [Frontend internationalization](docs/I18N.md)
 - [Roadmap](docs/ROADMAP.md)
@@ -86,10 +87,12 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Atomic automotive graph persistence](docs/decisions/0017-atomic-automotive-graph-persistence.md)
 - [Idempotent automotive processing orchestration](docs/decisions/0018-idempotent-automotive-processing-orchestration.md)
 - [Source-language structured extraction recap](docs/decisions/0019-source-language-structured-recap.md)
+- [Transactional case review save](docs/decisions/0020-transactional-case-review-save.md)
+- [Explicit case lifecycle actions](docs/decisions/0021-explicit-case-lifecycle-actions.md)
 
 ## Current status
 
-Phases 1 through 4 are complete. Accepted automotive extractions are normalized, persisted atomically as active and unreviewed relational data, and shown in a bilingual structured recap that preserves the source language. Phase 5 optional admin review and editing is next and has not started.
+Phases 1 through 5 are complete. An operator can run structured automotive analysis, open a bilingual review page, atomically correct the complete case graph, and explicitly review, reject, or archive a case without changing source-language technical content or deleting its audit trail. Phase 6 case browsing and search are next.
 
 ## Run locally
 

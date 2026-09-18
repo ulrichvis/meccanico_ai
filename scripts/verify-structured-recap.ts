@@ -295,7 +295,7 @@ async function main() {
     });
 
     const repository = new AutomotiveGraphRepository(database);
-    await repository.persistAndCompleteSource({
+    const persisted = await repository.persistAndCompleteSource({
       documentId,
       extraction: normalizeAutomotiveExtraction(extraction),
       extractionJobId,
@@ -343,6 +343,7 @@ async function main() {
 
     console.info(
       JSON.stringify({
+        caseId: persisted.caseIds[0] ?? null,
         sourceId,
         url: `/sources/${sourceId}`,
         verifiedLanguage: "it",

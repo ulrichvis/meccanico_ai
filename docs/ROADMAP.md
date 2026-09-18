@@ -76,19 +76,24 @@ A machine-validated extraction automatically becomes a coherent active case in t
 
 ## Phase 5 — Optional admin review and editing
 
+Status: complete.
+
 ### Deliverables
 
-- `/extractions/[id]/review` page.
-- Document preview and page navigation.
-- Editing of vehicles, DTCs, symptoms, causes, checks, solutions, and outcomes.
-- Clear display of inferences and confidence values.
-- Editing of relationships and the primary DTC.
-- Ability to mark a case as reviewed, corrected, rejected, or archived.
-- Preservation of raw and validated extraction artifacts after edits.
+- A focused `/cases/[caseId]/review` page linked from the existing source recap.
+- One complete case read model with source evidence, inference indicators, confidence, lifecycle status, and review status.
+- A bilingual source-detail action that runs the existing structured automotive analysis and reveals persisted cases without requiring a terminal command.
+- One explicit, Zod-validated form for useful case fields and relationships, with add, edit, remove, and meaningful reordering only.
+- One transactional application service with a simple `updatedAt` concurrency check.
+- Explicit reviewed, rejected, and archived actions; changed data becomes corrected automatically.
+- Preservation of the source, document, raw AI output, and validated extraction after every edit.
+- English and Italian interface copy while technical data remains in the source document language.
+
+The MVP does not include autosave, drafts, bulk editing, hard deletion, approval chains, assignments, comments, multi-user roles, a generic form engine, or editorial version history. Search, filters, and the global case list remain in Phase 6.
 
 ### Expected outcome
 
-An operator can inspect and improve stored data at any time without blocking ingestion.
+An operator can run structured analysis, inspect the resulting cases, and safely correct one stored case at a time without using the terminal, blocking ingestion, or altering the immutable extraction audit trail.
 
 ## Phase 6 — Case browsing
 

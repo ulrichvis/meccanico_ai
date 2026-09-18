@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { CaseReviewForm } from "@/components/cases/case-review-form";
 import { useLanguage } from "@/components/i18n/language-provider";
 import type { MessageKey } from "@/i18n/translator";
 import type { SourceDetail as SourceDetailData } from "@/sources/source-detail-repository";
@@ -59,6 +60,16 @@ const extractionApiErrorKeys = {
   service_unavailable: "sourceDetail.actions.errors.unavailable",
 } as const satisfies Record<string, MessageKey>;
 
+const automotiveAnalysisApiErrorKeys = {
+  invalid_source: "sourceDetail.automotiveAnalysis.errors.invalidSource",
+  source_not_found: "sourceDetail.automotiveAnalysis.errors.notFound",
+  source_not_ready: "sourceDetail.automotiveAnalysis.errors.notReady",
+  source_not_eligible: "sourceDetail.automotiveAnalysis.errors.notEligible",
+  analysis_busy: "sourceDetail.automotiveAnalysis.errors.busy",
+  analysis_failed: "sourceDetail.automotiveAnalysis.errors.failed",
+  service_unavailable: "sourceDetail.automotiveAnalysis.errors.unavailable",
+} as const satisfies Record<string, MessageKey>;
+
 const caseStatusKeys = {
   ACTIVE: "sourceDetail.knowledge.caseStatus.active",
   REJECTED: "sourceDetail.knowledge.caseStatus.rejected",
@@ -99,6 +110,15 @@ const evidenceTypeKeys = {
   UNCLEAR: "sourceDetail.knowledge.evidenceType.unclear",
 } as const satisfies Record<string, MessageKey>;
 
+const relationshipNodeKeys = {
+  DTC: "caseReview.relationships.nodeTypes.dtc",
+  SYMPTOM: "caseReview.relationships.nodeTypes.symptom",
+  CAUSE: "caseReview.relationships.nodeTypes.cause",
+  DIAGNOSTIC_CHECK: "caseReview.relationships.nodeTypes.diagnosticCheck",
+  SOLUTION: "caseReview.relationships.nodeTypes.solution",
+  REPAIR_OUTCOME: "caseReview.relationships.nodeTypes.repairOutcome",
+} as const satisfies Record<string, MessageKey>;
+
 function mappedKey(
   value: string | null,
   keys: Record<string, MessageKey>,
@@ -107,10 +127,17 @@ function mappedKey(
   return (value && keys[value]) || fallback;
 }
 
-export function SourceDetail({ source }: { source: SourceDetailData }) {
+export function SourceDetail({
+  focusedCaseId,
+  source,
+}: {
+  focusedCaseId?: string;
+  source: SourceDetailData;
+}) {
   const { locale, t } = useLanguage();
   const router = useRouter();
-  const [pending, setPending] = useState(false);
+  const [extractionPending, setExtractionPending] = useState(false);
+  const [automotiveAnalysisPending, setAutomotiveAnalysisPending] = useState(false);
   const [actionError, setActionError] = useState<MessageKey | null>(null);
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }),
@@ -128,7 +155,23 @@ export function SourceDetail({ source }: { source: SourceDetailData }) {
   const readablePages = document?.pages.filter((page) => page.textQuality === "readable").length ?? 0;
   const partialPages = document?.pages.filter((page) => page.textQuality === "partial").length ?? 0;
   const unreadablePages = document?.pages.filter((page) => page.textQuality === "unreadable").length ?? 0;
-  const canExtract = source.status === "UPLOADED" || source.status === "FAILED";
+  const canExtract =
+    source.status === "UPLOADED" ||
+    (source.status === "FAILED" && document === null);
+  const automotiveCases = focusedCaseId
+    ? source.automotiveCases.filter((item) => item.id === focusedCaseId)
+    : source.automotiveCases;
+  const focusedCase = focusedCaseId ? automotiveCases[0] : undefined;
+  const canAnalyzeAutomotive =
+    !focusedCaseId &&
+    document !== null &&
+    automotiveCases.length === 0 &&
+    ["TEXT_EXTRACTED", "SCHEMA_INVALID", "FAILED"].includes(source.status);
+  const automotiveAnalysisInProgress =
+    !focusedCaseId &&
+    document !== null &&
+    automotiveCases.length === 0 &&
+    source.status === "PROCESSING";
   const sourceLanguage = document?.language?.match(/^[a-z]{2,3}(?:-[a-z0-9]+)*$/i)
     ? document.language
     : undefined;
@@ -159,9 +202,9 @@ export function SourceDetail({ source }: { source: SourceDetailData }) {
   }
 
   async function startExtraction() {
-    if (!canExtract || pending) return;
+    if (!canExtract || extractionPending) return;
 
-    setPending(true);
+    setExtractionPending(true);
     setActionError(null);
 
     try {
@@ -187,41 +230,114 @@ export function SourceDetail({ source }: { source: SourceDetailData }) {
     } catch {
       setActionError("sourceDetail.actions.errors.unavailable");
     } finally {
-      setPending(false);
+      setExtractionPending(false);
+    }
+  }
+
+  async function startAutomotiveAnalysis() {
+    if (!canAnalyzeAutomotive || automotiveAnalysisPending) return;
+
+    setAutomotiveAnalysisPending(true);
+    setActionError(null);
+
+    try {
+      const response = await fetch(
+        `/api/sources/${source.id}/automotive-analysis`,
+        { method: "POST" },
+      );
+      const body = (await response.json().catch(() => null)) as
+        | { error?: { code?: string }; status?: string }
+        | null;
+
+      if (!response.ok) {
+        setActionError(
+          mappedKey(
+            body?.error?.code ?? null,
+            automotiveAnalysisApiErrorKeys,
+            "sourceDetail.automotiveAnalysis.errors.unavailable",
+          ),
+        );
+        return;
+      }
+
+      router.refresh();
+    } catch {
+      setActionError("sourceDetail.automotiveAnalysis.errors.unavailable");
+    } finally {
+      setAutomotiveAnalysisPending(false);
     }
   }
 
   return (
     <main className="source-detail-page">
-      <Link className="source-back-link" href="/sources">
-        {t("sourceDetail.back")}
+      <Link
+        className="source-back-link"
+        href={focusedCaseId ? `/sources/${source.id}` : "/sources"}
+      >
+        {t(focusedCaseId ? "caseReview.back" : "sourceDetail.back")}
       </Link>
 
       <section className="source-detail-heading">
         <div>
-          <p className="eyebrow">{t("sourceDetail.eyebrow")}</p>
-          <h1>{source.originalFilename ?? t("sources.unnamed")}</h1>
+          <p className="eyebrow">
+            {t(focusedCaseId ? "caseReview.eyebrow" : "sourceDetail.eyebrow")}
+          </p>
+          <h1>
+            {focusedCase?.title ?? source.originalFilename ?? t("sources.unnamed")}
+          </h1>
+          {focusedCaseId && (
+            <p className="case-review-source-context">
+              {t("caseReview.sourceContext", {
+                filename: source.originalFilename ?? t("sources.unnamed"),
+              })}
+            </p>
+          )}
           <div className="source-detail-reference">
-            <span className={`source-status is-${source.status.toLowerCase()}`}>
-              {t(mappedKey(source.status, sourceStatusKeys, "sources.status.unknown"))}
+            <span className={`source-status is-${(focusedCase?.status ?? source.status).toLowerCase()}`}>
+              {focusedCase
+                ? t(mappedKey(focusedCase.status, caseStatusKeys, "sourceDetail.knowledge.caseStatus.unknown"))
+                : t(mappedKey(source.status, sourceStatusKeys, "sources.status.unknown"))}
             </span>
-            <code>{source.id}</code>
+            {focusedCase && (
+              <span className="review-state">
+                {t(mappedKey(focusedCase.reviewStatus, reviewStatusKeys, "sourceDetail.knowledge.reviewStatus.unknown"))}
+              </span>
+            )}
+            <code>{focusedCaseId ?? source.id}</code>
           </div>
         </div>
 
-        {canExtract && (
-          <button
-            className="primary-action source-extraction-action"
-            disabled={pending}
-            onClick={startExtraction}
-            type="button"
-          >
-            {pending
-              ? t("sourceDetail.actions.extracting")
-              : source.status === "FAILED"
-                ? t("sourceDetail.actions.retry")
-                : t("sourceDetail.actions.extract")}
-          </button>
+        {!focusedCaseId && (
+          <div className="source-heading-actions">
+            {canExtract && (
+              <button
+                className="primary-action source-extraction-action"
+                disabled={extractionPending}
+                onClick={startExtraction}
+                type="button"
+              >
+                {extractionPending
+                  ? t("sourceDetail.actions.extracting")
+                  : source.status === "FAILED"
+                    ? t("sourceDetail.actions.retry")
+                    : t("sourceDetail.actions.extract")}
+              </button>
+            )}
+            {(canAnalyzeAutomotive || automotiveAnalysisInProgress) && (
+              <button
+                className="primary-action source-extraction-action"
+                disabled={automotiveAnalysisPending || automotiveAnalysisInProgress}
+                onClick={startAutomotiveAnalysis}
+                type="button"
+              >
+                {automotiveAnalysisPending || automotiveAnalysisInProgress
+                  ? t("sourceDetail.automotiveAnalysis.analyzing")
+                  : source.status === "SCHEMA_INVALID" || source.status === "FAILED"
+                    ? t("sourceDetail.automotiveAnalysis.retry")
+                    : t("sourceDetail.automotiveAnalysis.start")}
+              </button>
+            )}
+          </div>
         )}
       </section>
 
@@ -278,7 +394,9 @@ export function SourceDetail({ source }: { source: SourceDetailData }) {
             </section>
           )}
 
-          {(source.status === "PERSISTED" || source.automotiveCases.length > 0) && (
+          {focusedCase && <CaseReviewForm automotiveCase={focusedCase} />}
+
+          {!focusedCaseId && (source.status === "PERSISTED" || automotiveCases.length > 0) && (
             <section className="source-detail-panel knowledge-recap" aria-labelledby="source-knowledge-title">
               <div className="source-panel-title">
                 <div>
@@ -287,10 +405,10 @@ export function SourceDetail({ source }: { source: SourceDetailData }) {
                 </div>
                 <span>
                   {t(
-                    source.automotiveCases.length === 1
+                    automotiveCases.length === 1
                       ? "sourceDetail.knowledge.countOne"
                       : "sourceDetail.knowledge.countMany",
-                    { count: source.automotiveCases.length },
+                    { count: automotiveCases.length },
                   )}
                 </span>
               </div>
@@ -298,19 +416,29 @@ export function SourceDetail({ source }: { source: SourceDetailData }) {
                 {t("sourceDetail.knowledge.sourceLanguageNotice")}
               </p>
 
-              {source.automotiveCases.length === 0 ? (
+              {automotiveCases.length === 0 ? (
                 <div className="knowledge-empty">
                   <strong>{t("sourceDetail.knowledge.empty.title")}</strong>
                   <p>{t("sourceDetail.knowledge.empty.description")}</p>
                 </div>
               ) : (
                 <div className="knowledge-case-list" lang={sourceLanguage}>
-                  {source.automotiveCases.map((automotiveCase, caseIndex) => (
-                    <details
-                      className="knowledge-case"
-                      key={automotiveCase.id}
-                      open={source.automotiveCases.length === 1}
-                    >
+                  {automotiveCases.map((automotiveCase, caseIndex) => (
+                    <article className="knowledge-case-shell" key={automotiveCase.id}>
+                      {!focusedCaseId && (
+                        <div className="knowledge-case-actions">
+                          <Link
+                            className="secondary-action case-review-link"
+                            href={`/cases/${automotiveCase.id}/review`}
+                          >
+                            {t("caseReview.open")}
+                          </Link>
+                        </div>
+                      )}
+                      <details
+                        className="knowledge-case"
+                        open={automotiveCases.length === 1}
+                      >
                       <summary>
                         <div>
                           <span className="knowledge-case-number">
@@ -327,11 +455,13 @@ export function SourceDetail({ source }: { source: SourceDetailData }) {
                       </summary>
 
                       <div className="knowledge-case-content">
-                        {(automotiveCase.caseType || automotiveCase.complaint || automotiveCase.problemDescription) && (
+                        {(automotiveCase.caseType || automotiveCase.complaint || automotiveCase.problemDescription || automotiveCase.analysisSummary || automotiveCase.reviewNotes) && (
                           <dl className="knowledge-facts">
                             {automotiveCase.caseType && <div><dt>{t("sourceDetail.knowledge.labels.caseType")}</dt><dd>{automotiveCase.caseType}</dd></div>}
                             {automotiveCase.complaint && <div><dt>{t("sourceDetail.knowledge.labels.complaint")}</dt><dd>{automotiveCase.complaint}</dd></div>}
                             {automotiveCase.problemDescription && <div><dt>{t("sourceDetail.knowledge.labels.problem")}</dt><dd>{automotiveCase.problemDescription}</dd></div>}
+                            {automotiveCase.analysisSummary && <div><dt>{t("caseReview.analysisSummary")}</dt><dd>{automotiveCase.analysisSummary}</dd></div>}
+                            {automotiveCase.reviewNotes && <div><dt>{t("caseReview.reviewNotes")}</dt><dd>{automotiveCase.reviewNotes}</dd></div>}
                           </dl>
                         )}
 
@@ -488,8 +618,44 @@ export function SourceDetail({ source }: { source: SourceDetailData }) {
                             </div>
                           </section>
                         )}
+
+                        {automotiveCase.relationships.length > 0 && (
+                          <section className="knowledge-section">
+                            <h3>{t("caseReview.relationships.title")}</h3>
+                            <div className="knowledge-stack">
+                              {automotiveCase.relationships.map((relationship) => (
+                                <article className="knowledge-item relationship-item" key={relationship.id}>
+                                  <div className="knowledge-item-heading">
+                                    <strong>{relationship.relationshipType}</strong>
+                                    {originBadge(relationship.relationOrigin, relationship.confidence)}
+                                  </div>
+                                  <div className="relationship-path">
+                                    <span>
+                                      <small>{t(mappedKey(relationship.fromType, relationshipNodeKeys, "caseReview.relationships.nodeTypes.unknown"))}</small>
+                                      {relationship.fromLabel ?? t(mappedKey(relationship.fromType, relationshipNodeKeys, "caseReview.relationships.nodeTypes.unknown"))}
+                                    </span>
+                                    <span aria-hidden="true">→</span>
+                                    <span>
+                                      <small>{t(mappedKey(relationship.toType, relationshipNodeKeys, "caseReview.relationships.nodeTypes.unknown"))}</small>
+                                      {relationship.toLabel ?? t(mappedKey(relationship.toType, relationshipNodeKeys, "caseReview.relationships.nodeTypes.unknown"))}
+                                    </span>
+                                  </div>
+                                  {relationship.evidence && (
+                                    <p className="relationship-evidence">
+                                      {relationship.evidence.excerpt}
+                                      {relationship.evidence.pageNumber
+                                        ? ` · ${t("sourceDetail.knowledge.labels.page", { page: relationship.evidence.pageNumber })}`
+                                        : ""}
+                                    </p>
+                                  )}
+                                </article>
+                              ))}
+                            </div>
+                          </section>
+                        )}
                       </div>
-                    </details>
+                      </details>
+                    </article>
                   ))}
                 </div>
               )}
