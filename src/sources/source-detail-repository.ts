@@ -43,7 +43,116 @@ const validatedAttemptSchema = z.looseObject({
   usage: usageSchema.nullable().optional(),
 });
 
+type OriginFields = {
+  confidence: string | null;
+  relationOrigin: string;
+};
+
+export interface AutomotiveCaseDetail {
+  caseType: string | null;
+  causes: Array<OriginFields & {
+    description: string | null;
+    id: string;
+    name: string;
+    probabilitySource: string | null;
+  }>;
+  complaint: string | null;
+  components: Array<OriginFields & {
+    componentType: string | null;
+    id: string;
+    name: string;
+    role: string | null;
+  }>;
+  createdAt: string;
+  diagnosticChecks: Array<OriginFields & {
+    actualResult: string | null;
+    description: string;
+    expectedResult: string | null;
+    id: string;
+    interpretation: string | null;
+    measurements: Array<OriginFields & {
+      conditions: string | null;
+      id: string;
+      maxValue: string | null;
+      minValue: string | null;
+      numericValue: string | null;
+      parameter: string;
+      unit: string | null;
+      valueText: string | null;
+    }>;
+    sequenceOrder: number | null;
+  }>;
+  dtcs: Array<OriginFields & {
+    code: string;
+    description: string | null;
+    id: string;
+    isPrimary: boolean;
+    relationshipType: string;
+  }>;
+  evidence: Array<OriginFields & {
+    entityType: string | null;
+    evidenceType: string;
+    excerpt: string;
+    id: string;
+    pageNumber: number | null;
+  }>;
+  id: string;
+  partsMaterials: Array<OriginFields & {
+    id: string;
+    manufacturer: string | null;
+    name: string;
+    notes: string | null;
+    partNumber: string | null;
+  }>;
+  problemDescription: string | null;
+  reviewStatus: string;
+  solutions: Array<OriginFields & {
+    description: string | null;
+    id: string;
+    name: string;
+    outcomes: Array<{
+      attempted: boolean | null;
+      caseCount: number | null;
+      confirmed: boolean | null;
+      id: string;
+      notes: string | null;
+      successful: boolean | null;
+      successfulCaseCount: number | null;
+    }>;
+    probabilitySource: string | null;
+    procedures: Array<OriginFields & {
+      id: string;
+      instruction: string;
+      sequenceOrder: number;
+    }>;
+    repairConfirmed: boolean | null;
+    repairSuccessful: boolean | null;
+  }>;
+  status: string;
+  symptoms: Array<OriginFields & {
+    description: string | null;
+    id: string;
+    name: string;
+  }>;
+  title: string | null;
+  vehicles: Array<OriginFields & {
+    brand: string | null;
+    compatibilityNote: string | null;
+    engineCode: string | null;
+    engineDescription: string | null;
+    fuelType: string | null;
+    generation: string | null;
+    id: string;
+    model: string | null;
+    power: string | null;
+    transmission: string | null;
+    yearFrom: number | null;
+    yearTo: number | null;
+  }>;
+}
+
 export interface SourceDetail {
+  automotiveCases: AutomotiveCaseDetail[];
   author: string | null;
   characterCount: number;
   createdAt: string;
@@ -118,6 +227,173 @@ export async function getSourceDetail(
           validatedOutput: true,
         },
       },
+      cases: {
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+        select: {
+          caseType: true,
+          causes: {
+            orderBy: { id: "asc" },
+            select: {
+              cause: { select: { normalizedName: true } },
+              confidence: true,
+              description: true,
+              id: true,
+              probabilitySource: true,
+              relationOrigin: true,
+            },
+          },
+          complaint: true,
+          components: {
+            orderBy: { id: "asc" },
+            select: {
+              component: {
+                select: { componentType: true, name: true },
+              },
+              confidence: true,
+              id: true,
+              relationOrigin: true,
+              role: true,
+            },
+          },
+          createdAt: true,
+          diagnosticChecks: {
+            orderBy: [{ sequenceOrder: "asc" }, { id: "asc" }],
+            select: {
+              actualResult: true,
+              confidence: true,
+              description: true,
+              expectedResult: true,
+              id: true,
+              interpretation: true,
+              measurements: {
+                orderBy: { id: "asc" },
+                select: {
+                  conditions: true,
+                  confidence: true,
+                  id: true,
+                  maxValue: true,
+                  minValue: true,
+                  numericValue: true,
+                  parameter: true,
+                  relationOrigin: true,
+                  unit: true,
+                  valueText: true,
+                },
+              },
+              relationOrigin: true,
+              sequenceOrder: true,
+            },
+          },
+          dtcs: {
+            orderBy: [{ isPrimary: "desc" }, { id: "asc" }],
+            select: {
+              confidence: true,
+              dtc: { select: { code: true, description: true } },
+              id: true,
+              isPrimary: true,
+              relationOrigin: true,
+              relationshipType: true,
+            },
+          },
+          evidence: {
+            orderBy: [{ pageNumber: "asc" }, { id: "asc" }],
+            select: {
+              confidence: true,
+              entityType: true,
+              evidenceType: true,
+              excerpt: true,
+              id: true,
+              pageNumber: true,
+              relationOrigin: true,
+            },
+          },
+          id: true,
+          partsMaterials: {
+            orderBy: { id: "asc" },
+            select: {
+              confidence: true,
+              id: true,
+              manufacturer: true,
+              name: true,
+              notes: true,
+              partNumber: true,
+              relationOrigin: true,
+            },
+          },
+          problemDescription: true,
+          reviewStatus: true,
+          solutions: {
+            orderBy: { id: "asc" },
+            select: {
+              confidence: true,
+              description: true,
+              id: true,
+              outcomes: {
+                orderBy: { id: "asc" },
+                select: {
+                  attempted: true,
+                  caseCount: true,
+                  confirmed: true,
+                  id: true,
+                  notes: true,
+                  successful: true,
+                  successfulCaseCount: true,
+                },
+              },
+              probabilitySource: true,
+              procedures: {
+                orderBy: [{ sequenceOrder: "asc" }, { id: "asc" }],
+                select: {
+                  confidence: true,
+                  id: true,
+                  instruction: true,
+                  relationOrigin: true,
+                  sequenceOrder: true,
+                },
+              },
+              relationOrigin: true,
+              repairConfirmed: true,
+              repairSuccessful: true,
+              solution: { select: { normalizedName: true } },
+            },
+          },
+          status: true,
+          symptoms: {
+            orderBy: { id: "asc" },
+            select: {
+              confidence: true,
+              description: true,
+              id: true,
+              relationOrigin: true,
+              symptom: { select: { normalizedName: true } },
+            },
+          },
+          title: true,
+          vehicles: {
+            orderBy: { id: "asc" },
+            select: {
+              compatibilityNote: true,
+              confidence: true,
+              id: true,
+              relationOrigin: true,
+              vehicle: {
+                select: {
+                  brand: true,
+                  engineCode: true,
+                  engineDescription: true,
+                  fuelType: true,
+                  generation: true,
+                  model: true,
+                  power: true,
+                  transmission: true,
+                  yearFrom: true,
+                  yearTo: true,
+                },
+              },
+            },
+          },
+        },
+      },
       id: true,
       originalFilename: true,
       rawText: true,
@@ -158,6 +434,113 @@ export async function getSourceDetail(
 
   return {
     author: source.author,
+    automotiveCases: source.cases.map((storedCase) => ({
+      caseType: storedCase.caseType,
+      causes: storedCase.causes.map((item) => ({
+        confidence: item.confidence?.toString() ?? null,
+        description: item.description,
+        id: item.id,
+        name: item.cause.normalizedName,
+        probabilitySource: item.probabilitySource,
+        relationOrigin: item.relationOrigin,
+      })),
+      complaint: storedCase.complaint,
+      components: storedCase.components.map((item) => ({
+        componentType: item.component.componentType,
+        confidence: item.confidence?.toString() ?? null,
+        id: item.id,
+        name: item.component.name,
+        relationOrigin: item.relationOrigin,
+        role: item.role,
+      })),
+      createdAt: storedCase.createdAt.toISOString(),
+      diagnosticChecks: storedCase.diagnosticChecks.map((item) => ({
+        actualResult: item.actualResult,
+        confidence: item.confidence?.toString() ?? null,
+        description: item.description,
+        expectedResult: item.expectedResult,
+        id: item.id,
+        interpretation: item.interpretation,
+        measurements: item.measurements.map((measurement) => ({
+          conditions: measurement.conditions,
+          confidence: measurement.confidence?.toString() ?? null,
+          id: measurement.id,
+          maxValue: measurement.maxValue?.toString() ?? null,
+          minValue: measurement.minValue?.toString() ?? null,
+          numericValue: measurement.numericValue?.toString() ?? null,
+          parameter: measurement.parameter,
+          relationOrigin: measurement.relationOrigin,
+          unit: measurement.unit,
+          valueText: measurement.valueText,
+        })),
+        relationOrigin: item.relationOrigin,
+        sequenceOrder: item.sequenceOrder,
+      })),
+      dtcs: storedCase.dtcs.map((item) => ({
+        code: item.dtc.code,
+        confidence: item.confidence?.toString() ?? null,
+        description: item.dtc.description,
+        id: item.id,
+        isPrimary: item.isPrimary,
+        relationOrigin: item.relationOrigin,
+        relationshipType: item.relationshipType,
+      })),
+      evidence: storedCase.evidence.map((item) => ({
+        confidence: item.confidence?.toString() ?? null,
+        entityType: item.entityType,
+        evidenceType: item.evidenceType,
+        excerpt: item.excerpt,
+        id: item.id,
+        pageNumber: item.pageNumber,
+        relationOrigin: item.relationOrigin,
+      })),
+      id: storedCase.id,
+      partsMaterials: storedCase.partsMaterials.map((item) => ({
+        confidence: item.confidence?.toString() ?? null,
+        id: item.id,
+        manufacturer: item.manufacturer,
+        name: item.name,
+        notes: item.notes,
+        partNumber: item.partNumber,
+        relationOrigin: item.relationOrigin,
+      })),
+      problemDescription: storedCase.problemDescription,
+      reviewStatus: storedCase.reviewStatus,
+      solutions: storedCase.solutions.map((item) => ({
+        confidence: item.confidence?.toString() ?? null,
+        description: item.description,
+        id: item.id,
+        name: item.solution.normalizedName,
+        outcomes: item.outcomes,
+        probabilitySource: item.probabilitySource,
+        procedures: item.procedures.map((procedure) => ({
+          confidence: procedure.confidence?.toString() ?? null,
+          id: procedure.id,
+          instruction: procedure.instruction,
+          relationOrigin: procedure.relationOrigin,
+          sequenceOrder: procedure.sequenceOrder,
+        })),
+        relationOrigin: item.relationOrigin,
+        repairConfirmed: item.repairConfirmed,
+        repairSuccessful: item.repairSuccessful,
+      })),
+      status: storedCase.status,
+      symptoms: storedCase.symptoms.map((item) => ({
+        confidence: item.confidence?.toString() ?? null,
+        description: item.description,
+        id: item.id,
+        name: item.symptom.normalizedName,
+        relationOrigin: item.relationOrigin,
+      })),
+      title: storedCase.title,
+      vehicles: storedCase.vehicles.map((item) => ({
+        ...item.vehicle,
+        compatibilityNote: item.compatibilityNote,
+        confidence: item.confidence?.toString() ?? null,
+        id: item.id,
+        relationOrigin: item.relationOrigin,
+      })),
+    })),
     characterCount:
       document?.quality?.characterCount ?? source.rawText?.length ?? 0,
     createdAt: source.createdAt.toISOString(),

@@ -99,6 +99,14 @@ The current schema intentionally has no token-usage fields. Token counts, durati
 
 The structured automotive response planned for Phase 3 is an exchange contract, not a mirror of database rows. Temporary references in the response allow the normalizer to resolve relationships before database-generated UUIDs exist.
 
+Phase 4.1 implements this boundary in `src/normalization/automotive-normalizer.ts`. DTC lookup codes use Unicode compatibility normalization, whitespace removal, and uppercase while the extracted `code` and `description` remain unchanged. Reusable-name keys use Unicode compatibility normalization, collapsed whitespace, and lowercase while the extracted name remains present in the normalized in-memory record and the validated audit artifact. Vehicle lookup keys include only supplied applicability fields; a vehicle with no identifying field receives a case-local key so unrelated unknown vehicles are never merged.
+
+The normalizer resolves temporary references to typed local targets but never invents database UUIDs. Phase 4.2 resolves those references to database UUIDs and writes every case from an extraction in one transaction. Any failed association, reference, or constraint rolls back the complete graph.
+
+Phase 4.3 treats `sources.status = persisted` as the completion marker for the accepted extraction, including a valid extraction with zero cases. The source transition occurs in the same transaction as graph persistence. This avoids placeholder domain rows and gives zero-case retries an explicit idempotency signal while the completed `ExtractionJob.validatedOutput` preserves the accepted audit result.
+
+Phase 4.4 presents the relational graph through a source-detail DTO. Stored source wording and technical identifiers are never translated for display. Reusable concept names may use their conservative normalized lookup form where the association has no separate display-name column, but normalization must never become translation. Interface labels remain outside the data model and come from the English and Italian message catalogs.
+
 | Structured concept | Relational destination |
 | --- | --- |
 | source metadata | `sources` and `documents` |
@@ -155,7 +163,7 @@ Newly normalized cases are inserted with `status = active` and `review_status = 
 
 ### `vehicles` and `case_vehicles`
 
-`vehicles` contains `brand`, `model`, `generation`, `year_from`, `year_to`, `engine_description`, `engine_code`, `fuel_type`, `power`, and `transmission`. Unknown fields remain `null`.
+`vehicles` contains the required unique `normalized_key` plus `brand`, `model`, `generation`, `year_from`, `year_to`, `engine_description`, `engine_code`, `fuel_type`, `power`, and `transmission`. Unknown descriptive fields remain `null`. The normalized key is application-generated from supplied applicability fields; unidentified vehicles use a case-local key so unrelated unknown vehicles are not merged.
 
 `case_vehicles` links several vehicles to a case and may contain `relation_origin`, `confidence`, and a compatibility note.
 
@@ -255,7 +263,7 @@ Future table, not implemented in the MVP. It may aggregate vehicle context, engi
 - `extraction_jobs(source_id, created_at desc)`;
 - `cases(status, review_status, created_at desc)`;
 - unique `dtcs(normalized_code)`;
-- `vehicles(brand, model, engine_code)`;
+- unique `vehicles(normalized_key)`;
 - indexes on every foreign key in association tables;
 - add full-text search only after real query patterns are known.
 

@@ -57,8 +57,12 @@ The current environment schema provides safe defaults for commands that do not a
 | `pnpm automotive-adapter:verify` | Verify the OpenAI automotive Structured Outputs adapter with synthetic responses; no OpenAI charge. |
 | `pnpm automotive-persistence:verify` | Verify Phase 3 quality gates, bounded escalation, audit history, idempotency, and zero domain writes in Supabase using temporary records; no OpenAI charge. |
 | `pnpm automotive-live:verify` | Run three representative structured-analysis checks against the configured OpenAI model; this makes billable API calls. |
-| `pnpm automotive:process --list` | List sources whose saved Phase 2 text is eligible for structured automotive analysis. |
-| `pnpm automotive:process <source-id>` | Send one source's saved page-aware text to OpenAI and preserve the Phase 3 attempt; this is billable and does not normalize domain rows. |
+| `pnpm automotive:process --list` | List sources eligible for new structured analysis or resumable accepted-artifact persistence. |
+| `pnpm automotive:process <source-id>` | Run structured analysis when needed, then normalize and atomically persist the accepted graph. Retrying a completed source makes no additional OpenAI call. |
+| `pnpm automotive-normalizer:verify` | Verify pure Phase 4 normalization, lookup keys, database enum mapping, defaults, and typed reference resolution without OpenAI or database access. |
+| `pnpm automotive-graph:verify` | Verify atomic graph persistence, shared-reference upserts, UUID resolution, duplicate protection, immutable extraction artifacts, and rollback against the configured Supabase database; no OpenAI call is made. |
+| `pnpm automotive-orchestration:verify` | Verify the complete Phase 3-to-4 flow against Supabase with a synthetic extractor, including atomic source completion, retry without another AI call, immutable audit output, and explicit zero-case completion. |
+| `pnpm structured-recap:verify` | Verify a complete Italian structured recap query against Supabase with isolated temporary records and automatic cleanup. |
 
 `pnpm build` and `pnpm install` regenerate Prisma Client automatically. Schema validation and client generation work while database variables are empty; migration and query commands require credentials.
 
@@ -183,11 +187,19 @@ The adapter verification injects synthetic provider responses. It confirms the R
 
 The persistence verification uses the configured Supabase database but never contacts OpenAI. It creates temporary Phase 2-like text records, checks a measurable semantic failure followed by one configured escalation, verifies one immutable `ExtractionJob` per attempt, confirms idempotent completion and non-retryable provider failure, and proves that no normalized automotive row is created. It deletes only its own UUID-scoped records in a final cleanup transaction.
 
-Real automotive processing requires `OPENAI_AUTOMOTIVE_MODEL`. Optional escalation and exceptional models must be distinct and are considered only after schema, incomplete-response, malformed-response, or deterministic semantic failure. `OPENAI_AUTOMOTIVE_MAX_ATTEMPTS` is bounded from one to three and defaults to two. A successful Phase 3 job intentionally leaves its source in `processing`; Phase 4 will own the transaction that creates domain rows and advances the source to `persisted`.
+Real automotive processing requires `OPENAI_AUTOMOTIVE_MODEL`. Optional escalation and exceptional models must be distinct and are considered only after schema, incomplete-response, malformed-response, or deterministic semantic failure. `OPENAI_AUTOMOTIVE_MAX_ATTEMPTS` is bounded from one to three and defaults to two. A successful Phase 3 job is immediately passed to the Phase 4 normalizer and atomic graph persistence service. The source becomes `persisted` only in the successful graph transaction.
 
-The application therefore makes two separate OpenAI calls in the complete ingestion path. Phase 2 sends the original PDF for faithful page-aware transcription. Phase 3 later sends only that saved text through `automotive:process` for semantic classification. The source-list UI does not trigger the second call yet; automatic orchestration belongs to Phase 4, after normalization can persist the accepted structure atomically.
+The application therefore makes two separate OpenAI calls in the complete ingestion path. Phase 2 sends the original PDF for faithful page-aware transcription. Phase 3 later sends only that saved text through `automotive:process` for semantic classification. Normalization and persistence reuse the saved accepted response and make no additional AI call. The source-list UI does not trigger this second processing stage yet; that controlled action and its recap belong to Phase 4.4.
 
 `pnpm automotive-live:verify` uses only three synthetic text inputs. It covers generic applicability, multiple DTCs without a forced primary code, diagnostic checks versus repairs, qualitative frequency, multiple independent cases, measurements, contradictory procedures, repair outcomes, incomplete text, and the visual-only boundary. It prints aggregate counts and token usage but does not print complete provider responses or create database rows. See `docs/PHASE_3_VERIFICATION.md`.
+
+Phase 4.1 is intentionally database-free. `pnpm automotive-normalizer:verify` revalidates the accepted extraction and converts it into database-oriented in-memory records. It preserves original values, adds only conservative lookup keys, maps contract enums to Prisma enum names, assigns `ACTIVE` and `UNREVIEWED`, and resolves temporary references to typed local targets.
+
+Phase 4.2 consumes that normalized graph inside one Prisma interactive transaction. The repository locks and validates ownership, atomically upserts reusable reference rows, creates case-owned records and associations, resolves all UUID links, and rolls back the entire graph on failure. It neither overwrites `ExtractionJob` artifacts nor advances the source status. `pnpm automotive-graph:verify` creates isolated synthetic records, verifies a full two-case graph and a relationship/evidence cycle, proves duplicate protection and rollback, then removes only its own fixtures.
+
+Phase 4.3 uses `processAutomotiveKnowledgeSource` as the application boundary shared by the trusted command and future transports. It first obtains or reuses an accepted Phase 3 job, then loads and revalidates its saved content, normalizes it, and persists the graph. Graph creation and the final `PERSISTED` source status share one transaction. A valid zero-case extraction creates no placeholder row; the persisted source status and immutable completed job are its completion record. `pnpm automotive-orchestration:verify` proves normal and zero-case retries make no second model call and create no duplicates.
+
+Phase 4.4 extends the source-detail read model with the complete persisted automotive graph. Run `pnpm structured-recap:verify` to create an isolated Italian fixture, assert that the relational query preserves its technical wording, and remove the fixture automatically. For manual browser verification, run the command with `-- --keep`, open the printed `/sources/<source-id>` URL, switch between English and Italian, and confirm that only interface copy changes. Remove the fixture afterward with `pnpm structured-recap:verify -- --cleanup <source-id>`. Also check a 390 px viewport for horizontal overflow. The cleanup command refuses sources whose filename does not start with `structured-recap-`.
 
 ## Migration conventions
 
@@ -197,6 +209,7 @@ The application therefore makes two separate OpenAI calls in the complete ingest
 - Before production, verify a migration against both an empty database and a database containing representative examples.
 - Add unsupported PostgreSQL features such as `CHECK` constraints directly to a create-only migration before applying it.
 - Use `DIRECT_URL` for Prisma CLI operations and `DATABASE_URL` only for application runtime queries.
+- Migration `20260917120000_add_vehicle_normalized_key` adds the unique vehicle identity required for atomic upserts. It was applied without a backfill because the target `vehicles` table was empty.
 
 ## Code conventions
 

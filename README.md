@@ -62,6 +62,7 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Phase 2 text extraction plan](docs/TEXT_EXTRACTION.md)
 - [Phase 2 verification report](docs/PHASE_2_VERIFICATION.md)
 - [Phase 3 verification report](docs/PHASE_3_VERIFICATION.md)
+- [Phase 4 verification report](docs/PHASE_4_VERIFICATION.md)
 - [Development guide](docs/DEVELOPMENT.md)
 - [Frontend internationalization](docs/I18N.md)
 - [Roadmap](docs/ROADMAP.md)
@@ -81,10 +82,14 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Safe extraction operations and persisted recap](docs/decisions/0013-safe-extraction-operations-and-recap.md)
 - [Replaceable automotive AI adapter](docs/decisions/0014-replaceable-automotive-ai-adapter.md)
 - [Bounded automotive analysis and audit history](docs/decisions/0015-bounded-automotive-analysis-and-audit.md)
+- [Pure normalization before relational persistence](docs/decisions/0016-pure-normalization-boundary.md)
+- [Atomic automotive graph persistence](docs/decisions/0017-atomic-automotive-graph-persistence.md)
+- [Idempotent automotive processing orchestration](docs/decisions/0018-idempotent-automotive-processing-orchestration.md)
+- [Source-language structured extraction recap](docs/decisions/0019-source-language-structured-recap.md)
 
 ## Current status
 
-Phases 1, 2, and 3 are complete. Structured automotive analysis has been verified with live representative inputs, while normalization and domain-table persistence remain intentionally disabled. Phase 4 is the next phase and requires explicit approval before implementation.
+Phases 1 through 4 are complete. Accepted automotive extractions are normalized, persisted atomically as active and unreviewed relational data, and shown in a bilingual structured recap that preserves the source language. Phase 5 optional admin review and editing is next and has not started.
 
 ## Run locally
 

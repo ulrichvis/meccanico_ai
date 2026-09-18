@@ -70,7 +70,11 @@ type ExtractedCase = {
 
 Internal identifiers in the response are temporary references used to connect elements before database insertion.
 
+The Phase 4 normalizer converts these strings to typed local targets before any database write. It does not assign UUIDs, call OpenAI, or query PostgreSQL. This preserves a provider- and prompt-independent boundary between the validated exchange artifact and relational persistence.
+
 The response must not contain database UUIDs, normalized database keys, timestamps, source status, case lifecycle status, or review status. Those values belong to the application and normalizer, not the model.
+
+All source-derived values remain in the document language. The structured recap must render those values unchanged; only surrounding interface labels and application-owned statuses are localized. Translation of extracted technical content is outside the current scope.
 
 Every extracted case and extractable entity uses a temporary `ref`. References are unique across one case. Generic relationship endpoints are checked against their declared node type, while measurements, repair procedures, and repair outcomes use their dedicated `diagnosticCheckRef` or `solutionRef` fields. An evidence `targetRef` may address any registered item in the same case, and a relationship may reference evidence from that case.
 
@@ -157,6 +161,7 @@ Zod validates shape. The normalizer validates these cross-field rules:
       "title": "Insufficient boost pressure",
       "vehicles": [
         {
+          "ref": "vehicle-1",
           "brand": "VAG",
           "model": null,
           "generation": null,

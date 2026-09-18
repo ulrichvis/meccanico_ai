@@ -203,6 +203,7 @@ model Case {
 
 model Vehicle {
   id                String        @id @default(uuid()) @db.Uuid
+  normalizedKey     String        @unique(map: "vehicles_normalized_key_key") @map("normalized_key")
   brand             String?
   model             String?
   generation        String?

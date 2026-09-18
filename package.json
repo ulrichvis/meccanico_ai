@@ -30,7 +30,11 @@
     "automotive-adapter:verify": "tsx scripts/verify-openai-automotive-adapter.ts",
     "automotive-persistence:verify": "tsx scripts/verify-automotive-extraction-persistence.ts",
     "automotive-live:verify": "tsx scripts/verify-live-automotive-extraction.ts",
-    "automotive:process": "tsx scripts/process-automotive-source.ts"
+    "automotive:process": "tsx scripts/process-automotive-source.ts",
+    "automotive-normalizer:verify": "tsx scripts/verify-automotive-normalizer.ts",
+    "automotive-graph:verify": "tsx scripts/verify-automotive-graph-persistence.ts",
+    "automotive-orchestration:verify": "tsx scripts/verify-automotive-orchestration.ts",
+    "structured-recap:verify": "tsx scripts/verify-structured-recap.ts"
   },
   "engines": {
     "node": "24.19.x",

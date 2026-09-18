@@ -200,6 +200,99 @@
       "extractedAt": "Extracted",
       "prompt": "Prompt version"
     },
+    "knowledge": {
+      "eyebrow": "Structured automotive data",
+      "title": "Technical knowledge recap",
+      "countOne": "{count} case",
+      "countMany": "{count} cases",
+      "caseNumber": "Case {number}",
+      "untitledCase": "Untitled technical case",
+      "sourceLanguageNotice": "Extracted technical data is shown in the source document language and is not translated.",
+      "empty": {
+        "title": "No automotive case was found",
+        "description": "The structured extraction completed successfully without creating a technical case."
+      },
+      "sections": {
+        "vehicles": "Vehicle applicability",
+        "dtcs": "Diagnostic trouble codes",
+        "symptoms": "Symptoms",
+        "causes": "Possible causes",
+        "components": "Components",
+        "checks": "Diagnostic checks and measurements",
+        "solutions": "Solutions, procedures and outcomes",
+        "parts": "Parts and materials",
+        "evidence": "Source evidence"
+      },
+      "labels": {
+        "caseType": "Case type",
+        "complaint": "Complaint",
+        "problem": "Problem description",
+        "unspecifiedVehicle": "Unspecified vehicle",
+        "years": "Years",
+        "engine": "Engine",
+        "engineCode": "Engine code",
+        "fuel": "Fuel",
+        "power": "Power",
+        "transmission": "Transmission",
+        "compatibility": "Compatibility",
+        "sourceFrequency": "Frequency stated by the source:",
+        "expected": "Expected result",
+        "actual": "Actual result",
+        "interpretation": "Interpretation",
+        "repairConfirmed": "Repair confirmed",
+        "repairSuccessful": "Repair successful",
+        "outcome": "Repair outcome",
+        "attempted": "Attempted",
+        "successful": "Successful",
+        "confirmed": "Confirmed",
+        "page": "Page {page}"
+      },
+      "values": {
+        "yes": "Yes",
+        "no": "No"
+      },
+      "origin": {
+        "explicit": "Source fact",
+        "inference": "AI inference",
+        "human": "Human addition",
+        "unknown": "Unknown origin",
+        "confidence": " · {value}% confidence"
+      },
+      "caseStatus": {
+        "active": "Active",
+        "rejected": "Rejected",
+        "archived": "Archived",
+        "unknown": "Unknown status"
+      },
+      "reviewStatus": {
+        "unreviewed": "Unreviewed",
+        "reviewed": "Reviewed",
+        "corrected": "Corrected",
+        "unknown": "Unknown review status"
+      },
+      "dtcRelationship": {
+        "primary": "Primary DTC",
+        "possibleCause": "Possible cause",
+        "consequence": "Consequence",
+        "associatedFault": "Associated fault",
+        "alternativeFault": "Alternative fault",
+        "sameSystem": "Same system",
+        "secondaryCode": "Secondary code",
+        "unclear": "Unclear relationship",
+        "unknown": "Unknown relationship"
+      },
+      "evidenceType": {
+        "theoretical": "Theoretical possible solution",
+        "manufacturer": "Manufacturer documentation",
+        "bulletin": "Technical bulletin",
+        "workshop": "Workshop report",
+        "realCase": "Real case",
+        "confirmedRepair": "Confirmed repair",
+        "multipleCases": "Multiple confirmed cases",
+        "unclear": "Unclear evidence",
+        "unknown": "Unknown evidence type"
+      }
+    },
     "quality": {
       "label": "Page text quality",
       "readable": "readable",

@@ -16,7 +16,9 @@ async function main() {
       const sources = await database.source.findMany({
         where: {
           type: "PDF",
-          status: { in: ["TEXT_EXTRACTED", "SCHEMA_INVALID", "FAILED"] },
+          status: {
+            in: ["TEXT_EXTRACTED", "PROCESSING", "SCHEMA_INVALID", "FAILED"],
+          },
           documents: { some: {} },
         },
         select: { id: true, originalFilename: true, status: true },

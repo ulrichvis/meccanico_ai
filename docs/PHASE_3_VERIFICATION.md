@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 3 is complete and verified as of 2026-09-17. Automatic normalization remains disabled until Phase 4.
+Phase 3 is complete and verified as of 2026-09-17. Phase 4 subsequently enabled automatic normalization and atomic relational persistence.
 
 ## What was verified
 
@@ -34,7 +34,7 @@ The synthetic Supabase integration verification confirmed:
 
 ## Operator boundary
 
-`pnpm automotive:process --list` lists eligible sources without making an OpenAI call. `pnpm automotive:process <source-id>` performs the second, billable AI call on saved Phase 2 text and preserves the Phase 3 result. It intentionally leaves the source in `processing`; do not use it on production sources until Phase 4 normalization is ready unless that intermediate state is explicitly desired.
+`pnpm automotive:process --list` lists eligible sources without making an OpenAI call. `pnpm automotive:process <source-id>` performs the second, billable AI call on saved Phase 2 text when needed, preserves the accepted Phase 3 result, and now continues through Phase 4 normalization and atomic relational persistence. Retrying a persisted source reuses its accepted artifact and makes no additional OpenAI call.
 
 ## Verification commands
 
@@ -55,4 +55,4 @@ pnpm build
 
 ## Remaining boundary
 
-These examples provide evidence for the selected scenarios, not a guarantee that every future document will be perfectly classified. Phase 4 must retain the validated extraction and evidence while atomically normalizing all cases as `unreviewed`. Human review remains optional and may correct the stored result later.
+These examples provide evidence for the selected scenarios, not a guarantee that every future document will be perfectly classified. Phase 4 retains the validated extraction and evidence while atomically normalizing all cases as `unreviewed`. Human review remains optional and may correct the stored result later.

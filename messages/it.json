@@ -200,6 +200,99 @@
       "extractedAt": "Estratto",
       "prompt": "Versione del prompt"
     },
+    "knowledge": {
+      "eyebrow": "Dati automobilistici strutturati",
+      "title": "Riepilogo delle conoscenze tecniche",
+      "countOne": "{count} caso",
+      "countMany": "{count} casi",
+      "caseNumber": "Caso {number}",
+      "untitledCase": "Caso tecnico senza titolo",
+      "sourceLanguageNotice": "I dati tecnici estratti sono mostrati nella lingua del documento originale e non vengono tradotti.",
+      "empty": {
+        "title": "Nessun caso automobilistico trovato",
+        "description": "L'estrazione strutturata è stata completata correttamente senza creare un caso tecnico."
+      },
+      "sections": {
+        "vehicles": "Applicabilità del veicolo",
+        "dtcs": "Codici diagnostici di guasto",
+        "symptoms": "Sintomi",
+        "causes": "Possibili cause",
+        "components": "Componenti",
+        "checks": "Controlli diagnostici e misurazioni",
+        "solutions": "Soluzioni, procedure e risultati",
+        "parts": "Ricambi e materiali",
+        "evidence": "Prove dalla fonte"
+      },
+      "labels": {
+        "caseType": "Tipo di caso",
+        "complaint": "Segnalazione",
+        "problem": "Descrizione del problema",
+        "unspecifiedVehicle": "Veicolo non specificato",
+        "years": "Anni",
+        "engine": "Motore",
+        "engineCode": "Codice motore",
+        "fuel": "Carburante",
+        "power": "Potenza",
+        "transmission": "Trasmissione",
+        "compatibility": "Compatibilità",
+        "sourceFrequency": "Frequenza indicata dalla fonte:",
+        "expected": "Risultato previsto",
+        "actual": "Risultato effettivo",
+        "interpretation": "Interpretazione",
+        "repairConfirmed": "Riparazione confermata",
+        "repairSuccessful": "Riparazione riuscita",
+        "outcome": "Esito della riparazione",
+        "attempted": "Tentata",
+        "successful": "Riuscita",
+        "confirmed": "Confermata",
+        "page": "Pagina {page}"
+      },
+      "values": {
+        "yes": "Sì",
+        "no": "No"
+      },
+      "origin": {
+        "explicit": "Fatto della fonte",
+        "inference": "Inferenza IA",
+        "human": "Aggiunta umana",
+        "unknown": "Origine sconosciuta",
+        "confidence": " · confidenza {value}%"
+      },
+      "caseStatus": {
+        "active": "Attivo",
+        "rejected": "Rifiutato",
+        "archived": "Archiviato",
+        "unknown": "Stato sconosciuto"
+      },
+      "reviewStatus": {
+        "unreviewed": "Non verificato",
+        "reviewed": "Verificato",
+        "corrected": "Corretto",
+        "unknown": "Stato di verifica sconosciuto"
+      },
+      "dtcRelationship": {
+        "primary": "DTC principale",
+        "possibleCause": "Possibile causa",
+        "consequence": "Conseguenza",
+        "associatedFault": "Guasto associato",
+        "alternativeFault": "Guasto alternativo",
+        "sameSystem": "Stesso sistema",
+        "secondaryCode": "Codice secondario",
+        "unclear": "Relazione non chiara",
+        "unknown": "Relazione sconosciuta"
+      },
+      "evidenceType": {
+        "theoretical": "Possibile soluzione teorica",
+        "manufacturer": "Documentazione del costruttore",
+        "bulletin": "Bollettino tecnico",
+        "workshop": "Rapporto d'officina",
+        "realCase": "Caso reale",
+        "confirmedRepair": "Riparazione confermata",
+        "multipleCases": "Più casi confermati",
+        "unclear": "Prova non chiara",
+        "unknown": "Tipo di prova sconosciuto"
+      }
+    },
     "quality": {
       "label": "Qualità del testo delle pagine",
       "readable": "leggibili",

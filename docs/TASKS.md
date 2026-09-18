@@ -2,7 +2,7 @@
 
 This file is the project's operational tracker. Check only tasks that are actually complete and verified.
 
-## Active phase: Phase 3 complete — awaiting Phase 4 approval
+## Next phase: Phase 5 — Optional admin review and editing
 
 ### 1. Initialization
 
@@ -225,16 +225,48 @@ Phase 3 consumes only the validated page-aware text produced by Phase 2. It does
 
 ### Phase 4 — Normalization and relational persistence
 
-- [ ] Build a normalizer that maps temporary extraction references to application entities without coupling the schema to a prompt version.
-- [ ] Normalize DTC codes without altering the original code or description.
-- [ ] Apply conservative reference-data deduplication while preserving case-specific wording.
-- [ ] Validate all graph and evidence references, confidence ranges, numeric bounds, primary-DTC uniqueness, and repair-outcome invariants.
-- [ ] Keep causes, diagnostic checks, proposed repairs, and confirmed outcomes as distinct entities.
-- [ ] Persist all cases from one validated extraction in a transaction, with no partial graph on failure.
-- [ ] Store every valid case as `active` and `unreviewed` without waiting for human approval.
-- [ ] Preserve evidence excerpts, original wording, raw AI output, and validated output after normalization.
-- [ ] Complete `processSource(sourceId)` orchestration without placing business logic in routes or components.
-- [ ] Verify multi-case documents, multi-DTC cases, transaction rollback, retry history, and optional later human editing.
+Phase 4 converts an accepted Phase 3 artifact into the existing relational model. It must not call OpenAI again, depend on a specific prompt shape beyond the validated contract, or require human approval.
+
+#### 4.1 Pure normalization and reference resolution
+
+- [x] Add a pure normalizer that revalidates the Phase 3 boundary and produces database-oriented in-memory records without writing to PostgreSQL.
+- [x] Normalize DTC lookup codes conservatively while preserving the original code and description.
+- [x] Produce conservative lookup keys for reusable vehicles, symptoms, causes, solutions, and components while preserving source wording.
+- [x] Resolve every temporary case/entity/evidence reference to a typed local target before persistence.
+- [x] Map extraction enums to database enums and assign `active` plus `unreviewed` application defaults.
+- [x] Keep causes, checks, repairs, procedures, and outcomes distinct and preserve all case-specific values.
+- [x] Verify multiple cases, DTC roles, normalized keys, reference resolution, missing values, and rejection of invalid input without a database write.
+
+#### 4.2 Atomic relational persistence
+
+- [x] Add a repository that writes all cases and their dependent records in one short transaction.
+- [x] Reuse reference entities conservatively with atomic upserts and keep case-specific wording on association records or in the validated artifact.
+- [x] Resolve typed local references to database UUIDs for evidence, procedures, measurements, outcomes, and graph relationships.
+- [x] Preserve the accepted `ExtractionJob` raw and validated artifacts without overwriting them.
+- [x] Roll back the entire graph when any row or reference fails.
+
+#### 4.3 End-to-end processing orchestration
+
+- [x] Connect accepted Phase 3 output to normalization and relational persistence without another AI call.
+- [x] Transition the source from `processing` to `persisted` only after the complete transaction succeeds.
+- [x] Keep processing idempotent so retry cannot duplicate cases or reference entities.
+- [x] Handle a valid zero-case extraction explicitly and preserve its audit result.
+- [x] Keep routes and commands thin and reuse the same application service.
+
+#### 4.4 Structured extraction recap
+
+- [x] Extend the source detail page with persisted cases, vehicles, DTCs, symptoms, causes, checks, solutions, outcomes, and evidence.
+- [x] Show `unreviewed` status and AI-inference indicators without requiring review.
+- [x] Keep original excerpts and technical identifiers untranslated while translating all interface copy through the English and Italian catalogs.
+- [x] Preserve mobile usability and avoid exposing raw provider responses or internal errors.
+
+#### 4.5 Phase 4 verification
+
+- [x] Verify multi-case and multi-DTC persistence against Supabase with temporary synthetic records.
+- [x] Verify transaction rollback, retry idempotence, zero-case completion, immutable extraction history, and no partial graph.
+- [x] Verify every stored case is `active` and `unreviewed` before optional human editing.
+- [x] Manually verify the structured recap in English and Italian at desktop and mobile widths.
+- [x] Run catalog parity, lint, type checking, all Phase 4 verification commands, and the production build successfully.
 
 ### Phase 5 — Optional admin review and editing
 
@@ -293,3 +325,8 @@ Phase 3 consumes only the validated page-aware text produced by Phase 2. It does
 | 2026-09-17 | Phase 3.3 | Added the provider-neutral automotive knowledge extractor contract, OpenAI Responses API adapter, strict Structured Outputs request, local Zod revalidation, raw-response callback, usage mapping, and separate automotive model/reasoning configuration. | Synthetic adapter verification passed request assembly, raw-response capture, valid output, usage, refusal, incomplete response, provider failure, and schema failure without an OpenAI charge. Type checking, linting, catalog parity, and the production build passed. |
 | 2026-09-17 | Phase 3.4 | Added deterministic evidence and uncertainty checks, bounded distinct-model escalation, source ownership, immutable per-attempt audit records, safe status transitions, and content-safe logs without adding a new table or domain write. | Synthetic Supabase verification passed semantic failure, one-step escalation, immutable raw and validated history, token/timing capture, idempotency, non-retryable provider failure, cleanup, and zero normalized automotive rows. Static checks and the production build passed. |
 | 2026-09-17 | Phase 3.5 | Added a trusted automotive-analysis command and evaluated `automotive-structure-v1` against three compact representative inputs using the configured live model. Completed Phase 3 without enabling UI-triggered analysis or relational normalization. | Live Structured Outputs produced one generic case, two independent cases, and zero cases for visual-only unreadable input. Deterministic checks, synthetic persistence/retry history, read-only Supabase listing, schema, prompt, adapter, catalog parity, lint, types, and the Webpack production build passed. |
+| 2026-09-17 | Phase 4.1 | Structured Phase 4 into normalization, atomic persistence, orchestration, recap, and verification steps. Added a pure prompt-independent normalizer with conservative lookup keys, database enum mapping, application-owned defaults, and typed local reference resolution. | The local normalizer verifier passed multiple-case handling, DTC roles, shared and local vehicle keys, source wording preservation, dedicated references, empty output, and invalid-reference/confidence rejection without an AI call or domain write. |
+| 2026-09-17 | Phase 4.2 | Added atomic relational persistence for the complete normalized graph, source/document/job ownership checks, conservative reference upserts, typed UUID resolution, duplicate protection, and a unique vehicle lookup key. | The live Supabase verifier persisted two cases with a shared vehicle and complete dependent graph, preserved raw and validated artifacts, resolved cyclic relationship evidence, rejected a duplicate attempt, proved full rollback after a forced constraint failure, and removed its synthetic fixtures. |
+| 2026-09-18 | Phase 4.3 | Connected completed Phase 3 artifacts to revalidation, normalization, atomic graph persistence, and the final source transition through one reusable application service. Added idempotent recovery and explicit zero-case completion without placeholder rows. | The live Supabase orchestration verifier completed normal and zero-case sources, preserved immutable job output, retried both without another synthetic model call or duplicate row, and removed all isolated fixtures. Type checking and linting passed. |
+| 2026-09-18 | Phase 4.4 | Added the structured automotive recap to source details with cases, applicability, DTCs, symptoms, causes, components, checks, measurements, solutions, procedures, outcomes, parts, and evidence. Kept source-derived technical content untranslated while localizing only interface copy. | A temporary Italian Supabase fixture verified complete relational reads and source-language preservation. English/Italian desktop and 390 px mobile checks passed without horizontal overflow or browser warnings, and the fixture was removed. Type checking, linting, and catalog parity passed. |
+| 2026-09-18 | Phase 4.5 | Completed the Phase 4 verification matrix and closed normalization and relational persistence. | Pure normalization, two-case/two-DTC atomic persistence, complete rollback, immutable artifacts, retry idempotence, zero-case completion, initial `active`/`unreviewed` state, source-language recap, bilingual desktop/mobile UI, schema validation, catalog parity, lint, types, and production build passed. Every temporary Supabase fixture was removed and no OpenAI request was made. |
