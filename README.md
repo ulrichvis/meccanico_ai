@@ -89,10 +89,11 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 - [Source-language structured extraction recap](docs/decisions/0019-source-language-structured-recap.md)
 - [Transactional case review save](docs/decisions/0020-transactional-case-review-save.md)
 - [Explicit case lifecycle actions](docs/decisions/0021-explicit-case-lifecycle-actions.md)
+- [Bounded active case index](docs/decisions/0022-bounded-active-case-index.md)
 
 ## Current status
 
-Phases 1 through 5 are complete. An operator can run structured automotive analysis, open a bilingual review page, atomically correct the complete case graph, and explicitly review, reject, or archive a case without changing source-language technical content or deleting its audit trail. Phase 6 case browsing and search are next.
+Phases 1 through 5 are complete. Phase 6 is active: `/cases` now provides a bilingual, bounded knowledge index with URL-based search across case, DTC, and vehicle fields plus review and lifecycle filters. The read-only complete case page is the next step.
 
 ## Run locally
 

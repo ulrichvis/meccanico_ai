@@ -7,6 +7,7 @@
     "ariaLabel": "Navigazione principale",
     "overview": "Panoramica",
     "sources": "Fonti",
+    "cases": "Casi",
     "upload": "Carica PDF",
     "foundation": "Base tecnica"
   },
@@ -151,6 +152,64 @@
       "schemaInvalid": "Da verificare",
       "failed": "Non riuscito",
       "unknown": "Sconosciuto"
+    }
+  },
+  "cases": {
+    "eyebrow": "Base di conoscenza",
+    "title": "Casi tecnici.",
+    "description": "Cerca nelle conoscenze automobilistiche strutturate mantenendo visibili il ciclo di vita e la qualità della verifica.",
+    "sourcesAction": "Vedi le fonti",
+    "resultsTitle": "Risultati dei casi",
+    "count": "{count} casi",
+    "loading": "Caricamento dei casi…",
+    "untitled": "Caso senza titolo",
+    "unnamedSource": "Fonte senza nome",
+    "notAvailable": "Non disponibile",
+    "filters": {
+      "searchLabel": "Cerca dati tecnici",
+      "searchPlaceholder": "Titolo, DTC, marca, modello o motore",
+      "reviewLabel": "Stato di verifica",
+      "allReviewStatuses": "Tutti gli stati di verifica",
+      "lifecycleLabel": "Ciclo di vita",
+      "submit": "Cerca casi",
+      "clear": "Azzera filtri"
+    },
+    "empty": {
+      "title": "Nessun caso attivo",
+      "description": "Analizza una fonte salvata per aggiungere i relativi casi automobilistici strutturati a questo elenco.",
+      "action": "Apri l'archivio delle fonti"
+    },
+    "noResults": {
+      "title": "Nessun caso corrisponde a questi filtri",
+      "description": "Modifica il testo di ricerca o i filtri di stato per vedere altri casi strutturati.",
+      "action": "Azzera filtri"
+    },
+    "error": {
+      "title": "L'archivio dei casi non è disponibile",
+      "description": "Non è stato possibile caricare i casi. La conoscenza salvata non è stata modificata.",
+      "retry": "Riprova"
+    },
+    "fields": {
+      "dtcs": "DTC",
+      "vehicles": "Veicoli",
+      "source": "Fonte",
+      "updatedAt": "Aggiornato"
+    },
+    "actions": {
+      "viewSource": "Vedi la fonte",
+      "review": "Verifica il caso"
+    },
+    "reviewStatus": {
+      "unreviewed": "Non verificato",
+      "reviewed": "Verificato",
+      "corrected": "Corretto",
+      "unknown": "Stato di verifica sconosciuto"
+    },
+    "lifecycleStatus": {
+      "active": "Attivo",
+      "rejected": "Rifiutato",
+      "archived": "Archiviato",
+      "unknown": "Stato sconosciuto"
     }
   },
   "sourceDetail": {

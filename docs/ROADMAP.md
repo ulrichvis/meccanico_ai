@@ -97,6 +97,8 @@ An operator can run structured analysis, inspect the resulting cases, and safely
 
 ## Phase 6 — Case browsing
 
+Status: active. The bounded case index plus URL-based search and status filters are complete; the read-only complete case page is next.
+
 ### Deliverables
 
 - `/cases` list showing active cases with their review status.

@@ -322,9 +322,35 @@ Phase 5 adds a small operator-only correction workflow for one persisted case at
 
 ### Phase 6 — Search and browsing
 
-- [ ] List active cases with visible review status.
-- [ ] Search by DTC, make, model, and engine.
-- [ ] Display the complete case and its relationships.
+Phase 6 makes the stored knowledge base browsable without implementing the future mechanic chat, embeddings, full-text infrastructure, or a generic admin data grid. Technical content remains in the source language and only interface copy is localized.
+
+#### 6.1 Active case index
+
+- [x] Add a localized `/cases` page and primary-navigation entry.
+- [x] List recent active cases through a bounded server-side read model with visible review status, source, DTC, vehicle, and last-update context.
+- [x] Link each row to the existing source and review workflows without exposing raw AI output or database implementation details.
+- [x] Provide bilingual empty, loading, and error states and preserve mobile usability.
+
+#### 6.2 Simple search and filters
+
+- [x] Search case title and stored applicability by DTC, make, model, engine code, and engine description using validated URL query parameters.
+- [x] Add review-status and lifecycle filters while keeping active cases as the default view.
+- [x] Keep the query bounded and deterministic; do not add Elasticsearch, embeddings, fuzzy ranking, or full-text infrastructure for the MVP.
+- [x] Preserve filters in the URL so results are reloadable and shareable without locale-specific routing.
+
+#### 6.3 Read-only case detail
+
+- [ ] Add `/cases/[caseId]` as the read-only browsing view for the complete diagnostic structure.
+- [ ] Show vehicles, DTCs, symptoms, causes, components, checks, measurements, solutions, procedures, outcomes, parts, evidence, and relationships.
+- [ ] Keep source-language technical content unchanged and provide explicit links to the source and optional correction page.
+- [ ] Keep rejected and archived records reachable only when explicitly selected through lifecycle browsing.
+
+#### 6.4 Phase 6 verification
+
+- [ ] Verify active-default browsing, every supported search field, review and lifecycle filters, deterministic limits, and empty results against isolated Supabase fixtures.
+- [ ] Manually verify the list and detail pages in English and Italian at desktop and mobile widths.
+- [ ] Verify evidence, relationships, lifecycle state, and review state remain visible without exposing immutable provider artifacts.
+- [ ] Run catalog parity, lint, type checking, focused Phase 6 verification commands, Prisma validation, and the production build successfully.
 
 ### Post-MVP — Mechanic-facing assistant
 
@@ -382,3 +408,5 @@ Phase 5 adds a small operator-only correction workflow for one persisted case at
 | 2026-09-18 | Phase 5.4 | Connected the complete case form to a server-validated application service and atomic Prisma save with `updatedAt` concurrency, shared-reference protection, review audit transitions, and immutable extraction artifacts. | An isolated Supabase verifier saved a complete corrected graph, marked an unchanged case reviewed, rejected stale and unsafe shared-reference edits with rollback, preserved another case and raw/validated artifacts, and removed its fixtures. Catalog parity, schema verification, Prisma validation, lint, types, and production build passed. |
 | 2026-09-18 | Phase 5.5 | Added explicit reviewed, rejected, and archived lifecycle commands with optimistic concurrency, separate lifecycle and review state, confirmation before non-active transitions, and no deletion. | Synthetic Supabase cases verified every transition, terminal cross-transition rejection, retained case rows, corrected-status preservation, and unchanged extraction artifacts. English and Italian success and confirmation copy remained in catalog parity. |
 | 2026-09-18 | Phase 5.6 | Completed the Phase 5 verification matrix and closed optional admin review and editing. | A complete existing graph was saved and reloaded, shared references remained unchanged, stale and invalid edits were rejected, a forced relational constraint failure rolled back fully, all lifecycle transitions passed, and the guarded browser fixture verified English/Italian source-language behavior at desktop and 390 px widths before cleanup. Focused checks, Prisma validation, catalog parity, lint, types, and production build passed. |
+| 2026-09-18 | Phase 6.1 | Structured Phase 6 into an active-case index, simple URL-based search and filters, a read-only detail page, and focused verification. Added `/cases` with a bounded server read model, primary navigation, review status, DTC/vehicle/source context, and links to existing workflows. | A guarded Italian Supabase case appeared beside existing active knowledge, preserved source-language content in English and Italian interfaces, rendered at desktop and 390 px widths, and produced a clean browser console in a fresh tab. The fixture was removed. Catalog parity, lint, types, Prisma validation, and production build passed. |
+| 2026-09-18 | Phase 6.2 | Added validated URL-based case search across titles, DTCs, makes, models, engine codes, and engine descriptions, plus review and lifecycle filters. Kept active cases as the default and the repository capped at 50 deterministic results. | Catalog parity, lint, type checking, Prisma validation, production build, and manual English/Italian desktop and mobile browsing passed. Search and filter URLs reloaded with their values preserved, invalid parameters fell back safely, and technical values remained untranslated. |

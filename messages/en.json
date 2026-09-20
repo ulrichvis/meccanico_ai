@@ -7,6 +7,7 @@
     "ariaLabel": "Primary navigation",
     "overview": "Overview",
     "sources": "Sources",
+    "cases": "Cases",
     "upload": "Upload PDF",
     "foundation": "Foundation"
   },
@@ -151,6 +152,64 @@
       "schemaInvalid": "Needs review",
       "failed": "Failed",
       "unknown": "Unknown"
+    }
+  },
+  "cases": {
+    "eyebrow": "Knowledge base",
+    "title": "Technical cases.",
+    "description": "Search structured automotive knowledge while keeping lifecycle and review quality visible.",
+    "sourcesAction": "View sources",
+    "resultsTitle": "Case results",
+    "count": "{count} cases",
+    "loading": "Loading cases…",
+    "untitled": "Untitled case",
+    "unnamedSource": "Unnamed source",
+    "notAvailable": "Not available",
+    "filters": {
+      "searchLabel": "Search technical data",
+      "searchPlaceholder": "Title, DTC, make, model or engine",
+      "reviewLabel": "Review status",
+      "allReviewStatuses": "All review statuses",
+      "lifecycleLabel": "Lifecycle",
+      "submit": "Search cases",
+      "clear": "Clear filters"
+    },
+    "empty": {
+      "title": "No active cases yet",
+      "description": "Analyze a stored source to add its structured automotive cases to this list.",
+      "action": "Open source library"
+    },
+    "noResults": {
+      "title": "No cases match these filters",
+      "description": "Change the search text or status filters to see other structured cases.",
+      "action": "Clear filters"
+    },
+    "error": {
+      "title": "The case library is unavailable",
+      "description": "The cases could not be loaded. Stored knowledge was not modified.",
+      "retry": "Try again"
+    },
+    "fields": {
+      "dtcs": "DTCs",
+      "vehicles": "Vehicles",
+      "source": "Source",
+      "updatedAt": "Updated"
+    },
+    "actions": {
+      "viewSource": "View source",
+      "review": "Review case"
+    },
+    "reviewStatus": {
+      "unreviewed": "Unreviewed",
+      "reviewed": "Reviewed",
+      "corrected": "Corrected",
+      "unknown": "Unknown review status"
+    },
+    "lifecycleStatus": {
+      "active": "Active",
+      "rejected": "Rejected",
+      "archived": "Archived",
+      "unknown": "Unknown status"
     }
   },
   "sourceDetail": {

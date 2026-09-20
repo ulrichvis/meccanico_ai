@@ -65,6 +65,10 @@ Phase 5.4 sends the complete validated edit contract to a thin case endpoint and
 
 Phase 5.5 adds a separate lifecycle command to the same thin case endpoint. A Zod-validated `PATCH` payload carries the case identifier, current `updatedAt`, and one explicit `review`, `reject`, or `archive` action. The repository applies the optimistic-concurrency check in a short transaction. Review updates only the quality signal and preserves `corrected`; reject and archive update only the lifecycle status and are allowed from `active`. The UI requires confirmation before reject or archive. No action deletes the case or changes its source and extraction artifacts.
 
+Phase 6.1 adds a bounded server-only browsing read model for `/cases`. It queries PostgreSQL through Prisma, selects only presentation-safe fields, defaults to `active` cases, orders deterministically by the most recent update, and caps the result at 50. The list includes review status plus compact DTC, vehicle, source, and timestamp context. It links to the existing source and optional correction workflows while search, lifecycle filters, and the read-only complete case page remain separate Phase 6 steps.
+
+Phase 6.2 extends that read model with a small validated query contract. A native GET form stores the search text, review status, and lifecycle status in the URL so the result can be reloaded or shared. The server maps the validated values to Prisma filters and searches case titles plus related DTC and vehicle applicability fields with case-insensitive substring matching. Invalid or repeated parameters resolve to safe defaults, active remains the default lifecycle, deterministic ordering and the 50-row cap remain unchanged, and no search index or ranking layer is introduced.
+
 The target orchestration function is:
 
 ```ts
