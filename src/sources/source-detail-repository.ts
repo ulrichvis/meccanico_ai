@@ -43,6 +43,10 @@ const validatedAttemptSchema = z.looseObject({
   usage: usageSchema.nullable().optional(),
 });
 
+const automotiveWarningsSchema = z.looseObject({
+  quality: z.looseObject({ warnings: z.array(z.string()).optional() }),
+});
+
 type OriginFields = {
   confidence: string | null;
   relationOrigin: string;
@@ -205,6 +209,7 @@ export interface SourceDetail {
     startedAt: string | null;
     status: string;
     usage: z.infer<typeof usageSchema> | null;
+    warnings?: string[];
   }>;
   id: string;
   originalFilename: string | null;
@@ -640,6 +645,9 @@ export async function getSourceDetail(
     document,
     extractionJobs: source.extractionJobs.map((job) => {
       const validated = validatedAttemptSchema.safeParse(job.validatedOutput);
+      const automotiveWarnings = job.promptVersion?.startsWith("automotive-structure-")
+        ? automotiveWarningsSchema.safeParse(job.validatedOutput)
+        : null;
 
       return {
         durationMs:
@@ -654,6 +662,9 @@ export async function getSourceDetail(
         startedAt: job.startedAt?.toISOString() ?? null,
         status: job.status,
         usage: validated.success ? (validated.data.usage ?? null) : null,
+        warnings: automotiveWarnings?.success
+          ? (automotiveWarnings.data.quality.warnings ?? [])
+          : [],
       };
     }),
     id: source.id,

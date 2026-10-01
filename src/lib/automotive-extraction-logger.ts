@@ -1,5 +1,6 @@
 import type { AutomotiveExtractionUsage } from "@/ai/automotive-knowledge-extractor";
 import type { AutomotiveModelRoute } from "@/automotive-extraction/automotive-model-routing";
+import { AUTOMOTIVE_EXTRACTION_PROMPT_VERSION } from "@/schemas/automotive-extraction.schema";
 
 interface AutomotiveExtractionLogEvent {
   attempt: number;
@@ -11,6 +12,7 @@ interface AutomotiveExtractionLogEvent {
   sourceId: string;
   triggerReason: string | null;
   usage?: AutomotiveExtractionUsage | null;
+  warnings?: string[];
 }
 
 export function logAutomotiveExtractionEvent(
@@ -19,7 +21,7 @@ export function logAutomotiveExtractionEvent(
   console.info(
     JSON.stringify({
       event: "automotive_extraction",
-      promptVersion: "automotive-structure-v1",
+      promptVersion: AUTOMOTIVE_EXTRACTION_PROMPT_VERSION,
       ...event,
     }),
   );

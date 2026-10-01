@@ -14,10 +14,7 @@ import {
   type AutomotiveRouting,
 } from "@/automotive-extraction/automotive-model-routing";
 import { AutomotiveExtractionRepository } from "@/automotive-extraction/automotive-extraction-repository";
-import {
-  AutomotiveQualityError,
-  evaluateAutomotiveQuality,
-} from "@/automotive-extraction/automotive-quality";
+import { evaluateAutomotiveQuality } from "@/automotive-extraction/automotive-quality";
 import { logAutomotiveExtractionEvent } from "@/lib/automotive-extraction-logger";
 
 export interface ProcessAutomotiveSourceDependencies {
@@ -82,8 +79,6 @@ export async function processAutomotiveSource(
       const quality = evaluateAutomotiveQuality(claim.input, result.output);
       await repository.saveValidated(id, jobId, result, quality);
 
-      if (!quality.accepted) throw new AutomotiveQualityError(quality);
-
       await repository.complete(id, jobId);
       logAutomotiveExtractionEvent({
         attempt,
@@ -94,6 +89,7 @@ export async function processAutomotiveSource(
         sourceId: id,
         triggerReason,
         usage: result.usage,
+        warnings: quality.warnings,
       });
       return {
         status: "completed",
@@ -116,9 +112,8 @@ export async function processAutomotiveSource(
         ? nextAutomotiveModelRoute(route, config)
         : null;
       const schemaInvalid =
-        error instanceof AutomotiveQualityError ||
-        (error instanceof AutomotiveKnowledgeExtractionError &&
-          error.code === "AUTOMOTIVE_AI_SCHEMA_INVALID");
+        error instanceof AutomotiveKnowledgeExtractionError &&
+        error.code === "AUTOMOTIVE_AI_SCHEMA_INVALID";
       const nextJobId = await repository.failAttempt(
         id,
         jobId,

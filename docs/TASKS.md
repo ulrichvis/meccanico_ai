@@ -20,6 +20,17 @@ Resume Phase 6.3 only after this cleanup is complete and the next step is reques
 - [x] Show localized pending/error feedback and prevent duplicate clicks while preparing the download.
 - [x] Verify the stored PDF download, invalid/missing source responses, catalog parity, lint, types, and build.
 
+### Meaning-preserving automotive analysis — requested MVP adjustment
+
+- [x] Keep structural JSON, reference, origin/confidence, and numeric checks blocking.
+- [x] Allow source-language reformulation without added facts, changed certainty, values, units, conditions, or variants.
+- [x] Replace citation/page, review-signal, and missing confirmed-outcome rejection with persisted advisory warnings; do not escalate on warnings.
+- [x] Show localized advisory notes and stop presenting supporting passages as guaranteed verbatim quotations.
+- [x] Version the prompt as `automotive-structure-v2`, preserve old attempts, and reuse completed v1 jobs without duplicate cases.
+- [x] Verify focused scripts, synthetic persistence/orchestration, catalog parity, lint, types, and the production build.
+
+Manual acceptance: retry the previously failed PDF from its source page; check persisted cases, source-language wording, non-blocking notes in history, and original PDF/text comparison in English and Italian. Do not change the existing Phase 2 transcription behavior or start Phase 6.3 in this adjustment.
+
 ### 1. Initialization
 
 - [x] Initialize Next.js with App Router, strict TypeScript, Tailwind, and `src/`.
@@ -211,7 +222,7 @@ Phase 3 consumes only the validated page-aware text produced by Phase 2. It does
 - [x] Keep explicit source facts separate from AI inferences and require valid confidence for an inference.
 - [x] Leave unknown scalar values `null`, unknown collections `[]`, `probabilitySource` `null` unless explicitly stated, and `probabilityCalculated` always `null` in the MVP.
 - [x] Require temporary entity references and page/excerpt evidence for important facts and inferred relationships.
-- [x] Require a non-empty exact excerpt for every evidence item and omit unverifiable evidence rather than inventing it.
+- [x] Require a non-empty source-supported passage for every evidence item; v2 allows faithful reformulation without invented evidence.
 - [x] Add `documentAnalysis.uncertainties` and advisory `requiresHumanReview` without making human review a persistence gate.
 - [x] Limit generic graph node types to the current database enum and use dedicated references for measurement-to-check, procedure-to-solution, and outcome-to-solution links.
 - [x] Preserve measurement conditions and ordered procedure variant wording without silently normalizing ambiguous units or values.
@@ -228,7 +239,7 @@ Phase 3 consumes only the validated page-aware text produced by Phase 2. It does
 
 #### 3.4 Quality gates, audit, and retry safety
 
-- [x] Add bounded schema and semantic quality gates with escalation only when cheaper output fails measurably.
+- [x] Add bounded structural validation and advisory content checks; v2 escalates only for schema-invalid, invalid-response, or incomplete-response failures, never for advisory warnings.
 - [x] Preserve immutable raw and validated outputs, model, prompt version, outcome, duration, and token usage.
 - [x] On invalid output, create no partial relational graph and make retry create a new job.
 
@@ -390,6 +401,7 @@ Phase 6 makes the stored knowledge base browsable without implementing the futur
 
 | Date | Phase | Change | Verification |
 |---|---|---|---|
+| 2026-10-01 | Meaning-preserving analysis | Added the v2 prompt, permitted faithful reformulation, retained blocking structural validation, made content checks advisory, exposed bilingual history notes, and preserved completed v1 reuse. | Schema, prompt, adapter, normalizer, synthetic persistence/orchestration, Prisma validation, lint, types, catalog parity (392 keys), production build, and diff checks passed. Synthetic fixtures were removed; no OpenAI call, migration, or deployment was made. Browser/source-fidelity checks remain manual in ADR 0026. |
 | 2026-10-01 | Original PDF download | Added an on-demand original PDF download action with a five-minute signed private Storage URL, original filename, and English/Italian pending and error feedback. | Catalog parity (384 keys), lint, types, build, and diff checks passed. Live read-only verification downloaded a current 6,620,991-byte PDF, checked its PDF signature, attachment disposition, original filename, non-cacheable endpoint, rendered button, and safe 400/404 responses. No source or Storage object was modified. Browser/mobile checks are documented in ADR 0025. |
 | 2026-10-01 | MVP frontend cleanup | Made `/cases` the home page via a server redirect, reduced the shell to Sources/Cases/Upload and the language selector, and removed landing-page presentation, footer, unused CSS, and translations. | Catalog parity (381 keys), lint, types, build, and diff checks passed. A local production server returned HTTP 307 with `Location: /cases`; `/upload` rendered exactly three navigation links and the selector, without the footer. Manual English/Italian mobile verification procedure is recorded in ADR 0024. |
 | 2026-08-25 | Documentation | Created the initial documentation and backlog. | Cross-checked all Markdown files. |

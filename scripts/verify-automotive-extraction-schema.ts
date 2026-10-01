@@ -3,6 +3,8 @@ import {
   automotiveExtractionSchema,
   type AutomotiveExtraction,
 } from "../src/schemas/automotive-extraction.schema";
+import { evaluateAutomotiveQuality } from "../src/automotive-extraction/automotive-quality";
+import type { AutomotiveExtractionPromptInput } from "../src/prompts/automotive-extraction.prompt";
 
 const validExtraction: AutomotiveExtraction = {
   source: {
@@ -226,13 +228,36 @@ expectInvalid(
   "EVIDENCE_TARGET_REFERENCE_INVALID",
 );
 
-expectInvalid(
-  "Confirmed solution without outcome",
-  (input) => {
-    input.cases[0]!.repairOutcomes = [];
+const confirmedWithoutOutcome = cloneValidExtraction();
+confirmedWithoutOutcome.cases[0]!.repairOutcomes = [];
+automotiveExtractionSchema.parse(confirmedWithoutOutcome);
+
+const qualityInput: AutomotiveExtractionPromptInput = {
+  originalFilename: "synthetic.pdf",
+  document: {
+    title: null, author: null, sourceDate: null, language: "en", pageCount: 2,
+    pages: [
+      { pageNumber: 1, text: "A leak was found in the", textQuality: "readable", uncertainty: null },
+      { pageNumber: 2, text: "charge-air hose.", textQuality: "partial", uncertainty: "First line continues page 1." },
+    ],
   },
-  "CONFIRMED_SOLUTION_OUTCOME_REQUIRED",
-);
+};
+const advisoryQuality = evaluateAutomotiveQuality(qualityInput, confirmedWithoutOutcome);
+if (!advisoryQuality.accepted || advisoryQuality.reasons.length > 0) {
+  throw new Error("Advisory content checks must not reject a valid extraction.");
+}
+for (const warning of ["EVIDENCE_WORDING_CHANGED", "HUMAN_REVIEW_FLAG_MISSING", "CONFIRMED_SOLUTION_OUTCOME_MISSING"]) {
+  if (!advisoryQuality.warnings.includes(warning as typeof advisoryQuality.warnings[number])) {
+    throw new Error(`Missing advisory warning: ${warning}`);
+  }
+}
+const invalidPagesOutput = cloneValidExtraction();
+invalidPagesOutput.cases[0]!.evidence[0]!.pageNumber = 99;
+invalidPagesOutput.documentAnalysis.uncertainties = [{ caseRef: "case-1", pageNumber: 99, description: "Unclear passage." }];
+const pageQuality = evaluateAutomotiveQuality(qualityInput, invalidPagesOutput);
+if (!pageQuality.accepted || !pageQuality.warnings.includes("EVIDENCE_PAGE_OUT_OF_RANGE") || !pageQuality.warnings.includes("UNCERTAINTY_PAGE_OUT_OF_RANGE")) {
+  throw new Error("Invalid source pages must produce advisory warnings.");
+}
 
 expectInvalid(
   "Invalid vehicle range",

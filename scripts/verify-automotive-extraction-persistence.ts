@@ -110,7 +110,7 @@ async function main() {
   try {
     const sourceId = await createSource();
     const calledModels: string[] = [];
-    const outputs = [incompleteOutput, acceptedOutput];
+    const outputs = [incompleteOutput];
 
     const createExtractor = (model: string): AutomotiveKnowledgeExtractor => ({
       extract: async (_input, onRawResponse) => {
@@ -135,18 +135,20 @@ async function main() {
       });
 
     assert.equal((await run()).status, "completed");
-    assert.deepEqual(calledModels, ["synthetic-primary", "synthetic-escalation"]);
+    assert.deepEqual(calledModels, ["synthetic-primary"]);
 
     const jobs = await database.extractionJob.findMany({
       where: { sourceId },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     });
-    assert.equal(jobs.length, 2);
-    assert.equal(jobs[0]?.status, "SCHEMA_INVALID");
-    assert.equal(jobs[0]?.error, "HUMAN_REVIEW_FLAG_MISSING");
-    assert.equal(jobs[1]?.status, "COMPLETED");
+    assert.equal(jobs.length, 1);
+    assert.equal(jobs[0]?.status, "COMPLETED");
+    assert.equal(jobs[0]?.error, null);
+    assert.deepEqual(
+      (jobs[0]?.validatedOutput as { quality: { warnings: string[] } }).quality.warnings,
+      ["HUMAN_REVIEW_FLAG_MISSING"],
+    );
     assert.equal(jobs[0]?.model, "synthetic-primary");
-    assert.equal(jobs[1]?.model, "synthetic-escalation");
     assert.equal(jobs[0]?.promptVersion, AUTOMOTIVE_EXTRACTION_PROMPT_VERSION);
     assert(jobs.every((job) => job.rawAiOutput !== null));
     assert(jobs.every((job) => job.validatedOutput !== null));
@@ -156,7 +158,7 @@ async function main() {
     assert.equal((await run()).status, "already_processed");
     assert.equal(
       await database.extractionJob.count({ where: { sourceId } }),
-      2,
+      1,
     );
     assert.equal(
       JSON.stringify(
@@ -174,6 +176,41 @@ async function main() {
         .status,
       "PROCESSING",
     );
+
+    await database.extractionJob.update({
+      where: { id: jobs[0]!.id },
+      data: { promptVersion: "automotive-structure-v1" },
+    });
+    assert.equal((await run()).status, "already_processed");
+    assert.deepEqual(calledModels, ["synthetic-primary"]);
+
+    const schemaFailureSourceId = await createSource();
+    const schemaModels: string[] = [];
+    const schemaRetry = await processAutomotiveSource(schemaFailureSourceId, {
+      repository,
+      routing: { primary: "synthetic-primary", escalation: "synthetic-escalation", maxAttempts: 2 },
+      createExtractor: (model): AutomotiveKnowledgeExtractor => ({
+        extract: async (_input, onRawResponse) => {
+          schemaModels.push(model);
+          if (model === "synthetic-primary") {
+            await onRawResponse?.({ synthetic: "invalid-schema" });
+            throw new AutomotiveKnowledgeExtractionError("AUTOMOTIVE_AI_SCHEMA_INVALID");
+          }
+          const result = resultFor(model, acceptedOutput);
+          await onRawResponse?.(result.rawResponse);
+          return result;
+        },
+      }),
+    });
+    assert.equal(schemaRetry.status, "completed");
+    assert.deepEqual(schemaModels, ["synthetic-primary", "synthetic-escalation"]);
+    const schemaJobs = await database.extractionJob.findMany({
+      where: { sourceId: schemaFailureSourceId }, orderBy: { createdAt: "asc" },
+    });
+    assert.equal(schemaJobs.length, 2);
+    assert.equal(schemaJobs[0]?.status, "SCHEMA_INVALID");
+    assert.equal(schemaJobs[1]?.status, "COMPLETED");
+    assert(schemaJobs.every((job) => job.rawAiOutput !== null));
 
     const providerFailureSourceId = await createSource();
     let providerCalls = 0;
@@ -214,7 +251,7 @@ async function main() {
     );
 
     console.info(
-      "Automotive quality gates, bounded escalation, immutable attempt history, and zero domain-row writes passed.",
+      "Advisory automotive warnings, immutable attempt history, provider failure, and zero domain-row writes passed.",
     );
   } finally {
     try {

@@ -347,6 +347,16 @@
       "page": "Pagina {page}",
       "noText": "Non è stato recuperato alcun testo leggibile da questa pagina."
     },
+    "analysisWarnings": {
+      "title": "Note sull'analisi — il salvataggio non è bloccato",
+      "wordingChanged": "Un passaggio di supporto non corrisponde parola per parola alla pagina indicata o al testo della fonte. Può essere stato riformulato o unito tra più pagine; ciò non stabilisce se il significato sia corretto.",
+      "evidencePage": "Un passaggio di supporto indica una pagina non presente nel testo estratto.",
+      "uncertaintyPage": "Un'incertezza indica una pagina non presente nel testo estratto.",
+      "reviewFlag": "La fonte contiene testo incompleto o incerto, ma l'analisi non ha consigliato una revisione.",
+      "confirmedOutcome": "Una riparazione è indicata come confermata senza un risultato confermato collegato. La conferma va verificata nella fonte.",
+      "generic": "Questa analisi contiene una nota di qualità non bloccante verificabile nella fonte.",
+      "evidenceNotice": "I passaggi di supporto possono essere riformulati per chiarezza e non sono necessariamente citazioni letterali. Il PDF originale e il testo estratto restano disponibili per il confronto."
+    },
     "history": {
       "eyebrow": "Registro di elaborazione",
       "title": "Cronologia delle estrazioni",
@@ -446,7 +456,7 @@
       "engineCode": "Codice motore",
       "engineDescription": "Descrizione del motore",
       "evidenceType": "Tipo di prova",
-      "excerpt": "Estratto dalla fonte",
+      "excerpt": "Passaggio di supporto (può essere riformulato)",
       "fuelType": "Tipo di carburante",
       "generation": "Generazione",
       "instruction": "Istruzione",

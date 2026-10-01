@@ -149,6 +149,7 @@ async function main() {
       model: result.model,
       name: fixture.name,
       requiresHumanReview: result.output.documentAnalysis.requiresHumanReview,
+      warnings: quality.warnings,
       usage: result.usage,
     });
   }

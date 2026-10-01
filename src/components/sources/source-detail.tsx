@@ -54,6 +54,14 @@ const attemptErrorKeys = {
   SOURCE_FILE_INVALID: "sourceDetail.attemptErrors.fileInvalid",
 } as const satisfies Record<string, MessageKey>;
 
+const automotiveWarningKeys = {
+  EVIDENCE_WORDING_CHANGED: "sourceDetail.analysisWarnings.wordingChanged",
+  EVIDENCE_PAGE_OUT_OF_RANGE: "sourceDetail.analysisWarnings.evidencePage",
+  UNCERTAINTY_PAGE_OUT_OF_RANGE: "sourceDetail.analysisWarnings.uncertaintyPage",
+  HUMAN_REVIEW_FLAG_MISSING: "sourceDetail.analysisWarnings.reviewFlag",
+  CONFIRMED_SOLUTION_OUTCOME_MISSING: "sourceDetail.analysisWarnings.confirmedOutcome",
+} as const satisfies Record<string, MessageKey>;
+
 const extractionApiErrorKeys = {
   invalid_source: "sourceDetail.actions.errors.invalidSource",
   source_not_found: "sourceDetail.actions.errors.notFound",
@@ -446,6 +454,9 @@ export function SourceDetail({
               <p className="knowledge-language-note">
                 {t("sourceDetail.knowledge.sourceLanguageNotice")}
               </p>
+              <p className="knowledge-language-note">
+                {t("sourceDetail.analysisWarnings.evidenceNotice")}
+              </p>
 
               {automotiveCases.length === 0 ? (
                 <div className="knowledge-empty">
@@ -638,7 +649,7 @@ export function SourceDetail({
                             <div className="knowledge-stack">
                               {automotiveCase.evidence.map((evidence) => (
                                 <figure className="knowledge-evidence" key={evidence.id}>
-                                  <blockquote>{evidence.excerpt}</blockquote>
+                                  <p>{evidence.excerpt}</p>
                                   <figcaption>
                                     <span>{t(mappedKey(evidence.evidenceType, evidenceTypeKeys, "sourceDetail.knowledge.evidenceType.unknown"))}</span>
                                     {evidence.pageNumber && <span>{t("sourceDetail.knowledge.labels.page", { page: evidence.pageNumber })}</span>}
@@ -756,6 +767,18 @@ export function SourceDetail({
                   <p className="attempt-error">
                     {t(mappedKey(job.errorCode, attemptErrorKeys, "sourceDetail.attemptErrors.generic"))}
                   </p>
+                )}
+                {(job.warnings?.length ?? 0) > 0 && (
+                  <div className="source-warning-panel">
+                    <strong>{t("sourceDetail.analysisWarnings.title")}</strong>
+                    <ul>
+                      {job.warnings?.map((warning) => (
+                        <li key={warning}>
+                          {t(mappedKey(warning, automotiveWarningKeys, "sourceDetail.analysisWarnings.generic"))}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </article>
             ))}

@@ -7,7 +7,7 @@
 3. Normalized entities also retain case-specific wording in association tables.
 4. Relationships, their origin, and their confidence level are first-class data.
 5. Probabilities stated by a source are separate from probabilities calculated later.
-6. Machine validation gates relational persistence; human review does not.
+6. Structural machine validation gates relational persistence; content-quality warnings and human review do not.
 7. Every stored case carries an explicit review status that future retrieval can use as a quality signal.
 
 ## Main relationships
@@ -121,17 +121,19 @@ Phase 4.4 presents the relational graph through a source-detail DTO. Stored sour
 
 This mapping guides the Phase 3 prompt: it must preserve multiple cases, temporary entity references, evidence, explicit-versus-inferred origin, confidence for inferences, and the distinctions enforced by the database. It must not request database IDs, normalized names, timestamps, review state, or lifecycle state from the model.
 
-The accepted `automotive-structure-v1` prompt requires several explicit application-level mappings:
+The current `automotive-structure-v2` prompt requires several explicit application-level mappings:
 
 - `vehicles` and `repairOutcomes` are arrays because the schema supports several of each per case;
 - AI JSON uses camelCase while Prisma performs the snake-case database mapping;
 - `requiresHumanReview` and `uncertainties` remain extraction-artifact metadata in `validated_output`; the recommendation is advisory and does not block persistence;
-- every persisted evidence item requires an exact non-empty excerpt because `source_evidence.excerpt` is non-null;
+- every persisted evidence item requires a non-empty supporting passage because `source_evidence.excerpt` is non-null; it may be reformulated without adding facts and must not be presented as a guaranteed verbatim quotation;
 - generic graph nodes are limited to `dtc`, `symptom`, `cause`, `diagnostic_check`, `solution`, and `repair_outcome`;
 - measurement-to-check, procedure-to-solution, and outcome-to-solution connections use dedicated references that the normalizer converts to foreign keys;
 - DTC normalization is performed by application code after extraction, while the model preserves the source code and description.
 
 Adaptation and programming steps, post-repair verification, and vehicle-specific conditions remain explicit in procedure wording during the MVP. A dedicated procedure subtype or conditions column should be considered only if real extractions show that preserving wording is insufficient for reliable retrieval.
+
+Meaning-preserving analysis requires no migration. Phase 2 page text and immutable raw outputs remain original audit material; Phase 3 structured descriptions and supporting passages may improve wording in the source language. The validated job artifact stores advisory warning codes in `quality.warnings`, with `accepted = true` and empty blocking `reasons`. Existing completed v1 artifacts remain valid and are not rewritten. A warning is not proof of an invention or proof of semantic correctness.
 
 ## Future visual assets
 

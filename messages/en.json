@@ -347,6 +347,16 @@
       "page": "Page {page}",
       "noText": "No readable text was recovered from this page."
     },
+    "analysisWarnings": {
+      "title": "Analysis notes — saving is not blocked",
+      "wordingChanged": "A supporting passage is not a verbatim match on its indicated page or in the source text. It may have been reformulated or combined across pages; this does not establish whether its meaning is correct.",
+      "evidencePage": "A supporting passage references a page that is not present in the extracted text.",
+      "uncertaintyPage": "An uncertainty references a page that is not present in the extracted text.",
+      "reviewFlag": "The source contains incomplete or uncertain text, but the analysis did not recommend review.",
+      "confirmedOutcome": "A repair is marked confirmed without a linked confirmed outcome. Its confirmation should be checked against the source.",
+      "generic": "This analysis has a non-blocking quality note that can be checked against the source.",
+      "evidenceNotice": "Supporting passages may be reformulated for clarity; they are not necessarily verbatim quotations. The original PDF and extracted text remain available for comparison."
+    },
     "history": {
       "eyebrow": "Processing record",
       "title": "Extraction history",
@@ -446,7 +456,7 @@
       "engineCode": "Engine code",
       "engineDescription": "Engine description",
       "evidenceType": "Evidence type",
-      "excerpt": "Source excerpt",
+      "excerpt": "Supporting passage (may be reformulated)",
       "fuelType": "Fuel type",
       "generation": "Generation",
       "instruction": "Instruction",

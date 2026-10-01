@@ -34,6 +34,8 @@ REVIEWED OR CORRECTED DOMAIN DATA
 
 These layers remain separate. JSON produced by an AI model is an exchange and audit format, not the database domain model. Machine validation of the extraction contract is required before relational persistence; human review is optional and may happen later.
 
+Structured analysis may clarify or reformulate source-language descriptions without adding facts or changing their meaning. Structural validation remains blocking; evidence wording, page traceability, review-signal, and missing confirmed-outcome checks are advisory notes, not persistence gates. Original text and raw responses remain unchanged. See [Meaning-preserving analysis](docs/decisions/0026-meaning-preserving-automotive-analysis.md).
+
 ## Long-term product
 
 The stored knowledge base will become the retrieval layer for a mechanic-facing conversational assistant. A mechanic will describe a vehicle, DTCs, symptoms, measurements, or attempted repairs in natural language. The assistant will retrieve relevant cases and evidence, ask for missing diagnostic context, and answer conversationally without presenting unsupported claims as facts.

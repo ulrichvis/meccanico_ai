@@ -7,7 +7,7 @@ import type {
   NormalizedReference,
 } from "@/normalization/automotive-normalizer";
 import {
-  AUTOMOTIVE_EXTRACTION_PROMPT_VERSION,
+  ACCEPTED_AUTOMOTIVE_PROMPT_VERSIONS,
   automotiveExtractionSchema,
   type AutomotiveExtraction,
 } from "@/schemas/automotive-extraction.schema";
@@ -77,7 +77,7 @@ async function assertPersistenceOwnership(
       id: input.extractionJobId,
       sourceId: input.sourceId,
       status: "COMPLETED",
-      promptVersion: AUTOMOTIVE_EXTRACTION_PROMPT_VERSION,
+      promptVersion: { in: ACCEPTED_AUTOMOTIVE_PROMPT_VERSIONS },
     },
     select: { id: true },
   });
@@ -446,7 +446,7 @@ export class AutomotiveGraphRepository {
         extractionJobs: {
           where: {
             status: "COMPLETED",
-            promptVersion: AUTOMOTIVE_EXTRACTION_PROMPT_VERSION,
+            promptVersion: { in: ACCEPTED_AUTOMOTIVE_PROMPT_VERSIONS },
           },
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           select: { id: true, validatedOutput: true },

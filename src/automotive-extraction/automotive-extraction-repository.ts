@@ -5,7 +5,10 @@ import type { AutomotiveModelRoute } from "@/automotive-extraction/automotive-mo
 import { AutomotiveExtractionStateError } from "@/automotive-extraction/automotive-model-routing";
 import type { AutomotiveQualityResult } from "@/automotive-extraction/automotive-quality";
 import { automotiveExtractionPromptInputSchema } from "@/prompts/automotive-extraction.prompt";
-import { AUTOMOTIVE_EXTRACTION_PROMPT_VERSION } from "@/schemas/automotive-extraction.schema";
+import {
+  ACCEPTED_AUTOMOTIVE_PROMPT_VERSIONS,
+  AUTOMOTIVE_EXTRACTION_PROMPT_VERSION,
+} from "@/schemas/automotive-extraction.schema";
 
 const STALE_ATTEMPT_MS = 10 * 60 * 1000;
 
@@ -99,7 +102,7 @@ export class AutomotiveExtractionRepository {
         where: {
           sourceId,
           status: "COMPLETED",
-          promptVersion: AUTOMOTIVE_EXTRACTION_PROMPT_VERSION,
+          promptVersion: { in: ACCEPTED_AUTOMOTIVE_PROMPT_VERSIONS },
         },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         select: { id: true },
@@ -126,7 +129,7 @@ export class AutomotiveExtractionRepository {
           where: {
             sourceId,
             status: "RUNNING",
-            promptVersion: AUTOMOTIVE_EXTRACTION_PROMPT_VERSION,
+            promptVersion: { in: ACCEPTED_AUTOMOTIVE_PROMPT_VERSIONS },
           },
           data: {
             status: "FAILED",

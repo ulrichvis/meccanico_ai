@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { AutomotiveKnowledgeExtractionError } from "@/ai/automotive-knowledge-extractor";
-import { AutomotiveQualityError } from "@/automotive-extraction/automotive-quality";
 
 export const automotiveRoutingSchema = z.strictObject({
   primary: z.string().trim().min(1),
@@ -44,8 +43,6 @@ export function nextAutomotiveModelRoute(
 }
 
 export function canRetryAutomotiveExtraction(error: unknown): boolean {
-  if (error instanceof AutomotiveQualityError) return true;
-
   return (
     error instanceof AutomotiveKnowledgeExtractionError &&
     [
@@ -57,7 +54,6 @@ export function canRetryAutomotiveExtraction(error: unknown): boolean {
 }
 
 export function automotiveExtractionErrorCode(error: unknown): string {
-  if (error instanceof AutomotiveQualityError) return error.code;
   if (error instanceof AutomotiveKnowledgeExtractionError) return error.code;
   if (error instanceof AutomotiveExtractionStateError) return error.code;
   return "AUTOMOTIVE_EXTRACTION_FAILED";

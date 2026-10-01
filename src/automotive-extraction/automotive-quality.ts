@@ -2,14 +2,16 @@ import type { AutomotiveExtractionPromptInput } from "@/prompts/automotive-extra
 import type { AutomotiveExtraction } from "@/schemas/automotive-extraction.schema";
 
 export type AutomotiveQualityReason =
-  | "EVIDENCE_EXCERPT_NOT_FOUND"
+  | "EVIDENCE_WORDING_CHANGED"
   | "EVIDENCE_PAGE_OUT_OF_RANGE"
   | "HUMAN_REVIEW_FLAG_MISSING"
-  | "UNCERTAINTY_PAGE_OUT_OF_RANGE";
+  | "UNCERTAINTY_PAGE_OUT_OF_RANGE"
+  | "CONFIRMED_SOLUTION_OUTCOME_MISSING";
 
 export interface AutomotiveQualityResult {
   accepted: boolean;
   reasons: AutomotiveQualityReason[];
+  warnings: AutomotiveQualityReason[];
 }
 
 function pageExists(
@@ -49,10 +51,21 @@ export function evaluateAutomotiveQuality(
         }
 
         if (!pageText.includes(evidence.excerpt)) {
-          reasons.add("EVIDENCE_EXCERPT_NOT_FOUND");
+          reasons.add("EVIDENCE_WORDING_CHANGED");
         }
       } else if (!fullText.includes(evidence.excerpt)) {
-        reasons.add("EVIDENCE_EXCERPT_NOT_FOUND");
+        reasons.add("EVIDENCE_WORDING_CHANGED");
+      }
+    }
+
+    for (const solution of extractedCase.solutions) {
+      if (
+        solution.repairConfirmed === true &&
+        !extractedCase.repairOutcomes.some(
+          (outcome) => outcome.solutionRef === solution.ref && outcome.confirmed === true,
+        )
+      ) {
+        reasons.add("CONFIRMED_SOLUTION_OUTCOME_MISSING");
       }
     }
   }
@@ -68,18 +81,8 @@ export function evaluateAutomotiveQuality(
   const orderedReasons = [...reasons].sort();
 
   return {
-    accepted: orderedReasons.length === 0,
-    reasons: orderedReasons,
+    accepted: true,
+    reasons: [],
+    warnings: orderedReasons,
   };
-}
-
-export class AutomotiveQualityError extends Error {
-  readonly code: AutomotiveQualityReason | "AUTOMOTIVE_QUALITY_INVALID";
-
-  constructor(public readonly quality: AutomotiveQualityResult) {
-    const code = quality.reasons[0] ?? "AUTOMOTIVE_QUALITY_INVALID";
-    super(code);
-    this.code = code;
-    this.name = "AutomotiveQualityError";
-  }
 }

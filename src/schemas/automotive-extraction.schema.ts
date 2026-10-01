@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 export const AUTOMOTIVE_EXTRACTION_SCHEMA_NAME = "automotive_extraction";
-export const AUTOMOTIVE_EXTRACTION_PROMPT_VERSION = "automotive-structure-v1";
+export const AUTOMOTIVE_EXTRACTION_PROMPT_VERSION = "automotive-structure-v2";
+export const ACCEPTED_AUTOMOTIVE_PROMPT_VERSIONS = [
+  AUTOMOTIVE_EXTRACTION_PROMPT_VERSION,
+  "automotive-structure-v1",
+];
 
 const referenceSchema = z.string().trim().min(1).max(120);
 const requiredTextSchema = z.string().trim().min(1);
@@ -378,21 +382,6 @@ export const extractedCaseSchema = z
           code: "custom",
           message: "RELATIONSHIP_EVIDENCE_REFERENCE_INVALID",
           path: ["relationships", index, "evidenceRef"],
-        });
-      }
-    });
-
-    extractedCase.solutions.forEach((solution, index) => {
-      if (
-        solution.repairConfirmed === true &&
-        !extractedCase.repairOutcomes.some(
-          (outcome) => outcome.solutionRef === solution.ref && outcome.confirmed === true,
-        )
-      ) {
-        context.addIssue({
-          code: "custom",
-          message: "CONFIRMED_SOLUTION_OUTCOME_REQUIRED",
-          path: ["solutions", index, "repairConfirmed"],
         });
       }
     });

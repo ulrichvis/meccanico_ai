@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-The supplied automotive diagnostic-structure prompt is accepted as the semantic baseline for Phase 3 under version `automotive-structure-v1`.
+The supplied automotive diagnostic-structure prompt remains the semantic baseline. The current Phase 3 version is `automotive-structure-v2`: improve writing and organization without inventing facts or changing source meaning. Completed v1 artifacts remain reusable; earlier failed attempts are never rewritten.
 
 It is not the Phase 2 transcription prompt. Phase 2 sends the original PDF to OpenAI and stores faithful page-aware text. Phase 3 receives that validated text and reconstructs the automotive diagnostic structure. Keeping these prompts separate makes transcription failures distinguishable from domain-analysis failures.
 
@@ -10,7 +10,7 @@ The prompt is compatible with the current database after the contract adaptation
 
 The versioned implementation lives in `src/prompts/automotive-extraction.prompt.ts`. It exposes stable developer instructions and a separately validated builder for dynamic page-aware input. Run `pnpm automotive-prompt:verify` to check critical semantic rules, instruction/source isolation, metadata authority, page ordering, and incomplete-page validation without making an OpenAI call.
 
-The Phase 3.3 OpenAI adapter lives in `src/ai/openai-automotive-knowledge-extractor.ts`. It supplies the generated schema through strict Structured Outputs, revalidates the returned JSON with Zod, and exposes the raw provider response before validation. Phase 3.4 preserves that response in a separate job for every attempt and applies deterministic evidence, uncertainty, and review-signal checks before accepting the structured artifact. Run `pnpm automotive-adapter:verify` and `pnpm automotive-persistence:verify` for synthetic, non-billable boundary and persistence checks.
+The Phase 3.3 OpenAI adapter lives in `src/ai/openai-automotive-knowledge-extractor.ts`. It supplies the generated schema through strict Structured Outputs, revalidates the returned JSON with Zod, and exposes the raw provider response before validation. Phase 3.4 preserves that response in a separate job for every attempt. Structural errors block acceptance; evidence, uncertainty, review-signal, and missing confirmed-outcome checks produce advisory warnings instead. Run `pnpm automotive-adapter:verify` and `pnpm automotive-persistence:verify` for synthetic, non-billable boundary and persistence checks.
 
 ## Required model behavior
 
@@ -28,11 +28,13 @@ The versioned implementation prompt must preserve all of these rules:
 10. Distinguish a proposed repair, attempted repair, successful repair, and confirmed repair.
 11. Preserve measurement wording, units, signs, pressure basis, temperature scale, ranges, tolerances, and operating conditions. Normalize numerically only when unambiguous.
 12. Preserve procedure order and variant conditions. Do not merge contradictory procedures.
-13. Attach short, exact source excerpts and original page numbers to important facts and relationships whenever available.
+13. Attach short source-supported passages and original page numbers to important facts and relationships whenever available. Supporting passages may be reformulated and are not guaranteed verbatim quotations. Prefer separate evidence items for each page; use a null page rather than guessing when one passage spans pages.
 14. Never upgrade the documented evidence level beyond what the source supports.
 15. Re-scan the full supplied text for omitted relevant information before returning.
 16. Report unreadable, incomplete, contradictory, or ambiguous content as uncertainty.
 17. Return only data conforming to the supplied strict Structured Output schema, with unknown scalars as `null` and unknown collections as `[]`.
+18. Improve descriptions for human readers and future machine retrieval in the source language. Preserve certainty, negations, identifiers, numbers, units, conditions, and variant distinctions. Clearer wording of a stated fact does not turn it into an inference.
+19. Link a confirmed solution to a confirmed outcome when source-supported, but never invent an outcome merely to complete the structure.
 
 ## Contract adaptations required by the database
 
@@ -43,7 +45,7 @@ The prompt describes the correct business behavior, but the Structured Output sc
 | vehicle applicability | `vehicles: VehicleApplicability[]` | Normalized through `vehicles` and `case_vehicles`; one case may apply to several vehicles. |
 | repair outcomes | `repairOutcomes: RepairOutcome[]` | Stored as multiple `repair_outcomes` rows when present. |
 | procedures | `repairProcedures: RepairProcedure[]` | Diagnostic operations become `diagnostic_checks`; ordered repair, adaptation, programming, and verification wording is preserved in `repair_procedures`. |
-| evidence | an evidence item requires a non-empty exact `excerpt`; `pageNumber` may be `null` | `source_evidence.excerpt` is non-null. Omit an evidence item when no exact excerpt can be supplied. |
+| evidence | an evidence item requires a non-empty source-supported `excerpt`, possibly reformulated; `pageNumber` may be `null` | `source_evidence.excerpt` is non-null. Omit evidence only when no supporting passage exists, not because its wording differs. |
 | uncertainty | `documentAnalysis.uncertainties: Uncertainty[]` | Preserved in `extraction_jobs.validated_output`; it is not normalized into an invented domain fact. |
 | review recommendation | `documentAnalysis.requiresHumanReview: boolean` | Advisory only. It never blocks normalization or persistence of otherwise valid data. |
 | JSON naming | camelCase properties matching the TypeScript/Zod contract | Prisma maps application names to snake-case PostgreSQL columns. The model must not mix both naming conventions. |
@@ -84,6 +86,8 @@ This flag prioritizes later admin attention. It does not change the core persist
 
 An uncertainty is not permission to invent a value. The affected scalar remains `null`, the affected collection remains `[]`, or the uncertain relationship is omitted.
 
+Content-quality checks are advisory: wording differences, missing source pages, absent review flags on partial input, and confirmed solutions without matching outcomes are stored in `quality.warnings` and shown in source history. They do not reject a structurally valid result or cause another model call. They do not certify semantic equivalence; original PDF/text and optional human correction remain the comparison boundary. No additional AI verification call is introduced.
+
 ## Structured Output requirements
 
 - Generate JSON Schema from, or keep it mechanically aligned with, the strict Zod contract.
@@ -105,7 +109,7 @@ The model request contains these separately versioned inputs:
 2. the strict JSON Schema supplied through Structured Outputs rather than copied into the natural-language instructions;
 3. ordered page-aware source text;
 4. non-authoritative source metadata such as the original filename;
-5. the prompt version recorded as `automotive-structure-v1`.
+5. the prompt version recorded as `automotive-structure-v2`.
 
 Do not embed database credentials, signed Storage URLs, internal errors, normalized reference data, or prior human corrections into the prompt unless a later feature explicitly requires them.
 
@@ -126,5 +130,5 @@ Before enabling automatic normalization, verify the prompt against representativ
 - measurements with conditions, ranges, and units;
 - contradictory variant procedures;
 - unreadable or incomplete pages requiring an uncertainty;
-- exact evidence excerpts and page references;
+- faithful reformulated passages, source-page references, and sentences crossing page boundaries without whole-analysis rejection;
 - unsupported graph links that must use dedicated references or be omitted.

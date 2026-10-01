@@ -55,7 +55,7 @@ The current environment schema provides safe defaults for commands that do not a
 | `pnpm automotive-schema:verify` | Verify the strict automotive extraction contract and cross-reference invariants locally. |
 | `pnpm automotive-prompt:verify` | Verify prompt semantics and page-input isolation locally. |
 | `pnpm automotive-adapter:verify` | Verify the OpenAI automotive Structured Outputs adapter with synthetic responses; no OpenAI charge. |
-| `pnpm automotive-persistence:verify` | Verify Phase 3 quality gates, bounded escalation, audit history, idempotency, and zero domain writes in Supabase using temporary records; no OpenAI charge. |
+| `pnpm automotive-persistence:verify` | Verify advisory content warnings, bounded structural-error escalation, audit history, v1 compatibility, idempotency, and zero domain writes in Supabase using temporary records; no OpenAI charge. |
 | `pnpm automotive-live:verify` | Run three representative structured-analysis checks against the configured OpenAI model; this makes billable API calls. |
 | `pnpm automotive:process --list` | List sources eligible for new structured analysis or resumable accepted-artifact persistence. |
 | `pnpm automotive:process <source-id>` | Run structured analysis when needed, then normalize and atomically persist the accepted graph. Retrying a completed source makes no additional OpenAI call. |

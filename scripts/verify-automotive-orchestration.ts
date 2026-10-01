@@ -68,7 +68,11 @@ function extractionWithOneCase(marker: string): AutomotiveExtraction {
         measurements: [],
         partsMaterials: [],
         repairOutcomes: [],
-        evidence: [],
+        evidence: [{
+          ref: "evidence-1", targetRef: "case-1", pageNumber: 1,
+          excerpt: "Synthetic content used to verify orchestration.",
+          evidenceType: "unclear", relationOrigin: "explicit_source", confidence: null,
+        }],
         relationships: [],
       },
     ],
@@ -183,6 +187,11 @@ async function main() {
     assert.equal(source.extractionJobs.length, 1);
     assert.equal(source.extractionJobs[0]!.status, "COMPLETED");
     assert.equal(source.cases.length, 1);
+    assert.deepEqual(
+      (source.extractionJobs[0]!.validatedOutput as { quality: { warnings: string[] } }).quality.warnings,
+      ["EVIDENCE_WORDING_CHANGED"],
+    );
+    assert.equal(await database.sourceEvidence.count({ where: { sourceId } }), 1);
     const immutableArtifact = JSON.stringify(
       source.extractionJobs[0]!.validatedOutput,
     );
@@ -210,10 +219,21 @@ async function main() {
     const zeroMarker = `zero-orchestration-${randomUUID()}`;
     const zeroSourceId = await createSource(zeroMarker);
     const zeroCalls = { count: 0 };
+    const legacyJobId = await database.extractionJob.create({
+      data: {
+        sourceId: zeroSourceId, status: "COMPLETED", model: "synthetic-legacy",
+        promptVersion: "automotive-structure-v1",
+        rawAiOutput: { legacy: true },
+        validatedOutput: { content: emptyExtraction(), quality: { accepted: true, reasons: [] } },
+      },
+      select: { id: true },
+    });
+    await database.source.update({ where: { id: zeroSourceId }, data: { status: "PROCESSING" } });
     const zeroFirst = await run(zeroSourceId, emptyExtraction(), zeroCalls);
     assert.equal(zeroFirst.status, "persisted");
     assert.deepEqual(zeroFirst.caseIds, []);
-    assert.equal(zeroCalls.count, 1);
+    assert.equal(zeroCalls.count, 0);
+    assert.equal(zeroFirst.extractionJobId, legacyJobId.id);
     assert.equal(
       (await database.source.findUniqueOrThrow({ where: { id: zeroSourceId } }))
         .status,
@@ -227,7 +247,7 @@ async function main() {
     const zeroRetry = await run(zeroSourceId, emptyExtraction(), zeroCalls);
     assert.equal(zeroRetry.status, "already_persisted");
     assert.deepEqual(zeroRetry.caseIds, []);
-    assert.equal(zeroCalls.count, 1);
+    assert.equal(zeroCalls.count, 0);
     assert.equal(
       await database.extractionJob.count({ where: { sourceId: zeroSourceId } }),
       1,

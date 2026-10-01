@@ -2,13 +2,13 @@
 
 This document describes the target domain contract for Phase 3 structured automotive analysis. It does not govern Phase 2 text extraction, which is documented in `docs/TEXT_EXTRACTION.md`.
 
-The accepted prompt behavior and database-specific adaptations are defined in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md` under prompt version `automotive-structure-v1`.
+The current prompt behavior and database-specific adaptations are defined in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md` under prompt version `automotive-structure-v2`. Completed v1 jobs remain reusable; failed attempts are preserved and retried as new v2 jobs.
 
-The strict contract is implemented in `src/schemas/automotive-extraction.schema.ts`. It exports inferred TypeScript types and a draft-7 JSON Schema used by the OpenAI Structured Outputs adapter. The versioned instructions and validated page-input builder live in `src/prompts/automotive-extraction.prompt.ts`, and the provider-neutral extraction interface lives in `src/ai/automotive-knowledge-extractor.ts`. Deterministic post-response checks verify evidence page/excerpt traceability, uncertainty page validity, and honest review signaling for partial input. Run the `automotive-*:verify` commands documented in `docs/DEVELOPMENT.md` to exercise these boundaries without a billable OpenAI call.
+The strict structural contract is implemented in `src/schemas/automotive-extraction.schema.ts`. It exports inferred TypeScript types and a draft-7 JSON Schema used by the OpenAI Structured Outputs adapter. The versioned instructions and validated page-input builder live in `src/prompts/automotive-extraction.prompt.ts`, and the provider-neutral extraction interface lives in `src/ai/automotive-knowledge-extractor.ts`. Deterministic post-response checks report non-blocking evidence wording/page, uncertainty page, review-signal, and confirmed-outcome warnings; they cannot prove equivalent meaning or absence of invention. Run the `automotive-*:verify` commands documented in `docs/DEVELOPMENT.md` to exercise these boundaries without a billable OpenAI call.
 
 ## Input boundary
 
-Phase 3 receives validated, page-aware text already stored by Phase 2. The knowledge model is not responsible for OCR, PDF parsing, image extraction, or rewriting the source. Its input includes the original filename as metadata and ordered `{ pageNumber, text }` content so evidence remains traceable.
+Phase 3 receives validated, page-aware text already stored by Phase 2. It does not perform OCR, PDF parsing, image extraction, or overwrite the original source text. It may clarify structured descriptions and supporting passages while preserving source language and meaning. Its input includes the original filename as metadata and ordered `{ pageNumber, text }` content so evidence remains traceable.
 
 Photographs and diagrams are not interpreted in the first implementation. The original PDF remains available for a future multimodal phase, but Phase 3 must not infer knowledge from visual content that was not represented in its validated input.
 
@@ -133,12 +133,21 @@ Zod validates shape. The normalizer validates these cross-field rules:
 - `pageNumber` is positive when present;
 - `yearFrom <= yearTo` when both values exist;
 - `minValue <= maxValue` when both values exist;
-- a coherent confirmed solution must be connected to a repair outcome;
 - `successfulCaseCount <= caseCount` when both values exist;
 - no probability absent from the source text is synthesized;
-- every evidence item has a non-empty exact excerpt; evidence without a verifiable excerpt is omitted;
+- every evidence item has a non-empty source-supported passage; its wording may be clarified without adding facts;
 - `requiresHumanReview` is advisory and never blocks persistence of an otherwise valid extraction;
 - generic relationship node types are limited to those supported by the database; measurements, procedures, outcomes, vehicles, components, and evidence use their dedicated references where applicable.
+
+The source-support and no-invention requirements are prompt rules, not independently proven by Zod. Shape, references, origin/confidence, and numeric bounds remain blocking. The following content checks only populate `quality.warnings`, never block persistence or trigger escalation:
+
+- `EVIDENCE_WORDING_CHANGED`: a passage does not match the indicated page or full input verbatim; reformulation or cross-page content is allowed, and semantic fidelity is not automatically established;
+- `EVIDENCE_PAGE_OUT_OF_RANGE`: the cited page is missing from input;
+- `UNCERTAINTY_PAGE_OUT_OF_RANGE`: an uncertainty cites a missing page;
+- `HUMAN_REVIEW_FLAG_MISSING`: partial/uncertain input was not flagged for review;
+- `CONFIRMED_SOLUTION_OUTCOME_MISSING`: a confirmed solution has no corresponding confirmed outcome.
+
+Original page text and raw output remain unchanged. Supporting passages are not displayed as guaranteed quotations. Never fabricate a repair outcome simply to remove a warning.
 
 ## Minimal example
 
@@ -228,11 +237,11 @@ The prompt implemented in code must have a version identifier and communicate at
 
 > You are an automotive technical knowledge extraction engine. Analyze the source and reconstruct its diagnostic structure. Extract only information supported by the source. Never complete missing vehicle data from general automotive knowledge. Distinguish explicit facts from AI inference. Do not treat all DTC codes as equivalent. Keep symptoms, causes, components, diagnostic checks, measurements, repairs and outcomes separate. A proposed repair is not a confirmed repair. If no probability is explicitly provided, set `probabilitySource` to null. Preserve uncertainty and trace important information to the source.
 
-This text is a compact functional baseline. The implemented `automotive-structure-v1` instructions assemble the complete behavioral specification in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md`. The strict JSON Schema remains separate and will be supplied by the OpenAI adapter through Structured Outputs.
+This text is a compact functional baseline. The implemented `automotive-structure-v2` instructions assemble the complete behavioral specification in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md`. They allow improved writing without invented facts or changes to certainty, negation, values, units, conditions, or variants. The strict JSON Schema remains separate and is supplied by the OpenAI adapter through Structured Outputs.
 
 The prompt and JSON Schema have been reviewed against `docs/DATA_MODEL.md`. They expose temporary references for evidence and relationships while avoiding fields that the application can determine safely, such as normalized labels, database identifiers, timestamps, and `reviewStatus = "unreviewed"`.
 
-Model routing for structured analysis is independent from Phase 2 text extraction. Model names, reasoning effort, retry limits, and escalation rules are centralized. Start with the primary configured model, then escalate only after a measurable schema or semantic quality failure. Never call every model tier automatically.
+Model routing for structured analysis is independent from Phase 2 text extraction. Model names, reasoning effort, retry limits, and escalation rules are centralized. Start with the primary configured model, then escalate only for schema-invalid, invalid-response, or incomplete-response failures. Advisory content warnings do not trigger another AI call. Never call every model tier automatically.
 
 ## Failure behavior
 
