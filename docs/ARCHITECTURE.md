@@ -211,6 +211,14 @@ Lifecycle status controls default retrieval. Structurally valid cases are persis
 
 The current MVP exposes no lifecycle mutation actions. Existing non-active records remain browseable through explicit lifecycle filters.
 
+## Automatic processing after upload
+
+The upload UI runs at most three file pipelines concurrently. For each file, a successful `POST /api/sources` returns a validated source UUID, then `src/upload/process-uploaded-source.ts` sequences `POST /api/sources/[sourceId]/extraction` and `POST /api/sources/[sourceId]/automotive-analysis`. The second call starts only after a successful, Zod-validated text response. Both existing endpoints retain their independent duration budgets and delegate to the established server services; no provider or persistence logic moves into React.
+
+Each row progresses through uploading, extracting, analyzing, and complete/error. Only a persisted or already-persisted response counts as processing success, including zero cases. A failure stops that file while other workers continue. Stored files and accepted text remain available through a source link for manual retry. Upload-transfer retries reuse their upload identifier; processing failures are not re-uploaded by the batch retry action. A single successful file opens its source recap; batches remain on their per-file results.
+
+This is browser-driven orchestration, not durable scheduling. Closing, reloading, or navigating away can interrupt the remaining sequence; an in-flight server request may still finish. The next stage is not automatically resumed after returning. Source-page buttons and existing idempotency/ownership checks provide recovery. No queue, worker, poller, schema change, or additional retry tier is introduced. Uploads performed by an API client alone still store the file only. See ADR 0028.
+
 ## Error handling
 
 - Upload failure: leave no orphaned `Source`, or use the `failed` status if the record already exists.

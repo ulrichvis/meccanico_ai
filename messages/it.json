@@ -13,7 +13,10 @@
   "upload": {
     "eyebrow": "Fase 1 · Acquisizione della fonte",
     "title": "Aggiungi i tuoi PDF tecnici.",
-    "description": "Ogni documento originale verrà conservato privatamente e preparato separatamente per la pipeline di estrazione. L'elaborazione IA non inizia ancora.",
+    "description": "Carica i PDF per estrarre automaticamente il testo, analizzare le informazioni tecniche e salvare i casi strutturati.",
+    "keepOpen": "Mantieni questa pagina aperta fino al termine dell’elaborazione. Ogni PDF viene elaborato separatamente.",
+    "viewResult": "Visualizza risultato",
+    "retryFromSource": "Apri la fonte e riprova",
     "dropzone": {
       "title": "Trascina qui i tuoi PDF",
       "description": "Trascina più file oppure selezionali dal tuo dispositivo.",
@@ -22,7 +25,7 @@
     "limits": "Solo PDF · {size} MB per file · Fino a {count} file per lotto",
     "removeFile": "Rimuovi",
     "submitBatch": "Carica {count} file",
-    "uploading": "Caricamento del lotto…",
+    "uploading": "Caricamento ed elaborazione…",
     "queue": {
       "title": "File in questo lotto",
       "count": "{count} di {maximum}"
@@ -30,12 +33,14 @@
     "status": {
       "queued": "Pronto",
       "uploading": "Caricamento",
-      "success": "Salvato",
+      "extracting": "Estrazione del testo",
+      "analyzing": "Analisi e strutturazione",
+      "success": "Elaborazione completata",
       "error": "Richiede attenzione"
     },
     "summary": {
       "title": "Lotto completato",
-      "result": "{successful} salvati · {failed} non riusciti o rifiutati",
+      "result": "{successful} elaborati · {failed} non riusciti o rifiutati",
       "anotherBatch": "Avvia un altro lotto"
     },
     "errors": {
@@ -46,6 +51,8 @@
       "fileTooLarge": "Il PDF supera il limite di {size} MB.",
       "storageFailed": "Non è stato possibile salvare il documento. Riprova.",
       "uploadFailed": "Non è stato possibile completare il caricamento. Riprova.",
+      "extractionFailed": "Il PDF è salvato, ma l’estrazione del testo non è stata completata. Apri la fonte per riprovare; l’analisi non è stata avviata.",
+      "analysisFailed": "Il PDF e il testo estratto sono salvati, ma l’analisi strutturata non è stata completata. Apri la fonte per riprovare senza ricaricare il file.",
       "maximumFiles": "Un lotto non può contenere più di {count} PDF.",
       "duplicateFile": "Un file già presente in questo lotto è stato ignorato."
     },

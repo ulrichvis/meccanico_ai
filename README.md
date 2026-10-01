@@ -14,6 +14,8 @@ Enable an operator to:
 
 The operator does not fill in a form from scratch. The AI prepares and stores structured cases automatically. Human-review states, approval actions, and case editing are outside this MVP.
 
+After the operator submits a PDF batch, each stored file automatically proceeds through text extraction and structured analysis, with no intermediate click. Failed stages stop that file only; source-page controls remain available for manual recovery. Keep the upload page open until processing finishes: the MVP sequences existing requests in the browser, not a durable background queue. See [ADR 0028](docs/decisions/0028-automatic-upload-processing.md).
+
 ## Core principle
 
 ```text

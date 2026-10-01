@@ -27,6 +27,14 @@ Copy-Item .env.example .env.local
 
 The current environment schema provides safe defaults for commands that do not access external services. `.env.local` is required before applying migrations or running database queries.
 
+## Automatic PDF processing
+
+Submitting files from `/upload` now chains storage, text extraction, and structured analysis for each PDF. Keep the page open until completion; at most three complete file pipelines run together. The user no longer needs to click extraction or analysis during a successful upload. A single completed PDF opens `/sources/<id>`; batches show individual result or recovery links. Existing source buttons remain stage-specific manual recovery controls.
+
+Run `pnpm upload-pipeline:verify` for mocked HTTP sequencing, idempotent success, zero-case success, rejected/malformed responses, network failures, and independent-file checks without database writes or OpenAI charges. Then run lint, types, catalog parity, and build. The API routes and server processors are unchanged.
+
+Manual acceptance: submit one approved small PDF and confirm upload → extraction → analysis → saved recap without another click. Repeat with several PDFs, including a locally rejected file; valid files must continue. In browser network tools, temporarily block `/extraction` and confirm no `/automotive-analysis` request occurs for that source. Separately block `/automotive-analysis` and confirm the stored text remains recoverable through the source button, without re-uploading. Check English/Italian status and error copy plus mobile layout. These live successful scenarios call OpenAI and may incur cost; they are not part of the mocked verifier. Closing the page between stages intentionally requires manual recovery in this MVP.
+
 ## Standard commands
 
 | Command | Purpose |

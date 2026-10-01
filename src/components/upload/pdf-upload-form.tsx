@@ -2,11 +2,14 @@
 
 import { useMemo, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { z } from "zod";
 
 import { useLanguage } from "@/components/i18n/language-provider";
 import type { MessageKey } from "@/i18n/translator";
+import { processUploadedSource } from "@/upload/process-uploaded-source";
 
-const MAXIMUM_CONCURRENT_UPLOADS = 3;
+const MAXIMUM_CONCURRENT_FILES = 3;
 
 const uploadErrorKeys = {
   file_required: "upload.errors.fileRequired",
@@ -16,10 +19,20 @@ const uploadErrorKeys = {
   file_too_large: "upload.errors.fileTooLarge",
   storage_failed: "upload.errors.storageFailed",
   upload_failed: "upload.errors.uploadFailed",
+  extraction_failed: "upload.errors.extractionFailed",
+  analysis_failed: "upload.errors.analysisFailed",
 } as const satisfies Record<string, MessageKey>;
 
 type UploadErrorCode = keyof typeof uploadErrorKeys;
-type UploadStatus = "queued" | "uploading" | "success" | "error";
+type UploadStatus = "queued" | "uploading" | "extracting" | "analyzing" | "success" | "error";
+
+const uploadResponseSchema = z.object({ sourceId: z.uuid() });
+const uploadErrorResponseSchema = z.object({
+  error: z.object({ code: z.enum([
+    "file_required", "invalid_extension", "invalid_mime_type", "invalid_pdf",
+    "file_too_large", "storage_failed", "upload_failed",
+  ]) }),
+});
 
 interface UploadItem {
   errorCode: UploadErrorCode | null;
@@ -66,6 +79,7 @@ export function PdfUploadForm({
   const { locale, t } = useLanguage();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const batchRunning = useRef(false);
   const [items, setItems] = useState<UploadItem[]>([]);
   const [dragging, setDragging] = useState(false);
   const [pending, setPending] = useState(false);
@@ -160,23 +174,22 @@ export function PdfUploadForm({
       });
       request.addEventListener("load", () => {
         try {
-          const response = JSON.parse(request.responseText) as {
-            sourceId?: string;
-            error?: { code?: UploadErrorCode };
-          };
+          const body: unknown = JSON.parse(request.responseText);
+          const response = uploadResponseSchema.safeParse(body);
 
-          if (request.status >= 200 && request.status < 300 && response.sourceId) {
+          if (request.status >= 200 && request.status < 300 && response.success) {
             updateItem(item.id, {
               progress: 100,
-              sourceId: response.sourceId,
-              status: "success",
+              sourceId: response.data.sourceId,
+              status: "extracting",
             });
-            resolve({ sourceId: response.sourceId, success: true });
+            resolve({ sourceId: response.data.sourceId, success: true });
             return;
           }
 
+          const error = uploadErrorResponseSchema.safeParse(body);
           updateItem(item.id, {
-            errorCode: response.error?.code ?? "upload_failed",
+            errorCode: error.success ? error.data.error.code : "upload_failed",
             status: "error",
           });
         } catch {
@@ -196,7 +209,8 @@ export function PdfUploadForm({
   async function submitBatch() {
     const targets = items.filter(isRetryable);
 
-    if (targets.length === 0 || pending) return;
+    if (targets.length === 0 || batchRunning.current) return;
+    batchRunning.current = true;
     setPending(true);
     setBatchError(null);
     let nextIndex = 0;
@@ -206,20 +220,44 @@ export function PdfUploadForm({
       while (nextIndex < targets.length) {
         const item = targets[nextIndex];
         nextIndex += 1;
-        results.push(await uploadOne(item));
+        let upload: UploadResult;
+        try {
+          upload = await uploadOne(item);
+        } catch {
+          updateItem(item.id, { errorCode: "upload_failed", status: "error" });
+          results.push({ sourceId: null, success: false });
+          continue;
+        }
+        if (!upload.success || !upload.sourceId) {
+          results.push(upload);
+          continue;
+        }
+        const processing = await processUploadedSource(upload.sourceId, (status) => {
+          updateItem(item.id, { status });
+        });
+        updateItem(item.id, {
+          status: processing.success ? "success" : "error",
+          errorCode: processing.success ? null : processing.stage === "extracting"
+            ? "extraction_failed" : "analysis_failed",
+        });
+        results.push({ sourceId: upload.sourceId, success: processing.success });
       }
     }
 
-    await Promise.all(
-      Array.from(
-        { length: Math.min(MAXIMUM_CONCURRENT_UPLOADS, targets.length) },
-        () => worker(),
-      ),
-    );
-    setPending(false);
+    try {
+      await Promise.all(
+        Array.from(
+          { length: Math.min(MAXIMUM_CONCURRENT_FILES, targets.length) },
+          () => worker(),
+        ),
+      );
+    } finally {
+      setPending(false);
+      batchRunning.current = false;
+    }
 
     if (items.length === 1 && results[0]?.success && results[0].sourceId) {
-      router.push(`/upload/${results[0].sourceId}/success`);
+      router.push(`/sources/${results[0].sourceId}`);
     }
   }
 
@@ -229,6 +267,7 @@ export function PdfUploadForm({
         <p className="eyebrow">{t("upload.eyebrow")}</p>
         <h1>{t("upload.title")}</h1>
         <p>{t("upload.description")}</p>
+        <p>{t("upload.keepOpen")}</p>
       </section>
 
       <section className="upload-panel" aria-labelledby="upload-panel-title">
@@ -290,7 +329,7 @@ export function PdfUploadForm({
                     <strong>{item.file.name}</strong>
                     <span>{formatFileSize(item.file.size, locale)}</span>
                   </div>
-                  <div className="file-status">
+                  <div className="file-status" aria-live="polite">
                     <span>{t(`upload.status.${item.status}`)}</span>
                     {item.status === "uploading" && <strong>{item.progress}%</strong>}
                   </div>
@@ -299,6 +338,11 @@ export function PdfUploadForm({
                   )}
                   {item.errorCode && (
                     <p role="alert">{t(uploadErrorKeys[item.errorCode], { size: maximumUploadSizeMb })}</p>
+                  )}
+                  {!pending && item.sourceId && (item.status === "success" || item.status === "error") && (
+                    <Link href={`/sources/${item.sourceId}`} prefetch={false}>
+                      {t(item.status === "error" ? "upload.retryFromSource" : "upload.viewResult")}
+                    </Link>
                   )}
                   {(item.status === "queued" || item.status === "error") && !pending && (
                     <button

@@ -13,7 +13,10 @@
   "upload": {
     "eyebrow": "Phase 1 · Source ingestion",
     "title": "Add your technical PDFs.",
-    "description": "Each original document will be stored privately and prepared independently for the extraction pipeline. No AI processing starts yet.",
+    "description": "Upload your PDFs to automatically extract their text, analyze the technical information, and save the structured cases.",
+    "keepOpen": "Keep this page open until processing finishes. Each PDF is processed independently.",
+    "viewResult": "View result",
+    "retryFromSource": "Open source and retry",
     "dropzone": {
       "title": "Drop your PDFs here",
       "description": "Drag and drop several files, or choose them from your device.",
@@ -22,7 +25,7 @@
     "limits": "PDF only · {size} MB per file · Up to {count} files per batch",
     "removeFile": "Remove",
     "submitBatch": "Upload {count} files",
-    "uploading": "Uploading batch…",
+    "uploading": "Uploading and processing…",
     "queue": {
       "title": "Files in this batch",
       "count": "{count} of {maximum}"
@@ -30,12 +33,14 @@
     "status": {
       "queued": "Ready",
       "uploading": "Uploading",
-      "success": "Stored",
+      "extracting": "Extracting text",
+      "analyzing": "Analyzing and structuring",
+      "success": "Processing complete",
       "error": "Needs attention"
     },
     "summary": {
       "title": "Batch complete",
-      "result": "{successful} stored · {failed} failed or rejected",
+      "result": "{successful} processed · {failed} failed or rejected",
       "anotherBatch": "Start another batch"
     },
     "errors": {
@@ -46,6 +51,8 @@
       "fileTooLarge": "The PDF is larger than the {size} MB limit.",
       "storageFailed": "The document could not be stored. Please try again.",
       "uploadFailed": "The upload could not be completed. Please try again.",
+      "extractionFailed": "The PDF is stored, but text extraction did not complete. Open its source to retry; analysis was not started.",
+      "analysisFailed": "The PDF and extracted text are saved, but structured analysis did not complete. Open its source to retry without uploading again.",
       "maximumFiles": "A batch can contain no more than {count} PDFs.",
       "duplicateFile": "A file already present in this batch was ignored."
     },

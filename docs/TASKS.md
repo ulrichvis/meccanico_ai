@@ -4,6 +4,18 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ## Next phase: Phase 6 — Search and browsing
 
+### Automatic processing after PDF upload — requested MVP simplification
+
+- [x] Automatically call text extraction after each successful upload, then structured analysis after accepted text, without intermediate user actions.
+- [x] Stop downstream requests after failed, busy, malformed, or interrupted stage responses; keep batch files independent.
+- [x] Limit concurrency to three complete file pipelines and retain existing batch/file-size limits.
+- [x] Show localized uploading/extracting/analyzing/completed/error states, preserving source identifiers and recovery links after processing errors.
+- [x] Keep existing source-page extraction/analysis buttons, server orchestration, immutable history, and idempotency behavior unchanged.
+- [x] Validate transport boundaries with Zod and verify the sequence using mocked HTTP; run lint, type checking, catalog parity, and build.
+- [ ] Product acceptance: exercise a real single PDF, mixed-result batch, interrupted stage, and English/Italian mobile flow using the procedure in `docs/DEVELOPMENT.md`.
+
+Keep the upload page open. This increment uses existing browser-driven requests, not a durable background queue. It does not apply the pending review-removal migration or begin Phase 6.3. See ADR 0028.
+
 ### AI-first MVP simplification — before continuing Phase 6
 
 - [x] Remove case-review buttons, the editing page, its API, services, schemas, and obsolete verification scripts.
@@ -414,6 +426,8 @@ Phase 6 makes the stored knowledge base browsable without implementing the futur
 - [ ] Evaluate image usefulness, privacy, cost, and groundedness before exposing visuals to the mechanic assistant.
 
 ## Progress log
+
+Automatic upload processing, 2026-10-01: the upload UI now chains text extraction and structured analysis for each successfully stored PDF, with at most three complete pipelines, validated responses, downstream failure short-circuiting, per-file recovery links, and unchanged manual controls. Mocked sequencing, lint, types, catalog parity, and build passed. No live OpenAI, database mutation, deployment, or migration was performed; live product acceptance remains pending. See ADR 0028.
 
 AI-first cleanup, 2026-10-01: removed human-review UI, editing routes and services, new-write metadata, and Prisma fields; introduced the v3 contract with non-mutating legacy compatibility. Focused checks and isolated migration rollback passed, temporary fixtures were removed, and production HTTP checks confirmed existing cases/source recap and 404s for deleted routes. The shared Supabase migration is pending compatible deployment and backup confirmation. No OpenAI call, deployment, or Phase 6.3 work was performed. See [verification report](AI_FIRST_MVP_VERIFICATION.md).
 
