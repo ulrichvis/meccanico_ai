@@ -10,7 +10,7 @@ export interface SourceFileInfo {
 }
 
 export interface SourceStorage {
-  createSignedUrl(path: string, expiresInSeconds?: number): Promise<string>;
+  createSignedUrl(path: string, expiresInSeconds?: number, downloadFilename?: string): Promise<string>;
   getFileInfo(path: string): Promise<SourceFileInfo>;
   remove(path: string): Promise<void>;
   upload(input: SourceFileUpload): Promise<void>;

@@ -164,6 +164,11 @@
     }
   },
   "sourceDetail": {
+    "download": {
+      "button": "Scarica il PDF originale",
+      "preparing": "Preparazione del download…",
+      "error": "Non è stato possibile scaricare il PDF originale. Riprova."
+    },
     "back": "Torna alle fonti",
     "eyebrow": "Dettaglio della fonte",
     "loading": "Caricamento del documento…",

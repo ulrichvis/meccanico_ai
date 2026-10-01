@@ -55,11 +55,15 @@ export class SupabaseSourceStorage implements SourceStorage {
     };
   }
 
-  async createSignedUrl(path: string, expiresInSeconds = 300): Promise<string> {
+  async createSignedUrl(
+    path: string,
+    expiresInSeconds = 300,
+    downloadFilename?: string,
+  ): Promise<string> {
     const validLifetime = signedUrlLifetimeSchema.parse(expiresInSeconds);
     const { data, error } = await this.client.storage
       .from(this.bucket)
-      .createSignedUrl(path, validLifetime);
+      .createSignedUrl(path, validLifetime, downloadFilename ? { download: downloadFilename } : undefined);
 
     if (error) {
       throw new StorageOperationError("STORAGE_SIGNED_URL_FAILED", {

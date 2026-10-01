@@ -228,6 +228,8 @@ Lifecycle changes are explicit state transitions rather than case edits. In the 
 
 ## Visual-content boundary
 
+The source-detail download button calls `GET /api/sources/[sourceId]/download`. The route validates the source UUID and delegates to a server service that reads the stored PDF path and creates a five-minute signed Storage URL with the original download filename. The response is private and non-cacheable; the URL is created only on demand and never included in the source-detail read model or logs. The browser downloads directly from Storage. This operator endpoint uses the same deployment access boundary as the existing source pages; application authentication remains a prerequisite for public multi-user access.
+
 PDFs may contain diagrams and photographs that will be useful to mechanics in a later version. The original private PDF is retained, so those assets are not lost. Phase 2 may transcribe visible text from a scanned page, but it does not extract, describe, classify, or interpret visual content.
 
 A future visual-content adapter may create page-region assets and link them to evidence. It must preserve the original image separately from any AI description and must not be coupled to the PDF format. No visual asset schema is required for the current phase.

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 
 import { CaseReviewForm } from "@/components/cases/case-review-form";
 import { useLanguage } from "@/components/i18n/language-provider";
@@ -18,6 +19,8 @@ const sourceStatusKeys = {
   SCHEMA_INVALID: "sources.status.schemaInvalid",
   FAILED: "sources.status.failed",
 } as const satisfies Record<string, MessageKey>;
+
+const downloadResponseSchema = z.strictObject({ url: z.url().startsWith("https://") });
 
 const attemptStatusKeys = {
   PENDING: "sourceDetail.attemptStatus.pending",
@@ -137,6 +140,7 @@ export function SourceDetail({
   const { locale, t } = useLanguage();
   const router = useRouter();
   const [extractionPending, setExtractionPending] = useState(false);
+  const [downloadPending, setDownloadPending] = useState(false);
   const [automotiveAnalysisPending, setAutomotiveAnalysisPending] = useState(false);
   const [actionError, setActionError] = useState<MessageKey | null>(null);
   const dateFormatter = useMemo(
@@ -199,6 +203,23 @@ export function SourceDetail({
           ? "sourceDetail.knowledge.values.yes"
           : "sourceDetail.knowledge.values.no",
     );
+  }
+
+  async function downloadOriginalPdf() {
+    if (downloadPending) return;
+
+    setDownloadPending(true);
+    setActionError(null);
+    try {
+      const response = await fetch(`/api/sources/${source.id}/download`, { cache: "no-store" });
+      if (!response.ok) throw new Error("SOURCE_DOWNLOAD_FAILED");
+      const { url } = downloadResponseSchema.parse(await response.json());
+      window.location.assign(url);
+    } catch {
+      setActionError("sourceDetail.download.error");
+    } finally {
+      setDownloadPending(false);
+    }
   }
 
   async function startExtraction() {
@@ -309,6 +330,16 @@ export function SourceDetail({
 
         {!focusedCaseId && (
           <div className="source-heading-actions">
+            {source.type === "PDF" && (
+              <button
+                className="secondary-action source-extraction-action"
+                disabled={downloadPending}
+                onClick={downloadOriginalPdf}
+                type="button"
+              >
+                {t(downloadPending ? "sourceDetail.download.preparing" : "sourceDetail.download.button")}
+              </button>
+            )}
             {canExtract && (
               <button
                 className="primary-action source-extraction-action"

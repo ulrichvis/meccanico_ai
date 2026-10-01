@@ -13,6 +13,13 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 Resume Phase 6.3 only after this cleanup is complete and the next step is requested.
 
+### Original PDF download
+
+- [x] Add a localized download button to `/sources/[sourceId]`.
+- [x] Generate a five-minute private Storage download URL on demand, using the original filename and no database changes.
+- [x] Show localized pending/error feedback and prevent duplicate clicks while preparing the download.
+- [x] Verify the stored PDF download, invalid/missing source responses, catalog parity, lint, types, and build.
+
 ### 1. Initialization
 
 - [x] Initialize Next.js with App Router, strict TypeScript, Tailwind, and `src/`.
@@ -383,6 +390,7 @@ Phase 6 makes the stored knowledge base browsable without implementing the futur
 
 | Date | Phase | Change | Verification |
 |---|---|---|---|
+| 2026-10-01 | Original PDF download | Added an on-demand original PDF download action with a five-minute signed private Storage URL, original filename, and English/Italian pending and error feedback. | Catalog parity (384 keys), lint, types, build, and diff checks passed. Live read-only verification downloaded a current 6,620,991-byte PDF, checked its PDF signature, attachment disposition, original filename, non-cacheable endpoint, rendered button, and safe 400/404 responses. No source or Storage object was modified. Browser/mobile checks are documented in ADR 0025. |
 | 2026-10-01 | MVP frontend cleanup | Made `/cases` the home page via a server redirect, reduced the shell to Sources/Cases/Upload and the language selector, and removed landing-page presentation, footer, unused CSS, and translations. | Catalog parity (381 keys), lint, types, build, and diff checks passed. A local production server returned HTTP 307 with `Location: /cases`; `/upload` rendered exactly three navigation links and the selector, without the footer. Manual English/Italian mobile verification procedure is recorded in ADR 0024. |
 | 2026-08-25 | Documentation | Created the initial documentation and backlog. | Cross-checked all Markdown files. |
 | 2026-08-25 | Documentation | Translated all project documentation into English and established English as the primary project language. | Checked internal links, formatting, and residual French text. |

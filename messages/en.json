@@ -164,6 +164,11 @@
     }
   },
   "sourceDetail": {
+    "download": {
+      "button": "Download original PDF",
+      "preparing": "Preparing download…",
+      "error": "The original PDF could not be downloaded. Please try again."
+    },
     "back": "Back to sources",
     "eyebrow": "Source detail",
     "loading": "Loading document…",
