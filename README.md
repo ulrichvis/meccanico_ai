@@ -102,7 +102,7 @@ pnpm install
 pnpm dev
 ```
 
-Then open `http://localhost:3000`. Use the language selector to switch all displayed text between English and Italian without changing the route.
+Then open `http://localhost:3000`, which redirects to `/cases`, the MVP home page. The navigation contains only Sources, Cases, Upload PDF, and the language selector. Use the selector to switch interface text between English and Italian without changing the route.
 
 Database credentials are intentionally absent from the repository. Copy `.env.example` to `.env.local`, add the two Supabase PostgreSQL connection strings, and follow the [database setup procedure](docs/DEVELOPMENT.md#supabase-database-setup).
 

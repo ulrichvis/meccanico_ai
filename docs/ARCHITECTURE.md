@@ -247,6 +247,8 @@ The chat layer is a read and reasoning interface over the knowledge base. It mus
 
 ## Frontend internationalization
 
+The MVP opens directly into case browsing: `/` redirects server-side to `/cases`. The application shell contains only Sources, Cases, Upload PDF, and the language selector, including on mobile. The former informational landing page, branding copy, and footer are removed. This cleanup changes presentation only; source ingestion, extraction, persistence, and optional review keep their existing behavior.
+
 English is the official language of development. The frontend supports English (`en`) and Italian (`it`) from Phase 1.
 
 ```text

@@ -1,10 +1,5 @@
-import { HomeContent } from "@/components/home/home-content";
-import { AppShell } from "@/components/layout/app-shell";
+import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  return (
-    <AppShell>
-      <HomeContent />
-    </AppShell>
-  );
+  redirect("/cases");
 }

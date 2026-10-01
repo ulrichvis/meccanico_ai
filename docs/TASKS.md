@@ -4,6 +4,15 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ## Next phase: Phase 6 — Search and browsing
 
+### MVP frontend cleanup — before continuing Phase 6
+
+- [x] Make `/cases` the MVP home page with a server-side redirect from `/`.
+- [x] Remove the informational landing page and its unused component, styles, and translations.
+- [x] Keep only Sources, Cases, Upload PDF, and the language selector in the application shell; keep navigation visible on mobile.
+- [x] Verify catalog parity, lint, type checking, production build, and the root redirect.
+
+Resume Phase 6.3 only after this cleanup is complete and the next step is requested.
+
 ### 1. Initialization
 
 - [x] Initialize Next.js with App Router, strict TypeScript, Tailwind, and `src/`.
@@ -374,6 +383,7 @@ Phase 6 makes the stored knowledge base browsable without implementing the futur
 
 | Date | Phase | Change | Verification |
 |---|---|---|---|
+| 2026-10-01 | MVP frontend cleanup | Made `/cases` the home page via a server redirect, reduced the shell to Sources/Cases/Upload and the language selector, and removed landing-page presentation, footer, unused CSS, and translations. | Catalog parity (381 keys), lint, types, build, and diff checks passed. A local production server returned HTTP 307 with `Location: /cases`; `/upload` rendered exactly three navigation links and the selector, without the footer. Manual English/Italian mobile verification procedure is recorded in ADR 0024. |
 | 2026-08-25 | Documentation | Created the initial documentation and backlog. | Cross-checked all Markdown files. |
 | 2026-08-25 | Documentation | Translated all project documentation into English and established English as the primary project language. | Checked internal links, formatting, and residual French text. |
 | 2026-08-25 | Documentation | Made human review non-blocking and documented the future mechanic-facing conversational assistant. | Cross-checked product, architecture, data, roadmap, and ADR terminology. |
