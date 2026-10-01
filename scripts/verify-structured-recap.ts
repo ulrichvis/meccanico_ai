@@ -18,7 +18,7 @@ function italianFixture(marker: string): AutomotiveExtraction {
       sourceDate: null,
       language: "it",
     },
-    documentAnalysis: { uncertainties: [], requiresHumanReview: false },
+    documentAnalysis: { uncertainties: [] },
     cases: [
       {
         ref: "case-1",
@@ -273,7 +273,7 @@ async function main() {
                 uncertainty: null,
               },
             ],
-            metadataJson: { reviewStatus: "unreviewed" },
+            metadataJson: {},
           },
         },
         extractionJobs: {

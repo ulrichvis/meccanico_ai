@@ -8,7 +8,7 @@
 4. Relationships, their origin, and their confidence level are first-class data.
 5. Probabilities stated by a source are separate from probabilities calculated later.
 6. Structural machine validation gates relational persistence; content-quality warnings and human review do not.
-7. Every stored case carries an explicit review status that future retrieval can use as a quality signal.
+7. The AI-first MVP has no human-review fields; provenance, uncertainty, and source-reported outcomes remain separate signals.
 
 ## Main relationships
 
@@ -69,7 +69,7 @@ erDiagram
 
 `pages_json` provides a simple starting point. A `document_pages` table may replace it if search requirements or volume justify the change.
 
-The implemented Phase 2 pages also contain `textQuality` and nullable `uncertainty`. Metadata records `reviewStatus: unreviewed`, the extraction job, model route, quality report, author, source date as written, and token usage. Partial dates stay in metadata; only a complete valid ISO date populates `sources.source_date`. No database migration was required for these JSON fields.
+The implemented Phase 2 pages also contain `textQuality` and nullable `uncertainty`. Metadata records the extraction job, model route, quality report, author, source date as written, and token usage. Partial dates stay in metadata; only a complete valid ISO date populates `sources.source_date`. No database migration was required for these JSON fields.
 
 `documents.language` describes the source content language. It is independent from the frontend locale. English or Italian UI selection must never alter extracted evidence or source-language metadata.
 
@@ -121,11 +121,11 @@ Phase 4.4 presents the relational graph through a source-detail DTO. Stored sour
 
 This mapping guides the Phase 3 prompt: it must preserve multiple cases, temporary entity references, evidence, explicit-versus-inferred origin, confidence for inferences, and the distinctions enforced by the database. It must not request database IDs, normalized names, timestamps, review state, or lifecycle state from the model.
 
-The current `automotive-structure-v2` prompt requires several explicit application-level mappings:
+The current `automotive-structure-v3` prompt requires several explicit application-level mappings:
 
 - `vehicles` and `repairOutcomes` are arrays because the schema supports several of each per case;
 - AI JSON uses camelCase while Prisma performs the snake-case database mapping;
-- `requiresHumanReview` and `uncertainties` remain extraction-artifact metadata in `validated_output`; the recommendation is advisory and does not block persistence;
+- `uncertainties` remain extraction-artifact metadata in `validated_output`; they do not block persistence.
 - every persisted evidence item requires a non-empty supporting passage because `source_evidence.excerpt` is non-null; it may be reformulated without adding facts and must not be presented as a guaranteed verbatim quotation;
 - generic graph nodes are limited to `dtc`, `symptom`, `cause`, `diagnostic_check`, `solution`, and `repair_outcome`;
 - measurement-to-check, procedure-to-solution, and outcome-to-solution connections use dedicated references that the normalizer converts to foreign keys;
@@ -133,7 +133,7 @@ The current `automotive-structure-v2` prompt requires several explicit applicati
 
 Adaptation and programming steps, post-repair verification, and vehicle-specific conditions remain explicit in procedure wording during the MVP. A dedicated procedure subtype or conditions column should be considered only if real extractions show that preserving wording is insufficient for reliable retrieval.
 
-Meaning-preserving analysis requires no migration. Phase 2 page text and immutable raw outputs remain original audit material; Phase 3 structured descriptions and supporting passages may improve wording in the source language. The validated job artifact stores advisory warning codes in `quality.warnings`, with `accepted = true` and empty blocking `reasons`. Existing completed v1 artifacts remain valid and are not rewritten. A warning is not proof of an invention or proof of semantic correctness.
+Meaning-preserving analysis requires no migration. Phase 2 page text and immutable raw outputs remain original audit material; Phase 3 structured descriptions and supporting passages may improve wording in the source language. The validated job artifact stores advisory warning codes in `quality.warnings`, with `accepted = true` and empty blocking `reasons`. Existing completed v1/v2 artifacts remain valid and are not rewritten. A warning is not proof of an invention or proof of semantic correctness.
 
 ## Future visual assets
 
@@ -155,13 +155,10 @@ The original file in private Storage preserves diagrams and photographs during t
 | `problem_description` | text nullable        | Technical description.                             |
 | `analysis_summary`    | text nullable        | Summary clearly identified as analysis.            |
 | `status`              | enum                 | Lifecycle state: `active`, `rejected`, `archived`. |
-| `review_status`       | enum                 | `unreviewed`, `reviewed`, `corrected`.             |
 | `created_at`          | timestamptz          | Creation date.                                     |
 | `updated_at`          | timestamptz          | Modification date.                                 |
-| `reviewed_at`         | timestamptz nullable | Most recent human review date.                     |
-| `review_notes`        | text nullable        | Optional administrative notes.                     |
 
-Newly normalized cases are inserted with `status = active` and `review_status = unreviewed`. Human review is never required for insertion. Rejecting or archiving a case removes it from normal retrieval without deleting its source or extraction history.
+Newly normalized cases are inserted with `status = active`, without human-review metadata. Existing rejected or archived records remain distinct lifecycle states and are excluded from default browsing; the current MVP exposes no lifecycle mutation actions. The removal migration drops the review enum and columns, replaces the dependent index, and removes `Document.metadataJson.reviewStatus`. Immutable extraction artifacts are not rewritten.
 
 ### `vehicles` and `case_vehicles`
 
@@ -263,7 +260,7 @@ Future table, not implemented in the MVP. It may aggregate vehicle context, engi
 
 - `sources(status, created_at desc)`;
 - `extraction_jobs(source_id, created_at desc)`;
-- `cases(status, review_status, created_at desc)`;
+- `cases(status, created_at desc)`;
 - unique `dtcs(normalized_code)`;
 - unique `vehicles(normalized_key)`;
 - indexes on every foreign key in association tables;
@@ -284,10 +281,10 @@ The initial SQL migration adds database features that are not fully represented 
 
 Check constraints are kept in the migration SQL because Prisma ORM does not currently express PostgreSQL `CHECK` constraints in the Prisma Schema Language. Any future migration must preserve these constraints explicitly.
 
-## Admin edits and traceability
+## Immutable extraction traceability
 
 Phase 2 `raw_ai_output` uses a `response-json-string-v1` envelope containing the JSON-encoded response string, model route, and retry trigger. This preserves malformed text safely in JSONB and redacts an echoed signed access URL. `validated_output` stores the content, quality report, usage, and response ID; unsafe encodings are retained in the raw envelope instead of inserted as PostgreSQL text. Completed and failed jobs are immutable through the processing service. The document recap planned for point 2.7 will read these persisted fields without generating another AI summary.
 
-The raw and validated AI outputs are immutable audit artifacts. Editing a normalized case changes domain records, not those extraction artifacts. At minimum, the case stores `updated_at`, `review_status`, `reviewed_at`, and optional `review_notes`. When authentication is introduced, edits should also record the responsible actor and a revision history.
+The raw and validated AI outputs are immutable audit artifacts. The current MVP has no case editor or review columns. Legacy artifacts may still contain an old review recommendation; compatibility code removes it from an in-memory copy only, without rewriting the historical JSONB record.
 
-Future conversational retrieval must filter out rejected and archived cases. Review status is used for ranking and disclosure, not as an absolute requirement for retrieval.
+Future conversational retrieval must filter out rejected and archived cases. Relevance, source evidence, inference confidence, and source-reported repair outcomes are separate retrieval signals; there is no human-review ranking signal.

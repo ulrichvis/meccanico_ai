@@ -41,9 +41,9 @@ For any AI extraction work, also read `docs/EXTRACTION_CONTRACT.md`.
 - A cause is not a solution, a test is not a repair, and a proposed repair is not a confirmed repair.
 - A document may contain several cases, and a case may contain several DTCs.
 - Evidence and excerpts must remain traceable to the original page whenever that page is known.
-- Structurally valid normalized data is persisted immediately with an `unreviewed` status.
-- Human review is optional and must never be a persistence prerequisite.
-- Admin edits must preserve the raw and validated extraction so changes remain traceable.
+- Structurally valid normalized data is persisted automatically without a human-review status or approval workflow.
+- Human review and case editing are outside the current MVP scope.
+- Preserve immutable raw and validated extraction artifacts for traceability.
 
 ## Architecture constraints
 

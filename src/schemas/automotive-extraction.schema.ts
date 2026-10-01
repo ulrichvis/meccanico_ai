@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 export const AUTOMOTIVE_EXTRACTION_SCHEMA_NAME = "automotive_extraction";
-export const AUTOMOTIVE_EXTRACTION_PROMPT_VERSION = "automotive-structure-v2";
+export const AUTOMOTIVE_EXTRACTION_PROMPT_VERSION = "automotive-structure-v3";
 export const ACCEPTED_AUTOMOTIVE_PROMPT_VERSIONS = [
   AUTOMOTIVE_EXTRACTION_PROMPT_VERSION,
+  "automotive-structure-v2",
   "automotive-structure-v1",
 ];
 
@@ -397,7 +398,6 @@ export const automotiveExtractionSchema = z
     }),
     documentAnalysis: z.strictObject({
       uncertainties: z.array(uncertaintySchema),
-      requiresHumanReview: z.boolean(),
     }),
     cases: z.array(extractedCaseSchema),
   })
@@ -428,6 +428,19 @@ export const automotiveExtractionSchema = z
 
 export type AutomotiveExtraction = z.infer<typeof automotiveExtractionSchema>;
 export type ExtractedAutomotiveCase = z.infer<typeof extractedCaseSchema>;
+
+// Read legacy artifacts without mutating their immutable stored JSON.
+export function withoutLegacyReviewRecommendation(input: unknown): unknown {
+  if (typeof input !== "object" || input === null || !("documentAnalysis" in input)) return input;
+  const analysis = input.documentAnalysis;
+  if (typeof analysis !== "object" || analysis === null || !("requiresHumanReview" in analysis)) return input;
+  return {
+    ...input,
+    documentAnalysis: Object.fromEntries(
+      Object.entries(analysis).filter(([key]) => key !== "requiresHumanReview"),
+    ),
+  };
+}
 
 const generatedJsonSchema = z.toJSONSchema(automotiveExtractionSchema, {
   target: "draft-7",

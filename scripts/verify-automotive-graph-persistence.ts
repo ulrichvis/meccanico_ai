@@ -220,7 +220,7 @@ function extractionFixture(marker: string) {
       sourceDate: null,
       language: "en",
     },
-    documentAnalysis: { uncertainties: [], requiresHumanReview: false },
+    documentAnalysis: { uncertainties: [] },
     cases: [first, second],
   };
 }
@@ -305,7 +305,7 @@ async function main() {
     });
     assert.equal(cases.length, 2);
     assert(cases.every((item) => item.status === "ACTIVE"));
-    assert(cases.every((item) => item.reviewStatus === "UNREVIEWED"));
+    assert(cases.every((item) => !("reviewStatus" in item)));
     const complete = cases.find((item) => item.title === "Synthetic complete graph");
     assert(complete);
     assert.equal(complete.vehicles.length, 1);

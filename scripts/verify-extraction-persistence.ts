@@ -84,7 +84,7 @@ async function main() {
     assert.equal(stored.rawText, content.pages.map((page) => page.text).join("\n\n"));
     assert.equal(stored.sourceDate, null);
     assert.deepEqual(stored.documents[0].pagesJson, content.pages);
-    assert(JSON.stringify(stored.documents[0].metadataJson).includes("unreviewed"));
+    assert(!JSON.stringify(stored.documents[0].metadataJson).includes("reviewStatus"));
     const previousRaw = JSON.stringify(jobs[0].rawAiOutput);
     assert.equal((await runWith(id, [])).status, "already_processed");
     assert.equal(await database.document.count({ where: { sourceId: id } }), 1);

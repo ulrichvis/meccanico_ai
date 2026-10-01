@@ -4,6 +4,20 @@ This file is the project's operational tracker. Check only tasks that are actual
 
 ## Next phase: Phase 6 — Search and browsing
 
+### AI-first MVP simplification — before continuing Phase 6
+
+- [x] Remove case-review buttons, the editing page, its API, services, schemas, and obsolete verification scripts.
+- [x] Remove human-review badges and filters from case and source views; keep source links and read-only technical recaps.
+- [x] Remove review fields from Prisma, new document metadata, normalization, and persistence.
+- [x] Introduce `automotive-structure-v3` without a human-review recommendation; adapt completed v1/v2 artifacts in memory without changing history.
+- [x] Prepare an atomic migration removing review columns, enum, dependent index, and document metadata only.
+- [ ] Apply the migration to shared Supabase after deploying compatible application code and confirming a recoverable database backup.
+- [x] Complete focused migration/pipeline verification, catalog parity, lint, types, Prisma validation, and build.
+
+Manual acceptance: open `/cases` in English and Italian, search a known case, and follow **View source**. No review button, badge, filter, or editor should appear. The former `/cases/<id>/review` and case mutation API must return 404. Download the original PDF and inspect its read-only recap. On an approved source, run text extraction and structured analysis; data must save without approval. Processing states and source-reported repair confirmation are not human-review statuses and remain available.
+
+Do not start Phase 6.3 as part of this cleanup. See ADR 0027 for rollout order and legacy artifact compatibility.
+
 ### MVP frontend cleanup — before continuing Phase 6
 
 - [x] Make `/cases` the MVP home page with a server-side redirect from `/`.
@@ -297,6 +311,8 @@ Phase 4 converts an accepted Phase 3 artifact into the existing relational model
 
 ### Phase 5 — Optional admin review and editing
 
+Historical implementation, superseded by the AI-first MVP simplification (ADR 0027). Steps 5.1 and 5.3–5.6 below record past work, not currently available features or authorization to restore editing. Step 5.2 remains active; its result is a read-only source recap without review actions.
+
 Phase 5 adds a small operator-only correction workflow for one persisted case at a time. It must reuse the Phase 4 relational graph, preserve the original extraction audit trail, and avoid drafts, autosave, bulk editing, complex permissions, or editorial version history in the MVP.
 
 #### 5.1 Case review page and read model
@@ -354,14 +370,14 @@ Phase 6 makes the stored knowledge base browsable without implementing the futur
 #### 6.1 Active case index
 
 - [x] Add a localized `/cases` page and primary-navigation entry.
-- [x] List recent active cases through a bounded server-side read model with visible review status, source, DTC, vehicle, and last-update context.
-- [x] Link each row to the existing source and review workflows without exposing raw AI output or database implementation details.
+- [x] List recent active cases through a bounded server-side read model with source, DTC, vehicle, and last-update context.
+- [x] Link each row to its source without exposing raw AI output or database implementation details.
 - [x] Provide bilingual empty, loading, and error states and preserve mobile usability.
 
 #### 6.2 Simple search and filters
 
 - [x] Search case title and stored applicability by DTC, make, model, engine code, and engine description using validated URL query parameters.
-- [x] Add review-status and lifecycle filters while keeping active cases as the default view.
+- [x] Keep lifecycle filters and active cases as the default view; human-review filters have been removed.
 - [x] Keep the query bounded and deterministic; do not add Elasticsearch, embeddings, fuzzy ranking, or full-text infrastructure for the MVP.
 - [x] Preserve filters in the URL so results are reloadable and shareable without locale-specific routing.
 
@@ -369,19 +385,19 @@ Phase 6 makes the stored knowledge base browsable without implementing the futur
 
 - [ ] Add `/cases/[caseId]` as the read-only browsing view for the complete diagnostic structure.
 - [ ] Show vehicles, DTCs, symptoms, causes, components, checks, measurements, solutions, procedures, outcomes, parts, evidence, and relationships.
-- [ ] Keep source-language technical content unchanged and provide explicit links to the source and optional correction page.
+- [ ] Keep source-language technical content unchanged and provide an explicit link to the original source; do not restore an editor.
 - [ ] Keep rejected and archived records reachable only when explicitly selected through lifecycle browsing.
 
 #### 6.4 Phase 6 verification
 
-- [ ] Verify active-default browsing, every supported search field, review and lifecycle filters, deterministic limits, and empty results against isolated Supabase fixtures.
+- [ ] Verify active-default browsing, every supported search field, lifecycle filters, deterministic limits, and empty results against isolated Supabase fixtures.
 - [ ] Manually verify the list and detail pages in English and Italian at desktop and mobile widths.
-- [ ] Verify evidence, relationships, lifecycle state, and review state remain visible without exposing immutable provider artifacts.
+- [ ] Verify evidence, relationships, and lifecycle state remain visible without exposing immutable provider artifacts or human-review state.
 - [ ] Run catalog parity, lint, type checking, focused Phase 6 verification commands, Prisma validation, and the production build successfully.
 
 ### Post-MVP — Mechanic-facing assistant
 
-- [ ] Define retrieval and ranking policies for reviewed and unreviewed knowledge.
+- [ ] Define retrieval and ranking policies based on relevance, source evidence, inference confidence, and source-reported outcomes, without human-review state.
 - [ ] Implement evidence-backed retrieval over stored cases.
 - [ ] Build the conversational interface for mechanics.
 - [ ] Ask follow-up questions when vehicle or diagnostic context is incomplete.
@@ -398,6 +414,8 @@ Phase 6 makes the stored knowledge base browsable without implementing the futur
 - [ ] Evaluate image usefulness, privacy, cost, and groundedness before exposing visuals to the mechanic assistant.
 
 ## Progress log
+
+AI-first cleanup, 2026-10-01: removed human-review UI, editing routes and services, new-write metadata, and Prisma fields; introduced the v3 contract with non-mutating legacy compatibility. Focused checks and isolated migration rollback passed, temporary fixtures were removed, and production HTTP checks confirmed existing cases/source recap and 404s for deleted routes. The shared Supabase migration is pending compatible deployment and backup confirmation. No OpenAI call, deployment, or Phase 6.3 work was performed. See [verification report](AI_FIRST_MVP_VERIFICATION.md).
 
 | Date | Phase | Change | Verification |
 |---|---|---|---|

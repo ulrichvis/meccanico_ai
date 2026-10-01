@@ -117,7 +117,7 @@ export class ExtractionRepository {
         pagesJson: json(result.output.pages),
         metadataJson: json({
           author: result.output.author, sourceDate: result.output.sourceDate,
-          extractionMethod: "openai_pdf", transferMethod: "signed_url", reviewStatus: "unreviewed",
+          extractionMethod: "openai_pdf", transferMethod: "signed_url",
           extractionJobId: jobId, promptVersion: result.promptVersion, model: result.model,
           route, quality, responseId: result.responseId, usage: result.usage,
         }),

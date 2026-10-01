@@ -119,7 +119,7 @@ const fixtures: Array<{
     },
     verify: (output) => {
       assert.equal(output.cases.length, 0);
-      assert.equal(output.documentAnalysis.requiresHumanReview, true);
+      assert(!("requiresHumanReview" in output.documentAnalysis));
       assert(output.documentAnalysis.uncertainties.length > 0);
     },
   },
@@ -148,7 +148,6 @@ async function main() {
       caseCount: result.output.cases.length,
       model: result.model,
       name: fixture.name,
-      requiresHumanReview: result.output.documentAnalysis.requiresHumanReview,
       warnings: quality.warnings,
       usage: result.usage,
     });

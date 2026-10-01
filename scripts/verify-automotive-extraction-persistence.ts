@@ -24,7 +24,6 @@ const incompleteOutput: AutomotiveExtraction = {
   },
   documentAnalysis: {
     uncertainties: [],
-    requiresHumanReview: false,
   },
   cases: [],
 };
@@ -39,7 +38,6 @@ const acceptedOutput: AutomotiveExtraction = {
         description: "The second page is partially unreadable.",
       },
     ],
-    requiresHumanReview: true,
   },
 };
 
@@ -146,7 +144,7 @@ async function main() {
     assert.equal(jobs[0]?.error, null);
     assert.deepEqual(
       (jobs[0]?.validatedOutput as { quality: { warnings: string[] } }).quality.warnings,
-      ["HUMAN_REVIEW_FLAG_MISSING"],
+      [],
     );
     assert.equal(jobs[0]?.model, "synthetic-primary");
     assert.equal(jobs[0]?.promptVersion, AUTOMOTIVE_EXTRACTION_PROMPT_VERSION);

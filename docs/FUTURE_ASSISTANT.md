@@ -35,14 +35,7 @@ The mechanic can use the assistant in English or Italian. The selected product l
 
 The assistant reads normalized cases and their relationships, measurements, evidence, and repair outcomes. Raw AI extraction remains available for audits and debugging, but it is not the primary retrieval corpus.
 
-Human review is optional, so retrieval must account for quality metadata:
-
-1. corrected or reviewed cases with confirmed repair outcomes;
-2. reviewed cases with strong documentary evidence;
-3. unreviewed cases with explicit source evidence;
-4. inferred or weakly supported information.
-
-This ordering is a ranking principle, not an absolute filter. Relevance, evidence quality, sample size, repair confirmation, and review status must remain separate signals.
+The knowledge base is populated automatically, without human-review states. Future retrieval must distinguish relevance, source evidence strength, explicit facts versus inferences, uncertainty, sample size, and source-reported repair confirmation. These signals do not establish that AI-generated interpretations are infallible; retrieval must remain evidence-backed rather than treating automatic persistence as proof of truth.
 
 Rejected and archived cases are excluded from normal retrieval.
 
@@ -76,7 +69,7 @@ Retrieval may eventually combine:
 - diagnostic checks and measured values;
 - possible causes and involved components;
 - repairs attempted and their outcomes;
-- source evidence type, inference confidence, and review status.
+- source evidence type, inference confidence, and uncertainty.
 
 The future implementation may use structured SQL filters, full-text search, embeddings, and reranking. The exact approach must be chosen after real ingestion data is available.
 
@@ -92,12 +85,12 @@ Every response should make clear:
 - what additional check would reduce uncertainty;
 - when professional judgment or manufacturer documentation is still required.
 
-The assistant must not silently write generated conclusions back into the knowledge base. Any future learning or feedback flow must pass through an explicit ingestion or admin-review path.
+The assistant must not silently write generated conclusions back into the knowledge base. Any future learning or feedback flow must pass through an explicit ingestion path; future editing requires a separate product decision.
 
 ## Delivery stages
 
-1. Reliable PDF ingestion and automatic unreviewed persistence.
-2. Optional admin review, correction, rejection, and archiving.
+1. Reliable PDF ingestion and automatic persistence.
+2. Read-only source recaps and original PDF access.
 3. Searchable case browser and retrieval evaluation dataset.
 4. Evidence-backed retrieval API.
 5. Internal conversational prototype.

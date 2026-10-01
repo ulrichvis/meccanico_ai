@@ -2,9 +2,9 @@
 
 This document describes the target domain contract for Phase 3 structured automotive analysis. It does not govern Phase 2 text extraction, which is documented in `docs/TEXT_EXTRACTION.md`.
 
-The current prompt behavior and database-specific adaptations are defined in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md` under prompt version `automotive-structure-v2`. Completed v1 jobs remain reusable; failed attempts are preserved and retried as new v2 jobs.
+The current prompt behavior and database-specific adaptations are defined in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md` under prompt version `automotive-structure-v3`. Completed v1/v2 jobs remain reusable; failed attempts are preserved and retried as new v3 jobs.
 
-The strict structural contract is implemented in `src/schemas/automotive-extraction.schema.ts`. It exports inferred TypeScript types and a draft-7 JSON Schema used by the OpenAI Structured Outputs adapter. The versioned instructions and validated page-input builder live in `src/prompts/automotive-extraction.prompt.ts`, and the provider-neutral extraction interface lives in `src/ai/automotive-knowledge-extractor.ts`. Deterministic post-response checks report non-blocking evidence wording/page, uncertainty page, review-signal, and confirmed-outcome warnings; they cannot prove equivalent meaning or absence of invention. Run the `automotive-*:verify` commands documented in `docs/DEVELOPMENT.md` to exercise these boundaries without a billable OpenAI call.
+The strict structural contract is implemented in `src/schemas/automotive-extraction.schema.ts`. It exports inferred TypeScript types and a draft-7 JSON Schema used by the OpenAI Structured Outputs adapter. The versioned instructions and validated page-input builder live in `src/prompts/automotive-extraction.prompt.ts`, and the provider-neutral extraction interface lives in `src/ai/automotive-knowledge-extractor.ts`. Deterministic post-response checks report non-blocking evidence wording/page, uncertainty page, and confirmed-outcome warnings; they cannot prove equivalent meaning or absence of invention. Run the `automotive-*:verify` commands documented in `docs/DEVELOPMENT.md` to exercise these boundaries without a billable OpenAI call.
 
 ## Input boundary
 
@@ -15,7 +15,7 @@ Photographs and diagrams are not interpreted in the first implementation. The or
 ## Output rules
 
 - The root always contains `source` and `cases`.
-- The root also contains `documentAnalysis` for uncertainties and the non-blocking review recommendation.
+- The root also contains `documentAnalysis` for uncertainties, without a human-review recommendation.
 - A document may produce zero, one, or several cases.
 - An unknown scalar field is `null`.
 - A collection with no items is `[]`.
@@ -25,8 +25,8 @@ Photographs and diagrams are not interpreted in the first implementation. The or
 - Important items include page or excerpt evidence whenever possible.
 - `probabilitySource` remains `null` unless the source itself provides a frequency.
 - `probabilityCalculated` always remains `null` during the MVP.
-- A contract-compliant output is normalized and persisted automatically with `reviewStatus: "unreviewed"`.
-- Human review is optional and occurs after persistence.
+- A contract-compliant output is normalized and persisted automatically as an active case.
+- The MVP has no human approval, review status, or case editing workflow.
 
 ## Simplified target shape
 
@@ -40,7 +40,6 @@ type Extraction = {
   };
   documentAnalysis: {
     uncertainties: Uncertainty[];
-    requiresHumanReview: boolean;
   };
   cases: ExtractedCase[];
 };
@@ -144,7 +143,6 @@ The source-support and no-invention requirements are prompt rules, not independe
 - `EVIDENCE_WORDING_CHANGED`: a passage does not match the indicated page or full input verbatim; reformulation or cross-page content is allowed, and semantic fidelity is not automatically established;
 - `EVIDENCE_PAGE_OUT_OF_RANGE`: the cited page is missing from input;
 - `UNCERTAINTY_PAGE_OUT_OF_RANGE`: an uncertainty cites a missing page;
-- `HUMAN_REVIEW_FLAG_MISSING`: partial/uncertain input was not flagged for review;
 - `CONFIRMED_SOLUTION_OUTCOME_MISSING`: a confirmed solution has no corresponding confirmed outcome.
 
 Original page text and raw output remain unchanged. Supporting passages are not displayed as guaranteed quotations. Never fabricate a repair outcome simply to remove a warning.
@@ -237,9 +235,9 @@ The prompt implemented in code must have a version identifier and communicate at
 
 > You are an automotive technical knowledge extraction engine. Analyze the source and reconstruct its diagnostic structure. Extract only information supported by the source. Never complete missing vehicle data from general automotive knowledge. Distinguish explicit facts from AI inference. Do not treat all DTC codes as equivalent. Keep symptoms, causes, components, diagnostic checks, measurements, repairs and outcomes separate. A proposed repair is not a confirmed repair. If no probability is explicitly provided, set `probabilitySource` to null. Preserve uncertainty and trace important information to the source.
 
-This text is a compact functional baseline. The implemented `automotive-structure-v2` instructions assemble the complete behavioral specification in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md`. They allow improved writing without invented facts or changes to certainty, negation, values, units, conditions, or variants. The strict JSON Schema remains separate and is supplied by the OpenAI adapter through Structured Outputs.
+This text is a compact functional baseline. The implemented `automotive-structure-v3` instructions assemble the complete behavioral specification in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md`. They allow improved writing without invented facts or changes to certainty, negation, values, units, conditions, or variants. The strict JSON Schema remains separate and is supplied by the OpenAI adapter through Structured Outputs.
 
-The prompt and JSON Schema have been reviewed against `docs/DATA_MODEL.md`. They expose temporary references for evidence and relationships while avoiding fields that the application can determine safely, such as normalized labels, database identifiers, timestamps, and `reviewStatus = "unreviewed"`.
+The prompt and JSON Schema match `docs/DATA_MODEL.md`. They expose temporary evidence and relationship references, without database identifiers, normalized keys, timestamps, lifecycle state, or human-review fields. The v3 contract omits `requiresHumanReview`. Completed v1/v2 artifacts are adapted in memory for normalization; their original JSONB remains immutable.
 
 Model routing for structured analysis is independent from Phase 2 text extraction. Model names, reasoning effort, retry limits, and escalation rules are centralized. Start with the primary configured model, then escalate only for schema-invalid, invalid-response, or incomplete-response failures. Advisory content warnings do not trigger another AI call. Never call every model tier automatically.
 
@@ -251,11 +249,11 @@ Model routing for structured analysis is independent from Phase 2 text extractio
 - Use `schema_invalid` when the response cannot safely be normalized; otherwise use `failed` for processing or infrastructure failures.
 - A retry creates a new job and preserves history.
 
-## Machine validation versus human review
+## Automatic persistence
 
-Machine validation and human review serve different purposes:
+Only automatic structural validation gates relational persistence:
 
 - Machine validation is mandatory. It verifies the contract shape, references, invariants, and transaction safety before relational persistence.
-- Human review is optional. It improves, corrects, rejects, or annotates data already stored as `unreviewed`.
+- No human-review status, approval, or editing workflow exists in the current MVP.
 
-This distinction allows continuous ingestion without treating unchecked AI output as equivalent to human-reviewed knowledge.
+Automatic persistence is not a guarantee of semantic correctness. Source evidence, uncertainty, and explicit-versus-inferred origin remain available without requiring human action.

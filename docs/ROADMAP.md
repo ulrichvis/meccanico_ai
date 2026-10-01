@@ -53,7 +53,7 @@ An uploaded PDF is sent directly to OpenAI and produces faithful, source-languag
 - Explicit distinction between facts and inferences.
 - Model routing that is separate from the Phase 2 text-extraction policy.
 - Database-aligned handling of multiple vehicles, multiple outcomes, uncertainty, evidence excerpts, and dedicated relationship references.
-- Advisory `requiresHumanReview` signaling that never blocks valid persistence.
+- Source uncertainties without human approval or review recommendations.
 
 ### Expected outcome
 
@@ -68,7 +68,7 @@ A text document produces zero, one, or several contract-compliant extraction obj
 - Conservative reference-data deduplication.
 - Validation of references between entities.
 - Preservation of evidence and original wording.
-- Automatic assignment of `reviewStatus = unreviewed`.
+- Automatic assignment of active lifecycle state, without human-review metadata.
 
 ### Expected outcome
 
@@ -76,7 +76,7 @@ A machine-validated extraction automatically becomes a coherent active case in t
 
 ## Phase 5 — Optional admin review and editing
 
-Status: complete.
+Status: historical implementation, removed by ADR 0027. The following deliverables describe past work, not current MVP functionality. Only the source-detail structured-analysis action remains; no review page, editor, mutation API, or approval status remains in scope.
 
 ### Deliverables
 
@@ -101,11 +101,11 @@ Status: active. The bounded case index plus URL-based search and status filters 
 
 ### Deliverables
 
-- `/cases` list showing active cases with their review status.
+- `/cases` list showing active cases with source context.
 - Simple search by DTC, make, model, and engine.
 - `/cases/[id]` page showing the diagnostic structure.
 - Presentation of evidence, procedures, and outcomes.
-- Filters for review and lifecycle status in the admin interface.
+- Filters for lifecycle status in the admin interface.
 
 ### Expected outcome
 
@@ -116,13 +116,13 @@ The stored knowledge base becomes usable without direct table access while prese
 After ingestion and knowledge management are reliable, build a mechanic-facing chat interface in deliberate stages:
 
 1. retrieve relevant cases by vehicle, engine, DTC, symptoms, measurements, and repair history;
-2. rank results using relevance, evidence quality, repair confirmation, and review status;
+2. rank results using relevance, evidence quality, repair confirmation, and inference confidence;
 3. generate grounded answers with supporting case references;
 4. ask follow-up questions when diagnostic context is missing;
 5. maintain conversation context across a diagnostic session;
 6. evaluate answer quality and unsupported-claim rates before wider release.
 
-The assistant must prefer reviewed or corrected records when relevance is comparable, clearly represent uncertainty, and avoid presenting unsupported conclusions as facts. See `docs/FUTURE_ASSISTANT.md`.
+The assistant must distinguish evidence strength, inferred conclusions, uncertainty, and source-reported outcomes without treating database presence as certainty. See `docs/FUTURE_ASSISTANT.md`.
 
 The chat interface and generated responses must support English and Italian. Conversation language follows the user's explicit selection, with English as the fallback.
 

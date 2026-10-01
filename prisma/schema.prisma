@@ -50,14 +50,6 @@ enum CaseStatus {
   @@map("case_status")
 }
 
-enum ReviewStatus {
-  UNREVIEWED @map("unreviewed")
-  REVIEWED   @map("reviewed")
-  CORRECTED  @map("corrected")
-
-  @@map("review_status")
-}
-
 enum RelationOrigin {
   EXPLICIT_SOURCE @map("explicit_source")
   AI_INFERENCE    @map("ai_inference")
@@ -172,11 +164,8 @@ model Case {
   problemDescription String?           @map("problem_description")
   analysisSummary    String?           @map("analysis_summary")
   status             CaseStatus        @default(ACTIVE)
-  reviewStatus       ReviewStatus      @default(UNREVIEWED) @map("review_status")
   createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
-  reviewedAt         DateTime?         @map("reviewed_at") @db.Timestamptz(6)
-  reviewNotes        String?           @map("review_notes")
   source             Source            @relation(fields: [sourceId], references: [id], onDelete: Restrict)
   document           Document?         @relation(fields: [documentId], references: [id], onDelete: SetNull)
   extractionJob      ExtractionJob?    @relation(fields: [extractionJobId], references: [id], onDelete: SetNull)
@@ -197,7 +186,7 @@ model Case {
   @@index([sourceId], map: "cases_source_id_idx")
   @@index([documentId], map: "cases_document_id_idx")
   @@index([extractionJobId], map: "cases_extraction_job_id_idx")
-  @@index([status, reviewStatus, createdAt(sort: Desc)], map: "cases_status_review_created_at_idx")
+  @@index([status, createdAt(sort: Desc)], map: "cases_status_created_at_idx")
   @@map("cases")
 }
 

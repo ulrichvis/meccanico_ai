@@ -108,7 +108,7 @@ The `text-quality-v1` gate rejects completely empty documents, NUL/unpaired-surr
 
 The schema prevents automotive fields from being added to the contract, but software cannot distinguish a faithful transcription of diagnostic prose from invented diagnostic prose without source comparison. Fidelity, visual non-interpretation, and the real page count remain representative-document verification requirements, not claims made by the deterministic quality gate.
 
-Without a local PDF parser, the application cannot independently prove that every source character or page was recovered. The original PDF, raw model output, model identity, prompt version, and retry history therefore remain essential audit evidence. Human review remains optional and is not a persistence prerequisite for structurally valid text.
+Without a local PDF parser, the application cannot independently prove that every source character or page was recovered. The original PDF, raw model output, model identity, prompt version, and retry history therefore remain essential audit evidence. No human-review workflow is part of the current MVP.
 
 When extraction still fails, keep the original file, store an actionable failure, and allow a later retry. Do not create automotive domain records.
 
@@ -130,7 +130,7 @@ OpenAI never writes directly to Supabase. The application validates the response
 
 Implemented orchestration uses short transactions and locks the source row before its jobs. Network calls run outside transactions. An active source returns `busy`, an existing document returns `already_processed`, and a failed source can start a new job. A ten-minute stale-attempt window allows a later explicit invocation to recover a crashed worker; the five-minute OpenAI timeout is shorter than that window. Ownership checks prevent stale workers from changing replacement jobs. Existing accepted documents and historical artifacts are not overwritten.
 
-The final transaction inserts the document, stores `Source.rawText`, updates the source to `text_extracted`, and completes the job together. No domain rows are created. `Document.metadataJson.reviewStatus` is `unreviewed`, with no human-review gate. Ambiguous or partial source dates remain verbatim in metadata; only a valid complete `YYYY-MM-DD` date populates `Source.sourceDate`.
+The final transaction inserts the document, stores `Source.rawText`, updates the source to `text_extracted`, and completes the job together. No domain rows are created. Document metadata has no human-review status. Ambiguous or partial source dates remain verbatim in metadata; only a valid complete `YYYY-MM-DD` date populates `Source.sourceDate`.
 
 Raw responses are saved before status/JSON-schema validation in `rawAiOutput` as `{ format: "response-json-string-v1", responseJson, route, triggerReason }`. `responseJson` is a JSON-encoded string so malformed model text, NUL, and unpaired surrogates remain recoverable in PostgreSQL JSONB; the signed transfer URL is redacted if echoed. `validatedOutput` contains `{ content, quality, usage, responseId }` after schema validation. For unsafe text encoding, the content remains recoverable from the raw artifact and the validated envelope contains quality/usage/response ID only. A transport failure with no response is recorded as a failed job with a null response artifact.
 

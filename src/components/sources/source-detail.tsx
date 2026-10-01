@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
-import { CaseReviewForm } from "@/components/cases/case-review-form";
 import { useLanguage } from "@/components/i18n/language-provider";
 import type { MessageKey } from "@/i18n/translator";
 import type { SourceDetail as SourceDetailData } from "@/sources/source-detail-repository";
@@ -58,7 +57,6 @@ const automotiveWarningKeys = {
   EVIDENCE_WORDING_CHANGED: "sourceDetail.analysisWarnings.wordingChanged",
   EVIDENCE_PAGE_OUT_OF_RANGE: "sourceDetail.analysisWarnings.evidencePage",
   UNCERTAINTY_PAGE_OUT_OF_RANGE: "sourceDetail.analysisWarnings.uncertaintyPage",
-  HUMAN_REVIEW_FLAG_MISSING: "sourceDetail.analysisWarnings.reviewFlag",
   CONFIRMED_SOLUTION_OUTCOME_MISSING: "sourceDetail.analysisWarnings.confirmedOutcome",
 } as const satisfies Record<string, MessageKey>;
 
@@ -85,12 +83,6 @@ const caseStatusKeys = {
   ACTIVE: "sourceDetail.knowledge.caseStatus.active",
   REJECTED: "sourceDetail.knowledge.caseStatus.rejected",
   ARCHIVED: "sourceDetail.knowledge.caseStatus.archived",
-} as const satisfies Record<string, MessageKey>;
-
-const reviewStatusKeys = {
-  UNREVIEWED: "sourceDetail.knowledge.reviewStatus.unreviewed",
-  REVIEWED: "sourceDetail.knowledge.reviewStatus.reviewed",
-  CORRECTED: "sourceDetail.knowledge.reviewStatus.corrected",
 } as const satisfies Record<string, MessageKey>;
 
 const originKeys = {
@@ -122,12 +114,12 @@ const evidenceTypeKeys = {
 } as const satisfies Record<string, MessageKey>;
 
 const relationshipNodeKeys = {
-  DTC: "caseReview.relationships.nodeTypes.dtc",
-  SYMPTOM: "caseReview.relationships.nodeTypes.symptom",
-  CAUSE: "caseReview.relationships.nodeTypes.cause",
-  DIAGNOSTIC_CHECK: "caseReview.relationships.nodeTypes.diagnosticCheck",
-  SOLUTION: "caseReview.relationships.nodeTypes.solution",
-  REPAIR_OUTCOME: "caseReview.relationships.nodeTypes.repairOutcome",
+  DTC: "sourceDetail.knowledge.relationships.nodeTypes.dtc",
+  SYMPTOM: "sourceDetail.knowledge.relationships.nodeTypes.symptom",
+  CAUSE: "sourceDetail.knowledge.relationships.nodeTypes.cause",
+  DIAGNOSTIC_CHECK: "sourceDetail.knowledge.relationships.nodeTypes.diagnosticCheck",
+  SOLUTION: "sourceDetail.knowledge.relationships.nodeTypes.solution",
+  REPAIR_OUTCOME: "sourceDetail.knowledge.relationships.nodeTypes.repairOutcome",
 } as const satisfies Record<string, MessageKey>;
 
 function mappedKey(
@@ -139,10 +131,8 @@ function mappedKey(
 }
 
 export function SourceDetail({
-  focusedCaseId,
   source,
 }: {
-  focusedCaseId?: string;
   source: SourceDetailData;
 }) {
   const { locale, t } = useLanguage();
@@ -170,17 +160,12 @@ export function SourceDetail({
   const canExtract =
     source.status === "UPLOADED" ||
     (source.status === "FAILED" && document === null);
-  const automotiveCases = focusedCaseId
-    ? source.automotiveCases.filter((item) => item.id === focusedCaseId)
-    : source.automotiveCases;
-  const focusedCase = focusedCaseId ? automotiveCases[0] : undefined;
+  const automotiveCases = source.automotiveCases;
   const canAnalyzeAutomotive =
-    !focusedCaseId &&
     document !== null &&
     automotiveCases.length === 0 &&
     ["TEXT_EXTRACTED", "SCHEMA_INVALID", "FAILED"].includes(source.status);
   const automotiveAnalysisInProgress =
-    !focusedCaseId &&
     document !== null &&
     automotiveCases.length === 0 &&
     source.status === "PROCESSING";
@@ -301,43 +286,28 @@ export function SourceDetail({
     <main className="source-detail-page">
       <Link
         className="source-back-link"
-        href={focusedCaseId ? `/sources/${source.id}` : "/sources"}
+        href="/sources"
       >
-        {t(focusedCaseId ? "caseReview.back" : "sourceDetail.back")}
+        {t("sourceDetail.back")}
       </Link>
 
       <section className="source-detail-heading">
         <div>
           <p className="eyebrow">
-            {t(focusedCaseId ? "caseReview.eyebrow" : "sourceDetail.eyebrow")}
+            {t("sourceDetail.eyebrow")}
           </p>
           <h1>
-            {focusedCase?.title ?? source.originalFilename ?? t("sources.unnamed")}
+            {source.originalFilename ?? t("sources.unnamed")}
           </h1>
-          {focusedCaseId && (
-            <p className="case-review-source-context">
-              {t("caseReview.sourceContext", {
-                filename: source.originalFilename ?? t("sources.unnamed"),
-              })}
-            </p>
-          )}
           <div className="source-detail-reference">
-            <span className={`source-status is-${(focusedCase?.status ?? source.status).toLowerCase()}`}>
-              {focusedCase
-                ? t(mappedKey(focusedCase.status, caseStatusKeys, "sourceDetail.knowledge.caseStatus.unknown"))
-                : t(mappedKey(source.status, sourceStatusKeys, "sources.status.unknown"))}
+            <span className={`source-status is-${source.status.toLowerCase()}`}>
+              {t(mappedKey(source.status, sourceStatusKeys, "sources.status.unknown"))}
             </span>
-            {focusedCase && (
-              <span className="review-state">
-                {t(mappedKey(focusedCase.reviewStatus, reviewStatusKeys, "sourceDetail.knowledge.reviewStatus.unknown"))}
-              </span>
-            )}
-            <code>{focusedCaseId ?? source.id}</code>
+            <code>{source.id}</code>
           </div>
         </div>
 
-        {!focusedCaseId && (
-          <div className="source-heading-actions">
+        <div className="source-heading-actions">
             {source.type === "PDF" && (
               <button
                 className="secondary-action source-extraction-action"
@@ -376,8 +346,7 @@ export function SourceDetail({
                     : t("sourceDetail.automotiveAnalysis.start")}
               </button>
             )}
-          </div>
-        )}
+        </div>
       </section>
 
       {actionError && (
@@ -394,7 +363,6 @@ export function SourceDetail({
                 <p className="eyebrow">{t("sourceDetail.summary.eyebrow")}</p>
                 <h2 id="source-summary-title">{document.title ?? t("sourceDetail.summary.untitled")}</h2>
               </div>
-              <span className="review-state">{t("sourceDetail.summary.unreviewed")}</span>
             </div>
 
             <dl className="source-metadata-grid">
@@ -433,9 +401,7 @@ export function SourceDetail({
             </section>
           )}
 
-          {focusedCase && <CaseReviewForm automotiveCase={focusedCase} />}
-
-          {!focusedCaseId && (source.status === "PERSISTED" || automotiveCases.length > 0) && (
+          {(source.status === "PERSISTED" || automotiveCases.length > 0) && (
             <section className="source-detail-panel knowledge-recap" aria-labelledby="source-knowledge-title">
               <div className="source-panel-title">
                 <div>
@@ -467,16 +433,6 @@ export function SourceDetail({
                 <div className="knowledge-case-list" lang={sourceLanguage}>
                   {automotiveCases.map((automotiveCase, caseIndex) => (
                     <article className="knowledge-case-shell" key={automotiveCase.id}>
-                      {!focusedCaseId && (
-                        <div className="knowledge-case-actions">
-                          <Link
-                            className="secondary-action case-review-link"
-                            href={`/cases/${automotiveCase.id}/review`}
-                          >
-                            {t("caseReview.open")}
-                          </Link>
-                        </div>
-                      )}
                       <details
                         className="knowledge-case"
                         open={automotiveCases.length === 1}
@@ -492,18 +448,16 @@ export function SourceDetail({
                         </div>
                         <div className="knowledge-case-badges">
                           <span>{t(mappedKey(automotiveCase.status, caseStatusKeys, "sourceDetail.knowledge.caseStatus.unknown"))}</span>
-                          <span>{t(mappedKey(automotiveCase.reviewStatus, reviewStatusKeys, "sourceDetail.knowledge.reviewStatus.unknown"))}</span>
                         </div>
                       </summary>
 
                       <div className="knowledge-case-content">
-                        {(automotiveCase.caseType || automotiveCase.complaint || automotiveCase.problemDescription || automotiveCase.analysisSummary || automotiveCase.reviewNotes) && (
+                        {(automotiveCase.caseType || automotiveCase.complaint || automotiveCase.problemDescription || automotiveCase.analysisSummary) && (
                           <dl className="knowledge-facts">
                             {automotiveCase.caseType && <div><dt>{t("sourceDetail.knowledge.labels.caseType")}</dt><dd>{automotiveCase.caseType}</dd></div>}
                             {automotiveCase.complaint && <div><dt>{t("sourceDetail.knowledge.labels.complaint")}</dt><dd>{automotiveCase.complaint}</dd></div>}
                             {automotiveCase.problemDescription && <div><dt>{t("sourceDetail.knowledge.labels.problem")}</dt><dd>{automotiveCase.problemDescription}</dd></div>}
-                            {automotiveCase.analysisSummary && <div><dt>{t("caseReview.analysisSummary")}</dt><dd>{automotiveCase.analysisSummary}</dd></div>}
-                            {automotiveCase.reviewNotes && <div><dt>{t("caseReview.reviewNotes")}</dt><dd>{automotiveCase.reviewNotes}</dd></div>}
+                            {automotiveCase.analysisSummary && <div><dt>{t("sourceDetail.knowledge.labels.analysisSummary")}</dt><dd>{automotiveCase.analysisSummary}</dd></div>}
                           </dl>
                         )}
 
@@ -663,7 +617,7 @@ export function SourceDetail({
 
                         {automotiveCase.relationships.length > 0 && (
                           <section className="knowledge-section">
-                            <h3>{t("caseReview.relationships.title")}</h3>
+                            <h3>{t("sourceDetail.knowledge.relationships.title")}</h3>
                             <div className="knowledge-stack">
                               {automotiveCase.relationships.map((relationship) => (
                                 <article className="knowledge-item relationship-item" key={relationship.id}>
@@ -673,13 +627,13 @@ export function SourceDetail({
                                   </div>
                                   <div className="relationship-path">
                                     <span>
-                                      <small>{t(mappedKey(relationship.fromType, relationshipNodeKeys, "caseReview.relationships.nodeTypes.unknown"))}</small>
-                                      {relationship.fromLabel ?? t(mappedKey(relationship.fromType, relationshipNodeKeys, "caseReview.relationships.nodeTypes.unknown"))}
+                                      <small>{t(mappedKey(relationship.fromType, relationshipNodeKeys, "sourceDetail.knowledge.relationships.nodeTypes.unknown"))}</small>
+                                      {relationship.fromLabel ?? t(mappedKey(relationship.fromType, relationshipNodeKeys, "sourceDetail.knowledge.relationships.nodeTypes.unknown"))}
                                     </span>
                                     <span aria-hidden="true">→</span>
                                     <span>
-                                      <small>{t(mappedKey(relationship.toType, relationshipNodeKeys, "caseReview.relationships.nodeTypes.unknown"))}</small>
-                                      {relationship.toLabel ?? t(mappedKey(relationship.toType, relationshipNodeKeys, "caseReview.relationships.nodeTypes.unknown"))}
+                                      <small>{t(mappedKey(relationship.toType, relationshipNodeKeys, "sourceDetail.knowledge.relationships.nodeTypes.unknown"))}</small>
+                                      {relationship.toLabel ?? t(mappedKey(relationship.toType, relationshipNodeKeys, "sourceDetail.knowledge.relationships.nodeTypes.unknown"))}
                                     </span>
                                   </div>
                                   {relationship.evidence && (

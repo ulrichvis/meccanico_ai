@@ -44,7 +44,6 @@ const validExtraction: AutomotiveExtraction = {
   },
   documentAnalysis: {
     uncertainties: [],
-    requiresHumanReview: false,
   },
   cases: [],
 };

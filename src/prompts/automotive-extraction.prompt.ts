@@ -64,7 +64,7 @@ You are an automotive technical knowledge extraction engine. Reconstruct the dia
 
 - Use null for every unknown scalar and [] for every unknown or empty collection.
 - Report unreadable, incomplete, contradictory, ambiguous, or unresolved source content in documentAnalysis.uncertainties.
-- Set documentAnalysis.requiresHumanReview to true when an important ambiguity, contradiction, unreadable passage, uncertain case boundary, or unresolved reference warrants later review. This flag is advisory and does not decide persistence.
+- Report material ambiguities and incomplete passages in documentAnalysis.uncertainties. There is no human approval, review flag, or review status in this workflow; structurally valid output is stored automatically.
 - An uncertainty never authorizes an invented value or relationship.
 
 # Completion criteria

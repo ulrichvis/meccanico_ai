@@ -37,17 +37,17 @@ SourceAdapter
   → ValidatedExtraction
   → Normalizer
   → NormalizedCase[]
-  → Transactional persistence as unreviewed records
-  → Optional admin review and correction
+  → Transactional persistence
+  → Read-only source recap and case browsing
 ```
 
 The content and knowledge stages are deliberately separate. Phase 2 sends the original PDF directly to OpenAI and produces faithful, page-aware source text only. Phase 3 consumes that persisted text to extract structured automotive knowledge. A text-extraction model must not diagnose, summarize, normalize, or populate domain entities.
 
 Phase 2 does not add a PDF-reading or local preflight library. Native, scanned, and mixed PDFs use the same original-file input path. The selected model, transfer method, attempt, prompt version, quality result, and escalation reason are traceable. See `docs/TEXT_EXTRACTION.md`.
 
-Phase 3 uses the separately versioned `automotive-structure-v2` prompt specified in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md`. It permits clearer source-language wording without invented facts or changes to meaning, certainty, values, units, or conditions. Zod shape, reference, origin/confidence, and numeric invariants remain blocking. Evidence wording, page traceability, review signaling, and missing confirmed outcomes produce advisory warnings stored in the validated artifact and shown in source history; they do not cause escalation or block persistence. These checks do not prove semantic fidelity. The normalizer, not the model, assigns database identifiers, normalized labels, lifecycle state, and `reviewStatus = unreviewed`. Completed v1 jobs remain reusable to preserve idempotency; failed v1 attempts remain immutable and can be retried with v2.
+Phase 3 uses the separately versioned `automotive-structure-v3` prompt specified in `docs/AUTOMOTIVE_EXTRACTION_PROMPT.md`. It permits clearer source-language wording without invented facts or changes to meaning, certainty, values, units, or conditions. Zod shape, reference, origin/confidence, and numeric invariants remain blocking. Evidence wording, page traceability, and missing confirmed outcomes produce advisory warnings; they do not cause escalation or block persistence and do not prove semantic fidelity. The normalizer assigns identifiers, normalized labels, and active lifecycle state without human-review fields. Completed v1/v2 jobs remain reusable through an in-memory compatibility adapter; historical artifacts are not rewritten.
 
-Phase 4 starts with a pure normalization boundary. It revalidates the provider-neutral extraction contract, preserves source wording, creates conservative lookup keys, maps application enums, assigns `active` and `unreviewed`, and resolves temporary references to typed local targets. It performs no I/O. This keeps prompt changes, AI calls, and database transactions out of normalization and lets the persistence repository reject a complete graph before opening a transaction.
+Phase 4 starts with a pure normalization boundary. It revalidates the provider-neutral extraction contract, preserves source wording, creates conservative lookup keys, maps application enums, assigns `active`, and resolves temporary references to typed local targets. It performs no I/O. This keeps prompt changes, AI calls, and database transactions out of normalization and lets the persistence repository reject a complete graph before opening a transaction.
 
 The Phase 4 persistence repository consumes only normalized data and writes every case from one extraction inside a single Prisma interactive transaction. It locks the source, verifies source/document/job ownership and accepted prompt version, then resolves temporary references to database UUIDs while inserting the complete relational graph. Shared vehicles, DTCs, symptoms, causes, solutions, and components use database-backed unique keys and atomic upserts; case-specific wording remains on associations or in the immutable validated artifact. Evidence is inserted before relationships and patched inside the same transaction when an evidence target is the relationship that also cites it. Any failed insert or unresolved reference rolls back the whole graph.
 
@@ -55,19 +55,15 @@ Phase 4.3 composes the Phase 3 processor with accepted-artifact loading, pure no
 
 Phase 4.4 reads the persisted relational graph directly on the server and maps database values to a serializable presentation DTO before passing them to the interactive source-detail component. The recap never reads or exposes the raw provider response. English and Italian catalogs translate interface labels, statuses, and empty states only; case wording, technical identifiers, procedures, measurements, and evidence are displayed in the source document language without automatic translation. A persisted zero-case source receives an explicit empty recap instead of an invented case.
 
-Phase 5.1 adds a read-only `/cases/[caseId]/review` route for one persisted case. It resolves the case to its owning source on the server, reuses the established serializable source-detail presentation model, and filters that model to the selected case. The read model now resolves generic relationship endpoints to human-readable labels while retaining their typed identifiers, origin, confidence, and supporting evidence. This avoids a second public data contract before editing exists and keeps search, queues, and filters in Phase 6.
 
 Phase 5.2 exposes the existing automotive processing orchestration through a thin `POST /api/sources/[sourceId]/automotive-analysis` route. The source-detail UI offers the action only after page-aware text exists and no persisted result is present. The route validates the source identifier, maps internal failures to stable transport codes, and delegates OpenAI, retry, audit, normalization, and transactional persistence behavior to the established application service. The client prevents duplicate submissions, displays localized progress and retry feedback, and refreshes the server read model after completion. Provider output and database details remain server-side.
 
-Phase 5.3 maps the server-owned case presentation DTO into one explicit client edit contract validated by Zod. The contract carries stable identifiers for case-owned records and typed relationship endpoints without exposing Prisma models. The form covers metadata, applicability, DTC roles, symptoms, causes, components, checks, measurements, solutions, procedures, outcomes, parts, evidence, and supported relationships; reordering is limited to diagnostic and repair sequences. The form performs complete local validation through one Save action but intentionally performs no database write. Phase 5.4 owns the transactional mutation, shared-reference safeguards, optimistic concurrency, and review audit transition.
 
-Phase 5.4 sends the complete validated edit contract to a thin case endpoint and one application service. The persistence repository checks the submitted `updatedAt`, updates or rebuilds the entire case-owned graph in one Prisma transaction, and rejects stale edits before they can overwrite newer data. Reusable reference rows are resolved by conservative keys; a shared DTC or component is never silently changed when another case uses it. Existing provenance is retained for submitted rows and newly added rows use `human_added`. Technical changes mark the case `corrected`; an unchanged submission explicitly marks an unreviewed case `reviewed`. The source, document, and extraction-job artifacts are not part of the mutation.
 
-Phase 5.5 adds a separate lifecycle command to the same thin case endpoint. A Zod-validated `PATCH` payload carries the case identifier, current `updatedAt`, and one explicit `review`, `reject`, or `archive` action. The repository applies the optimistic-concurrency check in a short transaction. Review updates only the quality signal and preserves `corrected`; reject and archive update only the lifecycle status and are allowed from `active`. The UI requires confirmation before reject or archive. No action deletes the case or changes its source and extraction artifacts.
 
-Phase 6.1 adds a bounded server-only browsing read model for `/cases`. It queries PostgreSQL through Prisma, selects only presentation-safe fields, defaults to `active` cases, orders deterministically by the most recent update, and caps the result at 50. The list includes review status plus compact DTC, vehicle, source, and timestamp context. It links to the existing source and optional correction workflows while search, lifecycle filters, and the read-only complete case page remain separate Phase 6 steps.
+Phase 6.1 adds a bounded server-only browsing read model for `/cases`. It queries PostgreSQL through Prisma, selects only presentation-safe fields, defaults to `active` cases, orders deterministically by the most recent update, and caps the result at 50. The list includes compact DTC, vehicle, source, and timestamp context. It links to the existing read-only source workflow while search, lifecycle filters, and the read-only complete case page remain separate Phase 6 steps.
 
-Phase 6.2 extends that read model with a small validated query contract. A native GET form stores the search text, review status, and lifecycle status in the URL so the result can be reloaded or shared. The server maps the validated values to Prisma filters and searches case titles plus related DTC and vehicle applicability fields with case-insensitive substring matching. Invalid or repeated parameters resolve to safe defaults, active remains the default lifecycle, deterministic ordering and the 50-row cap remain unchanged, and no search index or ranking layer is introduced.
+Phase 6.2 extends that read model with a small validated query contract. A native GET form stores the search text and lifecycle status in the URL so the result can be reloaded or shared. The server maps the validated values to Prisma filters and searches case titles plus related DTC and vehicle applicability fields with case-insensitive substring matching. Invalid or repeated parameters resolve to safe defaults, active remains the default lifecycle, deterministic ordering and the 50-row cap remain unchanged, and no search index or ranking layer is introduced.
 
 The target orchestration function is:
 
@@ -85,7 +81,6 @@ src/
 │   ├── page.tsx
 │   ├── upload/page.tsx
 │   ├── sources/page.tsx
-│   ├── cases/[caseId]/review/page.tsx
 │   ├── cases/page.tsx
 │   ├── cases/[id]/page.tsx
 │   └── api/
@@ -204,19 +199,17 @@ pending → running → completed
 
 A retry creates a new job. It never overwrites raw output from an earlier attempt.
 
-### Case lifecycle and review
+### Case lifecycle
 
 ```text
-review_status: unreviewed → reviewed
-                         └→ corrected
 
 status: active → rejected
               └→ archived
 ```
 
-Review status is a data-quality signal, not an ingestion gate. Lifecycle status controls whether a case participates in normal retrieval. A case is persisted as soon as machine validation and normalization succeed. Admin review may happen later and must not overwrite the raw or validated extraction.
+Lifecycle status controls default retrieval. Structurally valid cases are persisted automatically as active, with no human-review fields or actions. Existing rejected and archived records remain traceable.
 
-Lifecycle changes are explicit state transitions rather than case edits. In the MVP, rejected and archived cases remain terminal, traceable records; restore, hard deletion, approval chains, assignments, comments, and role-based workflows remain outside the scope.
+The current MVP exposes no lifecycle mutation actions. Existing non-active records remain browseable through explicit lifecycle filters.
 
 ## Error handling
 
@@ -245,11 +238,11 @@ Mechanic message
   → citations, uncertainty, and follow-up questions
 ```
 
-The chat layer is a read and reasoning interface over the knowledge base. It must not silently modify cases. Reviewed and corrected records should rank above unreviewed records when relevance is otherwise comparable, and every answer must retain traceability to supporting evidence. The detailed target is documented in `docs/FUTURE_ASSISTANT.md`.
+The future chat is a read-only reasoning interface over the knowledge base. Relevance, source evidence, inference confidence, and repair outcomes guide retrieval without human-review ranking. See `docs/FUTURE_ASSISTANT.md`.
 
 ## Frontend internationalization
 
-The MVP opens directly into case browsing: `/` redirects server-side to `/cases`. The application shell contains only Sources, Cases, Upload PDF, and the language selector, including on mobile. The former informational landing page, branding copy, and footer are removed. This cleanup changes presentation only; source ingestion, extraction, persistence, and optional review keep their existing behavior.
+The MVP opens directly into case browsing: `/` redirects server-side to `/cases`. The application shell contains only Sources, Cases, Upload PDF, and the language selector, including on mobile. The former informational landing page, branding copy, and footer are removed. This cleanup changes presentation only; source ingestion, extraction, persistence, and browsing keep their existing behavior.
 
 English is the official language of development. The frontend supports English (`en`) and Italian (`it`) from Phase 1.
 
@@ -303,7 +296,7 @@ OPENAI_AUTOMOTIVE_REASONING_EFFORT=medium
 
 OpenAI credentials and the Phase 2 primary model are mandatory only when PDF text extraction runs. Optional Phase 2 higher tiers are selected only after schema/output-quality failure, within a one-to-three attempt cap (two by default). Phase 3 has separately configured bounded routing: only schema-invalid, invalid-response, or incomplete-response failures may escalate to a distinct higher model. Advisory content warnings never trigger another model call. Provider request failures and refusals are not automatically retried. Its provider-neutral contract lives in `src/ai/automotive-knowledge-extractor.ts`, while the OpenAI Responses implementation lives in `src/ai/openai-automotive-knowledge-extractor.ts`. Model identifiers must not be scattered through application code.
 
-Phase 3 orchestration reuses `ExtractionJob` rather than adding a stage-specific audit table. A short transaction locks the source and creates one running job; the OpenAI call runs outside the transaction; later short transactions preserve raw and validated artifacts and finish the attempt. Every escalation creates a new job. Structurally accepted output stores `quality.accepted = true`, empty blocking `reasons`, and advisory `warnings`. It leaves the source in `processing` until Phase 4 atomically normalizes it; no `Case` or related domain row is written in Phase 3. `requiresHumanReview` remains advisory: a missing flag on partial input produces a warning, and no human action is required before persistence.
+Phase 3 orchestration reuses `ExtractionJob` rather than adding a stage-specific audit table. A short transaction locks the source and creates one running job; the OpenAI call runs outside the transaction; later short transactions preserve raw and validated artifacts and finish the attempt. Every escalation creates a new job. Structurally accepted output stores `quality.accepted = true`, empty blocking `reasons`, and advisory `warnings`. It leaves the source in `processing` until Phase 4 atomically normalizes it; no `Case` or related domain row is written in Phase 3. New results contain uncertainties but no human-review recommendation. Legacy review fields are ignored in an in-memory copy only.
 
 The Phase 3 provider call happens after Phase 2 has persisted page-aware text. Both `pnpm automotive:process <source-id>` and the source-detail **Analyze and structure** action run the same complete knowledge-processing path: it performs structured analysis only when no accepted job exists, normalizes the accepted artifact, persists the graph, and advances the source atomically.
 

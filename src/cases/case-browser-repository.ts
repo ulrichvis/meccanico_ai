@@ -2,7 +2,7 @@ import "server-only";
 
 import { getDatabaseClient } from "@/db/client";
 import type { Prisma } from "@/generated/prisma/client";
-import { CaseStatus, ReviewStatus } from "@/generated/prisma/enums";
+import { CaseStatus } from "@/generated/prisma/enums";
 import type { CaseBrowserQuery } from "@/schemas/case-browser-query.schema";
 
 export interface BrowsableCase {
@@ -13,7 +13,6 @@ export interface BrowsableCase {
     isPrimary: boolean;
   }>;
   id: string;
-  reviewStatus: string;
   source: {
     id: string;
     originalFilename: string | null;
@@ -36,12 +35,6 @@ const caseStatusByFilter = {
   archived: CaseStatus.ARCHIVED,
   rejected: CaseStatus.REJECTED,
 } satisfies Record<CaseBrowserQuery["status"], CaseStatus>;
-
-const reviewStatusByFilter = {
-  corrected: ReviewStatus.CORRECTED,
-  reviewed: ReviewStatus.REVIEWED,
-  unreviewed: ReviewStatus.UNREVIEWED,
-} satisfies Record<Exclude<CaseBrowserQuery["review"], "all">, ReviewStatus>;
 
 function normalizeDtcQuery(query: string): string {
   return query.toUpperCase().replaceAll(/[^A-Z0-9]/g, "");
@@ -93,10 +86,6 @@ export async function listCases(filters: CaseBrowserQuery): Promise<BrowsableCas
     status: caseStatusByFilter[filters.status],
   };
 
-  if (filters.review !== "all") {
-    where.reviewStatus = reviewStatusByFilter[filters.review];
-  }
-
   const searchConditions = createSearchConditions(filters.q);
   if (searchConditions.length > 0) {
     where.OR = searchConditions;
@@ -116,7 +105,6 @@ export async function listCases(filters: CaseBrowserQuery): Promise<BrowsableCas
         take: 4,
       },
       id: true,
-      reviewStatus: true,
       source: {
         select: {
           id: true,
@@ -153,7 +141,6 @@ export async function listCases(filters: CaseBrowserQuery): Promise<BrowsableCas
       isPrimary: entry.isPrimary,
     })),
     id: item.id,
-    reviewStatus: item.reviewStatus,
     source: item.source,
     status: item.status,
     title: item.title,

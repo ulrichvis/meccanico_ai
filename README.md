@@ -9,10 +9,10 @@ Enable an operator to:
 1. upload a technical PDF;
 2. track its processing status;
 3. automatically store structurally valid extracted cases in the database;
-4. optionally review and correct those cases from an admin interface;
+4. inspect their read-only recap and original PDF without an approval step;
 5. search stored cases by DTC, vehicle, or engine.
 
-The operator does not fill in a form from scratch. The AI prepares and stores a structured case. Human review improves data quality but does not block persistence.
+The operator does not fill in a form from scratch. The AI prepares and stores structured cases automatically. Human-review states, approval actions, and case editing are outside this MVP.
 
 ## Core principle
 
@@ -25,16 +25,14 @@ RAW AI EXTRACTION
       ↓
 NORMALIZATION
       ↓
-STORED DOMAIN DATA — UNREVIEWED
+STORED DOMAIN DATA
       ↓
-OPTIONAL HUMAN REVIEW / CORRECTION
-      ↓
-REVIEWED OR CORRECTED DOMAIN DATA
+READ-ONLY BROWSING AND SOURCE RECAP
 ```
 
-These layers remain separate. JSON produced by an AI model is an exchange and audit format, not the database domain model. Machine validation of the extraction contract is required before relational persistence; human review is optional and may happen later.
+These layers remain separate. JSON produced by an AI model is an exchange and audit format, not the database domain model. Machine validation of the extraction contract is required before relational persistence; no human approval is involved.
 
-Structured analysis may clarify or reformulate source-language descriptions without adding facts or changing their meaning. Structural validation remains blocking; evidence wording, page traceability, review-signal, and missing confirmed-outcome checks are advisory notes, not persistence gates. Original text and raw responses remain unchanged. See [Meaning-preserving analysis](docs/decisions/0026-meaning-preserving-automotive-analysis.md).
+Structured analysis may clarify or reformulate source-language descriptions without adding facts or changing their meaning. Structural validation remains blocking; evidence wording, page traceability, and missing confirmed-outcome checks are advisory notes, not persistence gates. Original text and raw responses remain unchanged. See [Meaning-preserving analysis](docs/decisions/0026-meaning-preserving-automotive-analysis.md).
 
 ## Long-term product
 
@@ -95,7 +93,7 @@ The current implementation remains PDF-first. The chat, RAG, embeddings, and add
 
 ## Current status
 
-Phases 1 through 5 are complete. Phase 6 is active: `/cases` now provides a bilingual, bounded knowledge index with URL-based search across case, DTC, and vehicle fields plus review and lifecycle filters. The read-only complete case page is the next step.
+Phase 6 is active: `/cases` provides a bilingual, bounded knowledge index with URL-based search across case, DTC, and vehicle fields plus lifecycle filters. The former Phase 5 editor and human-review workflow have been removed. The read-only complete case page remains the next feature. Before applying the review-removal migration, deploy compatible code and follow [ADR 0027](docs/decisions/0027-ai-first-mvp-without-human-review.md).
 
 ## Run locally
 
@@ -118,6 +116,6 @@ Database credentials are intentionally absent from the repository. Copy `.env.ex
 - Never couple domain entities to the PDF format.
 - Persist a complete case in an atomic transaction.
 - Do not make human review a prerequisite for storing a structurally valid extraction.
-- Preserve review status so future retrieval can account for data quality.
+- Preserve source evidence, explicit-versus-inferred origin, and uncertainty; do not add human-review states to this MVP.
 - Use English as the official development language for documentation, code, identifiers, comments, logs, and future development tasks.
 - Never hard-code user-facing text. The frontend must use locale files and support English and Italian from Phase 1.

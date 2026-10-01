@@ -9,6 +9,7 @@ import type {
 import {
   ACCEPTED_AUTOMOTIVE_PROMPT_VERSIONS,
   automotiveExtractionSchema,
+  withoutLegacyReviewRecommendation,
   type AutomotiveExtraction,
 } from "@/schemas/automotive-extraction.schema";
 
@@ -45,7 +46,7 @@ export class AutomotiveGraphPersistenceError extends Error {
 const AUTOMOTIVE_GRAPH_TRANSACTION_TIMEOUT_MS = 30_000;
 
 const acceptedExtractionArtifactSchema = z.object({
-  content: automotiveExtractionSchema,
+  content: z.preprocess(withoutLegacyReviewRecommendation, automotiveExtractionSchema),
   quality: z.object({ accepted: z.literal(true) }),
 });
 
@@ -126,7 +127,6 @@ async function persistCase(
       problemDescription: normalizedCase.problemDescription,
       analysisSummary: normalizedCase.analysisSummary,
       status: normalizedCase.status,
-      reviewStatus: normalizedCase.reviewStatus,
     },
     select: { id: true },
   });

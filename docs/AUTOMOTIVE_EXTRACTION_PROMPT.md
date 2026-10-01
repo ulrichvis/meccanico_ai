@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-The supplied automotive diagnostic-structure prompt remains the semantic baseline. The current Phase 3 version is `automotive-structure-v2`: improve writing and organization without inventing facts or changing source meaning. Completed v1 artifacts remain reusable; earlier failed attempts are never rewritten.
+The supplied automotive diagnostic-structure prompt remains the semantic baseline. The current Phase 3 version is `automotive-structure-v3`: improve writing and organization without inventing facts or changing source meaning. Completed v1/v2 artifacts remain reusable; earlier failed attempts are never rewritten.
 
 It is not the Phase 2 transcription prompt. Phase 2 sends the original PDF to OpenAI and stores faithful page-aware text. Phase 3 receives that validated text and reconstructs the automotive diagnostic structure. Keeping these prompts separate makes transcription failures distinguishable from domain-analysis failures.
 
@@ -10,7 +10,7 @@ The prompt is compatible with the current database after the contract adaptation
 
 The versioned implementation lives in `src/prompts/automotive-extraction.prompt.ts`. It exposes stable developer instructions and a separately validated builder for dynamic page-aware input. Run `pnpm automotive-prompt:verify` to check critical semantic rules, instruction/source isolation, metadata authority, page ordering, and incomplete-page validation without making an OpenAI call.
 
-The Phase 3.3 OpenAI adapter lives in `src/ai/openai-automotive-knowledge-extractor.ts`. It supplies the generated schema through strict Structured Outputs, revalidates the returned JSON with Zod, and exposes the raw provider response before validation. Phase 3.4 preserves that response in a separate job for every attempt. Structural errors block acceptance; evidence, uncertainty, review-signal, and missing confirmed-outcome checks produce advisory warnings instead. Run `pnpm automotive-adapter:verify` and `pnpm automotive-persistence:verify` for synthetic, non-billable boundary and persistence checks.
+The Phase 3.3 OpenAI adapter lives in `src/ai/openai-automotive-knowledge-extractor.ts`. It supplies the generated schema through strict Structured Outputs, revalidates the returned JSON with Zod, and exposes the raw provider response before validation. Phase 3.4 preserves that response in a separate job for every attempt. Structural errors block acceptance; evidence, uncertainty, and missing confirmed-outcome checks produce advisory warnings instead. Run `pnpm automotive-adapter:verify` and `pnpm automotive-persistence:verify` for synthetic, non-billable boundary and persistence checks.
 
 ## Required model behavior
 
@@ -47,7 +47,6 @@ The prompt describes the correct business behavior, but the Structured Output sc
 | procedures | `repairProcedures: RepairProcedure[]` | Diagnostic operations become `diagnostic_checks`; ordered repair, adaptation, programming, and verification wording is preserved in `repair_procedures`. |
 | evidence | an evidence item requires a non-empty source-supported `excerpt`, possibly reformulated; `pageNumber` may be `null` | `source_evidence.excerpt` is non-null. Omit evidence only when no supporting passage exists, not because its wording differs. |
 | uncertainty | `documentAnalysis.uncertainties: Uncertainty[]` | Preserved in `extraction_jobs.validated_output`; it is not normalized into an invented domain fact. |
-| review recommendation | `documentAnalysis.requiresHumanReview: boolean` | Advisory only. It never blocks normalization or persistence of otherwise valid data. |
 | JSON naming | camelCase properties matching the TypeScript/Zod contract | Prisma maps application names to snake-case PostgreSQL columns. The model must not mix both naming conventions. |
 
 The model must not generate database UUIDs, normalized database labels, timestamps, lifecycle state, or review state. Temporary references connect extracted entities until the application resolves database identifiers.
@@ -74,19 +73,17 @@ Other supported links use dedicated contract references and relational foreign k
 
 The prompt may describe these links conceptually, but the Structured Output schema must not emit an unsupported generic graph node type.
 
-## Uncertainty and human review
+## Uncertainty without human approval
 
-Use `requiresHumanReview = true` when important meaning cannot be established reliably, including unreadable content, unresolved contradictions, ambiguous case boundaries, or unsupported references.
-
-This flag prioritizes later admin attention. It does not change the core persistence policy:
+Report important ambiguities in `documentAnalysis.uncertainties`, including unreadable content, unresolved contradictions, ambiguous case boundaries, or unsupported references. Do not emit a review recommendation. The persistence policy remains:
 
 - machine-invalid output is not normalized;
-- machine-valid output is stored as `active` and `unreviewed`;
-- human review remains optional and asynchronous.
+- machine-valid output is stored automatically as `active`;
+- there is no human-review workflow in this MVP.
 
 An uncertainty is not permission to invent a value. The affected scalar remains `null`, the affected collection remains `[]`, or the uncertain relationship is omitted.
 
-Content-quality checks are advisory: wording differences, missing source pages, absent review flags on partial input, and confirmed solutions without matching outcomes are stored in `quality.warnings` and shown in source history. They do not reject a structurally valid result or cause another model call. They do not certify semantic equivalence; original PDF/text and optional human correction remain the comparison boundary. No additional AI verification call is introduced.
+Content-quality checks are advisory: wording differences, missing source pages, confirmed solutions without matching outcomes are stored in `quality.warnings` and shown in source history. They do not reject a structurally valid result or cause another model call. They do not certify semantic equivalence; original PDF/text remain the comparison boundary. No additional AI verification call is introduced.
 
 ## Structured Output requirements
 
@@ -109,7 +106,7 @@ The model request contains these separately versioned inputs:
 2. the strict JSON Schema supplied through Structured Outputs rather than copied into the natural-language instructions;
 3. ordered page-aware source text;
 4. non-authoritative source metadata such as the original filename;
-5. the prompt version recorded as `automotive-structure-v2`.
+5. the prompt version recorded as `automotive-structure-v3`.
 
 Do not embed database credentials, signed Storage URLs, internal errors, normalized reference data, or prior human corrections into the prompt unless a later feature explicitly requires them.
 

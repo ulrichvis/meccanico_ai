@@ -8,13 +8,6 @@ export const caseBrowserQuerySchema = z.object({
     firstQueryValue,
     z.string().trim().max(100).catch("").default(""),
   ),
-  review: z.preprocess(
-    firstQueryValue,
-    z
-      .enum(["all", "unreviewed", "reviewed", "corrected"])
-      .catch("all")
-      .default("all"),
-  ),
   status: z.preprocess(
     firstQueryValue,
     z.enum(["active", "rejected", "archived"]).catch("active").default("active"),

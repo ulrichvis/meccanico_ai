@@ -33,7 +33,6 @@ const documentMetadataSchema = z.looseObject({
   model: z.string().optional(),
   promptVersion: z.string().optional(),
   quality: qualitySchema.optional(),
-  reviewStatus: z.string().optional(),
   sourceDate: z.string().nullable().optional(),
   transferMethod: z.string().optional(),
   usage: usageSchema.nullable().optional(),
@@ -129,9 +128,6 @@ export interface AutomotiveCaseDetail {
     toLabel: string | null;
     toType: string;
   }>;
-  reviewedAt: string | null;
-  reviewNotes: string | null;
-  reviewStatus: string;
   solutions: Array<OriginFields & {
     description: string | null;
     id: string;
@@ -195,7 +191,6 @@ export interface SourceDetail {
     pages: Array<z.infer<typeof pageContentSchema>>;
     promptVersion: string | null;
     quality: z.infer<typeof qualitySchema> | null;
-    reviewStatus: string | null;
     sourceDate: string | null;
     title: string | null;
   } | null;
@@ -369,9 +364,6 @@ export async function getSourceDetail(
               toType: true,
             },
           },
-          reviewedAt: true,
-          reviewNotes: true,
-          reviewStatus: true,
           solutions: {
             orderBy: { id: "asc" },
             select: {
@@ -473,9 +465,6 @@ export async function getSourceDetail(
           ? (metadata.data.promptVersion ?? null)
           : null,
         quality: metadata.success ? (metadata.data.quality ?? null) : null,
-        reviewStatus: metadata.success
-          ? (metadata.data.reviewStatus ?? null)
-          : null,
         sourceDate: metadata.success
           ? (metadata.data.sourceDate ?? null)
           : null,
@@ -597,9 +586,6 @@ export async function getSourceDetail(
         toLabel: relationshipNodeLabel(item.toType, item.toId),
         toType: item.toType,
       })),
-      reviewedAt: storedCase.reviewedAt?.toISOString() ?? null,
-      reviewNotes: storedCase.reviewNotes,
-      reviewStatus: storedCase.reviewStatus,
       solutions: storedCase.solutions.map((item) => ({
         confidence: item.confidence?.toString() ?? null,
         description: item.description,
@@ -663,7 +649,7 @@ export async function getSourceDetail(
         status: job.status,
         usage: validated.success ? (validated.data.usage ?? null) : null,
         warnings: automotiveWarnings?.success
-          ? (automotiveWarnings.data.quality.warnings ?? [])
+          ? (automotiveWarnings.data.quality.warnings ?? []).filter((code) => code !== "HUMAN_REVIEW_FLAG_MISSING")
           : [],
       };
     }),
@@ -674,28 +660,4 @@ export async function getSourceDetail(
     type: source.type,
     updatedAt: source.updatedAt.toISOString(),
   };
-}
-
-export async function getCaseReviewSource(
-  caseId: string,
-): Promise<SourceDetail | null> {
-  const parsedCaseId = z.uuid().safeParse(caseId);
-
-  if (!parsedCaseId.success) return null;
-
-  const storedCase = await getDatabaseClient().case.findUnique({
-    where: { id: parsedCaseId.data },
-    select: { sourceId: true },
-  });
-
-  if (!storedCase) return null;
-
-  const source = await getSourceDetail(storedCase.sourceId);
-  const selectedCase = source?.automotiveCases.find(
-    (item) => item.id === parsedCaseId.data,
-  );
-
-  if (!source || !selectedCase) return null;
-
-  return { ...source, automotiveCases: [selectedCase] };
 }

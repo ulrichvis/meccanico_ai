@@ -26,7 +26,6 @@ const extraction = {
         description: "The exact vehicle variant is unclear.",
       },
     ],
-    requiresHumanReview: true,
   },
   cases: [
     {
@@ -251,7 +250,7 @@ const first = normalized.cases[0]!;
 const second = normalized.cases[1]!;
 
 assert.equal(first.status, "ACTIVE");
-assert.equal(first.reviewStatus, "UNREVIEWED");
+assert(!("reviewStatus" in first));
 assert.equal(first.dtcs[0]?.code, "p 0299");
 assert.equal(first.dtcs[0]?.normalizedCode, "P0299");
 assert.equal(first.dtcs[0]?.relationshipType, "PRIMARY");
@@ -274,7 +273,7 @@ assert(first.references.some((reference) => reference.type === "relationship"));
 
 const empty = normalizeAutomotiveExtraction({
   source: { title: null, author: null, sourceDate: null, language: null },
-  documentAnalysis: { uncertainties: [], requiresHumanReview: false },
+  documentAnalysis: { uncertainties: [] },
   cases: [],
 });
 assert.deepEqual(empty.cases, []);

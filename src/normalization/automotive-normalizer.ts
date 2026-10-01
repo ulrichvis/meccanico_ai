@@ -88,7 +88,6 @@ export interface NormalizedAutomotiveCase {
   problemDescription: string | null;
   analysisSummary: null;
   status: "ACTIVE";
-  reviewStatus: "UNREVIEWED";
   vehicles: NormalizedVehicle[];
   dtcs: NormalizedDtc[];
   symptoms: NormalizedNamedEntity[];
@@ -318,7 +317,6 @@ function normalizeCase(extractedCase: ExtractedAutomotiveCase): NormalizedAutomo
     problemDescription: extractedCase.problemDescription,
     analysisSummary: null,
     status: "ACTIVE",
-    reviewStatus: "UNREVIEWED",
     vehicles: extractedCase.vehicles.map((item) => ({
       ...item,
       lookupKey: vehicleLookupKey(extractedCase.ref, item),

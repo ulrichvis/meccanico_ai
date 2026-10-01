@@ -4,7 +4,6 @@ import type { AutomotiveExtraction } from "@/schemas/automotive-extraction.schem
 export type AutomotiveQualityReason =
   | "EVIDENCE_WORDING_CHANGED"
   | "EVIDENCE_PAGE_OUT_OF_RANGE"
-  | "HUMAN_REVIEW_FLAG_MISSING"
   | "UNCERTAINTY_PAGE_OUT_OF_RANGE"
   | "CONFIRMED_SOLUTION_OUTCOME_MISSING";
 
@@ -68,14 +67,6 @@ export function evaluateAutomotiveQuality(
         reasons.add("CONFIRMED_SOLUTION_OUTCOME_MISSING");
       }
     }
-  }
-
-  const sourceNeedsReview = input.document.pages.some(
-    (page) => page.textQuality !== "readable" || page.uncertainty !== null,
-  );
-
-  if (sourceNeedsReview && !output.documentAnalysis.requiresHumanReview) {
-    reasons.add("HUMAN_REVIEW_FLAG_MISSING");
   }
 
   const orderedReasons = [...reasons].sort();

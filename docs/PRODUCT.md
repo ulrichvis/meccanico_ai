@@ -12,7 +12,7 @@ Meccanico IA transforms these sources into traceable, connected technical cases 
 
 Ingest source material, extract its diagnostic structure, validate its machine-readable shape, normalize it, and store it. PDF is the first source; other channels will follow.
 
-Human review is optional and asynchronous. A structurally valid extraction is stored immediately as `unreviewed`. An administrator may later inspect, correct, mark as reviewed, reject, or archive it.
+The AI-first MVP stores structurally valid extractions immediately. Operators can browse the results and original sources, but there are no human-review statuses, approval actions, or case-editing forms. Automatic storage does not certify that every model interpretation is correct.
 
 ### 2. Mechanic-facing conversational assistant
 
@@ -22,7 +22,7 @@ Provide a chat experience in which mechanics describe real diagnostic situations
 
 ### Knowledge operator
 
-Imports documents and monitors extraction. The operator may optionally review, correct, reject, or archive stored cases from the admin platform.
+Imports documents, starts and monitors extraction, and browses the resulting read-only knowledge base.
 
 ### Technician or workshop manager
 
@@ -42,12 +42,10 @@ Initially searches stored cases by DTC, make, model, or engine. In the later pro
 1. The operator opens `/upload` and uploads a PDF.
 2. The file is stored, and a `Source` is created with the `uploaded` status.
 3. The original private PDF is sent directly to OpenAI, which returns faithful page-aware text without automotive interpretation.
-4. In a separate phase, the versioned automotive prompt identifies and structures zero, one, or several cases from that validated text, while reporting important uncertainties as a non-blocking review recommendation.
+4. The versioned automotive prompt structures zero, one, or several cases from validated text and reports uncertainties without requesting human approval.
 5. Raw output is preserved, then validated and normalized.
-6. Every structurally valid normalized case is stored with `reviewStatus = "unreviewed"`.
-7. The case becomes available in the admin knowledge base without waiting for human review.
-8. At any later time, an operator may open `/extractions/[id]/review` or the case editor.
-9. The operator may edit, mark as reviewed, reject, or archive the case.
+6. Every structurally valid normalized case is stored automatically as active.
+7. The case becomes available in the read-only knowledge base.
 
 Routes do not contain the locale. English is the default interface language. On a first visit, the frontend selects a supported browser language when possible; the user can always override it with the language selector. Changing language replaces displayed text without changing the current route.
 
@@ -80,9 +78,9 @@ A technical case may contain:
 - Extracted text retains at least its page number.
 - An invalid extraction does not insert a partial domain graph.
 - A valid extraction is persisted without requiring human approval.
-- Every stored case clearly exposes its review status.
+- Every case retains traceable source evidence without a human-review status.
 - Every displayed inference is identifiable as such and includes its confidence level.
-- An operator can correct a case from the admin platform without modifying the database directly.
+- An operator can inspect the AI result and download its original PDF without an editing workflow.
 - An active case can be found by DTC or vehicle.
 
 ## Initial out of scope
@@ -107,6 +105,3 @@ A technical case may contain:
 | Evidence | A page, excerpt, or other anchor linking data to its source. |
 | Raw extraction | The model's complete, non-normalized response. |
 | Page-aware text | Faithful source-language text associated with its original PDF page before automotive analysis. |
-| Unreviewed data | Structurally valid normalized information stored automatically before human review. |
-| Reviewed data | Information inspected by a human without necessarily requiring changes. |
-| Corrected data | Information modified by a human while retaining traceability to the extraction. |

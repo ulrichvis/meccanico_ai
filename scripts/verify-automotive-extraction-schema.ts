@@ -1,6 +1,7 @@
 import {
   automotiveExtractionJsonSchema,
   automotiveExtractionSchema,
+  withoutLegacyReviewRecommendation,
   type AutomotiveExtraction,
 } from "../src/schemas/automotive-extraction.schema";
 import { evaluateAutomotiveQuality } from "../src/automotive-extraction/automotive-quality";
@@ -15,7 +16,6 @@ const validExtraction: AutomotiveExtraction = {
   },
   documentAnalysis: {
     uncertainties: [],
-    requiresHumanReview: false,
   },
   cases: [
     {
@@ -246,7 +246,7 @@ const advisoryQuality = evaluateAutomotiveQuality(qualityInput, confirmedWithout
 if (!advisoryQuality.accepted || advisoryQuality.reasons.length > 0) {
   throw new Error("Advisory content checks must not reject a valid extraction.");
 }
-for (const warning of ["EVIDENCE_WORDING_CHANGED", "HUMAN_REVIEW_FLAG_MISSING", "CONFIRMED_SOLUTION_OUTCOME_MISSING"]) {
+for (const warning of ["EVIDENCE_WORDING_CHANGED", "CONFIRMED_SOLUTION_OUTCOME_MISSING"]) {
   if (!advisoryQuality.warnings.includes(warning as typeof advisoryQuality.warnings[number])) {
     throw new Error(`Missing advisory warning: ${warning}`);
   }
@@ -291,6 +291,19 @@ const rootSchema = automotiveExtractionJsonSchema as {
   additionalProperties?: boolean;
   required?: string[];
 };
+
+const legacyExtraction = {
+  ...structuredClone(validExtraction),
+  documentAnalysis: { uncertainties: [], requiresHumanReview: true },
+};
+const originalLegacy = JSON.stringify(legacyExtraction);
+if (automotiveExtractionSchema.safeParse(legacyExtraction).success) {
+  throw new Error("New output must not contain a human review recommendation.");
+}
+automotiveExtractionSchema.parse(withoutLegacyReviewRecommendation(legacyExtraction));
+if (JSON.stringify(legacyExtraction) !== originalLegacy) {
+  throw new Error("Legacy artifact adaptation must not mutate stored history.");
+}
 
 if (rootSchema.additionalProperties !== false) {
   throw new Error("The generated root JSON Schema must reject additional properties.");

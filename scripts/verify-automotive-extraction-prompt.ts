@@ -57,8 +57,8 @@ const requiredInstructionFragments = [
   "not necessarily a verbatim quotation",
   "Preserve the source language, meaning, degree of certainty, negations",
   "Use null for every unknown scalar and [] for every unknown or empty collection",
-  "requiresHumanReview",
-  "advisory and does not decide persistence",
+  "There is no human approval, review flag, or review status",
+  "structurally valid output is stored automatically",
   "Do not include prose, Markdown, explanations",
 ];
 

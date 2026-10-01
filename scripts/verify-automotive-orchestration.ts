@@ -25,7 +25,7 @@ function extractionWithOneCase(marker: string): AutomotiveExtraction {
       sourceDate: null,
       language: "en",
     },
-    documentAnalysis: { uncertainties: [], requiresHumanReview: false },
+    documentAnalysis: { uncertainties: [] },
     cases: [
       {
         ref: "case-1",
@@ -87,7 +87,7 @@ function emptyExtraction(): AutomotiveExtraction {
       sourceDate: null,
       language: "en",
     },
-    documentAnalysis: { uncertainties: [], requiresHumanReview: false },
+    documentAnalysis: { uncertainties: [] },
     cases: [],
   };
 }
@@ -224,7 +224,13 @@ async function main() {
         sourceId: zeroSourceId, status: "COMPLETED", model: "synthetic-legacy",
         promptVersion: "automotive-structure-v1",
         rawAiOutput: { legacy: true },
-        validatedOutput: { content: emptyExtraction(), quality: { accepted: true, reasons: [] } },
+        validatedOutput: {
+          content: {
+            ...emptyExtraction(),
+            documentAnalysis: { uncertainties: [], requiresHumanReview: false },
+          },
+          quality: { accepted: true, reasons: [] },
+        },
       },
       select: { id: true },
     });
@@ -234,6 +240,10 @@ async function main() {
     assert.deepEqual(zeroFirst.caseIds, []);
     assert.equal(zeroCalls.count, 0);
     assert.equal(zeroFirst.extractionJobId, legacyJobId.id);
+    const legacyArtifact = (await database.extractionJob.findUniqueOrThrow({
+      where: { id: legacyJobId.id },
+    })).validatedOutput;
+    assert(JSON.stringify(legacyArtifact).includes('"requiresHumanReview":false'));
     assert.equal(
       (await database.source.findUniqueOrThrow({ where: { id: zeroSourceId } }))
         .status,

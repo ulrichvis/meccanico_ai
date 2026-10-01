@@ -7,16 +7,6 @@ import type { MessageKey } from "@/i18n/translator";
 import type { BrowsableCase } from "@/cases/case-browser-repository";
 import type { CaseBrowserQuery } from "@/schemas/case-browser-query.schema";
 
-const reviewStatusKeys: Record<string, MessageKey> = {
-  UNREVIEWED: "cases.reviewStatus.unreviewed",
-  REVIEWED: "cases.reviewStatus.reviewed",
-  CORRECTED: "cases.reviewStatus.corrected",
-};
-
-function reviewStatusKey(status: string): MessageKey {
-  return reviewStatusKeys[status] ?? "cases.reviewStatus.unknown";
-}
-
 const lifecycleStatusKeys: Record<string, MessageKey> = {
   ACTIVE: "cases.lifecycleStatus.active",
   ARCHIVED: "cases.lifecycleStatus.archived",
@@ -46,7 +36,7 @@ export function CasesDashboard({ cases, query }: CasesDashboardProps) {
     timeStyle: "short",
   });
   const hasCustomFilters =
-    query.q.length > 0 || query.review !== "all" || query.status !== "active";
+    query.q.length > 0 || query.status !== "active";
 
   return (
     <main className="cases-page">
@@ -71,16 +61,6 @@ export function CasesDashboard({ cases, query }: CasesDashboardProps) {
             placeholder={t("cases.filters.searchPlaceholder")}
             type="search"
           />
-        </label>
-
-        <label>
-          <span>{t("cases.filters.reviewLabel")}</span>
-          <select defaultValue={query.review} name="review">
-            <option value="all">{t("cases.filters.allReviewStatuses")}</option>
-            <option value="unreviewed">{t("cases.reviewStatus.unreviewed")}</option>
-            <option value="reviewed">{t("cases.reviewStatus.reviewed")}</option>
-            <option value="corrected">{t("cases.reviewStatus.corrected")}</option>
-          </select>
         </label>
 
         <label>
@@ -152,11 +132,6 @@ export function CasesDashboard({ cases, query }: CasesDashboardProps) {
                       >
                         {t(lifecycleStatusKey(item.status))}
                       </span>
-                      <span
-                        className={`case-review-status is-${item.reviewStatus.toLowerCase()}`}
-                      >
-                        {t(reviewStatusKey(item.reviewStatus))}
-                      </span>
                     </div>
                   </div>
 
@@ -190,9 +165,6 @@ export function CasesDashboard({ cases, query }: CasesDashboardProps) {
                   <div className="case-browser-actions">
                     <Link href={`/sources/${item.source.id}`}>
                       {t("cases.actions.viewSource")}
-                    </Link>
-                    <Link className="primary-action" href={`/cases/${item.id}/review`}>
-                      {t("cases.actions.review")}
                     </Link>
                   </div>
                 </article>

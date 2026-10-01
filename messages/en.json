@@ -100,7 +100,7 @@
       "textExtracted": "Text extracted",
       "processing": "Processing",
       "persisted": "Persisted",
-      "schemaInvalid": "Needs review",
+      "schemaInvalid": "Invalid output",
       "failed": "Failed",
       "unknown": "Unknown"
     }
@@ -108,7 +108,7 @@
   "cases": {
     "eyebrow": "Knowledge base",
     "title": "Technical cases.",
-    "description": "Search structured automotive knowledge while keeping lifecycle and review quality visible.",
+    "description": "Search the structured automotive knowledge extracted by AI.",
     "sourcesAction": "View sources",
     "resultsTitle": "Case results",
     "count": "{count} cases",
@@ -119,8 +119,6 @@
     "filters": {
       "searchLabel": "Search technical data",
       "searchPlaceholder": "Title, DTC, make, model or engine",
-      "reviewLabel": "Review status",
-      "allReviewStatuses": "All review statuses",
       "lifecycleLabel": "Lifecycle",
       "submit": "Search cases",
       "clear": "Clear filters"
@@ -147,14 +145,7 @@
       "updatedAt": "Updated"
     },
     "actions": {
-      "viewSource": "View source",
-      "review": "Review case"
-    },
-    "reviewStatus": {
-      "unreviewed": "Unreviewed",
-      "reviewed": "Reviewed",
-      "corrected": "Corrected",
-      "unknown": "Unknown review status"
+      "viewSource": "View source"
     },
     "lifecycleStatus": {
       "active": "Active",
@@ -219,7 +210,6 @@
     "summary": {
       "eyebrow": "Extraction recap",
       "untitled": "Extracted document",
-      "unreviewed": "Unreviewed",
       "author": "Author",
       "sourceDate": "Source date",
       "language": "Source language",
@@ -274,7 +264,8 @@
         "attempted": "Attempted",
         "successful": "Successful",
         "confirmed": "Confirmed",
-        "page": "Page {page}"
+        "page": "Page {page}",
+        "analysisSummary": "Analysis summary"
       },
       "values": {
         "yes": "Yes",
@@ -292,12 +283,6 @@
         "rejected": "Rejected",
         "archived": "Archived",
         "unknown": "Unknown status"
-      },
-      "reviewStatus": {
-        "unreviewed": "Unreviewed",
-        "reviewed": "Reviewed",
-        "corrected": "Corrected",
-        "unknown": "Unknown review status"
       },
       "dtcRelationship": {
         "primary": "Primary DTC",
@@ -320,6 +305,18 @@
         "multipleCases": "Multiple confirmed cases",
         "unclear": "Unclear evidence",
         "unknown": "Unknown evidence type"
+      },
+      "relationships": {
+        "title": "Relationships",
+        "nodeTypes": {
+          "dtc": "DTC",
+          "symptom": "Symptom",
+          "cause": "Cause",
+          "diagnosticCheck": "Diagnostic check",
+          "solution": "Solution",
+          "repairOutcome": "Repair outcome",
+          "unknown": "Item"
+        }
       }
     },
     "quality": {
@@ -352,7 +349,6 @@
       "wordingChanged": "A supporting passage is not a verbatim match on its indicated page or in the source text. It may have been reformulated or combined across pages; this does not establish whether its meaning is correct.",
       "evidencePage": "A supporting passage references a page that is not present in the extracted text.",
       "uncertaintyPage": "An uncertainty references a page that is not present in the extracted text.",
-      "reviewFlag": "The source contains incomplete or uncertain text, but the analysis did not recommend review.",
       "confirmedOutcome": "A repair is marked confirmed without a linked confirmed outcome. Its confirmation should be checked against the source.",
       "generic": "This analysis has a non-blocking quality note that can be checked against the source.",
       "evidenceNotice": "Supporting passages may be reformulated for clarity; they are not necessarily verbatim quotations. The original PDF and extracted text remain available for comparison."
@@ -388,137 +384,6 @@
       "qualityFailed": "The extracted text did not pass the quality checks.",
       "fileInvalid": "The stored file did not pass the PDF checks.",
       "generic": "This attempt could not be completed."
-    }
-  },
-  "caseReview": {
-    "eyebrow": "Case review",
-    "loading": "Loading case…",
-    "back": "Back to source",
-    "open": "Review this case",
-    "sourceContext": "Source: {filename}",
-    "analysisSummary": "Analysis summary",
-    "reviewNotes": "Review notes",
-    "relationships": {
-      "title": "Relationships",
-      "nodeTypes": {
-        "dtc": "DTC",
-        "symptom": "Symptom",
-        "cause": "Cause",
-        "diagnosticCheck": "Diagnostic check",
-        "solution": "Solution",
-        "repairOutcome": "Repair outcome",
-        "unknown": "Item"
-      }
-    },
-    "notFound": {
-      "title": "Case not found",
-      "description": "This case does not exist or is no longer available.",
-      "action": "Back to sources"
-    },
-    "error": {
-      "title": "The case could not be loaded",
-      "description": "The stored case is temporarily unavailable. Try again without changing the source data.",
-      "retry": "Try again"
-    }
-  },
-  "caseEdit": {
-    "eyebrow": "Optional correction",
-    "title": "Edit structured case",
-    "description": "Correct the stored technical structure while keeping the original extraction unchanged.",
-    "saveNotice": "Saving validates and updates the complete case atomically while keeping the original extraction unchanged.",
-    "actions": {
-      "add": "Add item",
-      "addMeasurement": "Add measurement",
-      "addOutcome": "Add outcome",
-      "addProcedure": "Add procedure",
-      "moveDown": "Move down",
-      "moveUp": "Move up",
-      "remove": "Remove",
-      "save": "Save case",
-      "saving": "Saving..."
-    },
-    "sections": {
-      "metadata": "Case information",
-      "measurements": "Measurements",
-      "outcomes": "Repair outcomes",
-      "procedures": "Repair procedures"
-    },
-    "labels": {
-      "attempted": "Attempted",
-      "brand": "Brand",
-      "caseCount": "Case count",
-      "compatibilityNote": "Compatibility note",
-      "componentType": "Component type",
-      "conditions": "Conditions",
-      "confirmed": "Confirmed",
-      "description": "Description",
-      "dtcCode": "DTC code",
-      "engineCode": "Engine code",
-      "engineDescription": "Engine description",
-      "evidenceType": "Evidence type",
-      "excerpt": "Supporting passage (may be reformulated)",
-      "fuelType": "Fuel type",
-      "generation": "Generation",
-      "instruction": "Instruction",
-      "manufacturer": "Manufacturer",
-      "maxValue": "Maximum value",
-      "minValue": "Minimum value",
-      "model": "Model",
-      "name": "Name",
-      "notes": "Notes",
-      "numericValue": "Numeric value",
-      "pageNumber": "Page number",
-      "parameter": "Parameter",
-      "partNumber": "Part number",
-      "power": "Power",
-      "primaryDtc": "Primary DTC",
-      "probabilitySource": "Frequency stated by the source",
-      "relationshipEvidence": "Supporting evidence",
-      "relationshipFrom": "From",
-      "relationshipTo": "To",
-      "relationshipType": "Relationship type",
-      "repairConfirmed": "Repair confirmed",
-      "repairSuccessful": "Repair successful",
-      "role": "Role",
-      "successful": "Successful",
-      "successfulCaseCount": "Successful case count",
-      "title": "Case title",
-      "transmission": "Transmission",
-      "unit": "Unit",
-      "unnamedOutcome": "Unnamed outcome",
-      "valueText": "Value as stated",
-      "yearFrom": "Year from",
-      "yearTo": "Year to"
-    },
-    "lifecycle": {
-      "title": "Review and lifecycle",
-      "description": "Reviewing confirms the current content. Rejecting or archiving removes the case from the normal active-case flow without deleting it.",
-      "actions": {
-        "review": "Mark as reviewed",
-        "reject": "Reject case",
-        "archive": "Archive case"
-      },
-      "confirm": {
-        "reject": "Reject this case? It will remain traceable but will no longer be active.",
-        "archive": "Archive this case? It will remain traceable but will no longer be active."
-      },
-      "feedback": {
-        "updating": "Updating the case status...",
-        "reviewed": "The case was marked as reviewed.",
-        "rejected": "The case was rejected without being deleted.",
-        "archived": "The case was archived without being deleted.",
-        "stale": "This case changed after you opened it. Reload the page before changing its status.",
-        "invalid": "This status change is no longer available. Reload the page.",
-        "error": "The case status could not be updated. Try again."
-      }
-    },
-    "validation": {
-      "conflict": "A shared reference is used by another case and cannot be changed here. Use a different DTC code or component name.",
-      "error": "The case could not be saved. Try again.",
-      "invalid": "Review the required fields, numeric values, and relationships before saving.",
-      "saved": "The case was saved successfully.",
-      "saving": "Saving the complete case...",
-      "stale": "This case changed after you opened it. Reload the page before saving again."
     }
   }
 }
